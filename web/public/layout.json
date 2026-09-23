@@ -1,0 +1,50 @@
+{
+  "schema_version": "2.0",
+  "model_positions": {
+    "B2.1.1": {
+      "x": -292.69,
+      "y": -2
+    },
+    "B2.2": {
+      "x": 184.77,
+      "y": -139.69
+    }
+  },
+  "notes": [
+    {
+      "id": "note-1790130681733",
+      "type": "note",
+      "position": {
+        "x": -253.18,
+        "y": -390
+      },
+      "data": {
+        "title": "as",
+        "text": ""
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "xy-edge__B2.1.1source-right-B2.2target-left",
+      "source": "B2.1.1",
+      "target": "B2.2",
+      "sourceHandle": "source-right",
+      "targetHandle": "target-left"
+    },
+    {
+      "id": "xy-edge__note-1790130681733source-right-B2.2target-top",
+      "source": "note-1790130681733",
+      "target": "B2.2",
+      "sourceHandle": "source-right",
+      "targetHandle": "target-top"
+    },
+    {
+      "id": "xy-edge__note-1790130681733source-right-B2.2target-left",
+      "source": "note-1790130681733",
+      "target": "B2.2",
+      "sourceHandle": "source-right",
+      "targetHandle": "target-left"
+    }
+  ]
+}

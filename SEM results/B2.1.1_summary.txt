@@ -1,0 +1,294 @@
+lavaan 0.7-2 ended normally after 72 iterations
+
+  Estimator                                       DWLS
+  Optimization method                           NLMINB
+  Number of model parameters                       133
+
+  Number of observations                          1522
+  Number of missing patterns                       327
+
+Model Test User Model:
+                                              Standard      Scaled
+  Test Statistic                              2876.461    4016.286
+  Degrees of freedom                               239         239
+  P-value (Unknown)                                 NA       0.000
+  Scaling correction factor                                  0.732
+  Shift parameter                                           87.207
+    simple second-order correction                                
+
+Model Test Baseline Model:
+
+  Test statistic                            517768.901  161329.207
+  Degrees of freedom                               276         276
+  P-value                                           NA       0.000
+  Scaling correction factor                                  3.213
+
+User Model versus Baseline Model:
+
+  Comparative Fit Index (CFI)                    0.995       0.977
+  Tucker-Lewis Index (TLI)                       0.994       0.973
+                                                                  
+  Robust Comparative Fit Index (CFI)                         0.873
+  Robust Tucker-Lewis Index (TLI)                            0.853
+
+Root Mean Square Error of Approximation:
+
+  RMSEA                                          0.085       0.102
+  90 Percent confidence interval - lower         0.082       0.099
+  90 Percent confidence interval - upper         0.088       0.105
+  P-value H_0: RMSEA <= 0.050                    0.000       0.000
+  P-value H_0: RMSEA >= 0.080                    0.999       1.000
+                                                                  
+  Robust RMSEA                                               0.108
+  90 Percent confidence interval - lower                     0.104
+  90 Percent confidence interval - upper                     0.112
+  P-value H_0: Robust RMSEA <= 0.050                         0.000
+  P-value H_0: Robust RMSEA >= 0.080                         1.000
+
+Standardized Root Mean Square Residual:
+
+  SRMR                                           0.063       0.063
+
+Goodness of Fit Index:
+
+  Goodness of Fit Index (GFI)                    0.874            
+  90 Percent confidence interval - lower         0.866            
+  90 Percent confidence interval - upper         0.881            
+                                                                  
+  Robust GFI                                                 0.812
+  90 Percent confidence interval - lower                     0.800
+  90 Percent confidence interval - upper                     0.824
+
+Parameter Estimates:
+
+  Parameterization                               Delta
+  Standard errors                           Robust.sem
+  Information                                 Expected
+  Information saturated (h1) model        Unstructured
+
+Latent Variables:
+                      Estimate  Std.Err  z-value  P(>|z|)   Std.lv  Std.all
+  Attitude =~                                                              
+    att_appealing        1.000                               0.983    0.983
+    att_desirable        0.996    0.003  377.912    0.000    0.980    0.980
+    att_goodidea         0.963    0.004  271.744    0.000    0.946    0.946
+    att_pleasant         0.917    0.006  160.204    0.000    0.901    0.901
+  PBC =~                                                                   
+    pbc_barrier          1.000                               0.888    0.888
+    pbc_could            0.884    0.041   21.394    0.000    0.785    0.785
+    pbc_resources        0.783    0.041   19.271    0.000    0.695    0.695
+  DescriptiveNorms =~                                                      
+    norms_d_many         1.000                               0.798    0.798
+    norms_d_common       1.237    0.034   36.599    0.000    0.987    0.987
+    norms_d_few          0.781    0.029   26.737    0.000    0.623    0.623
+  InjunctiveNorms =~                                                       
+    norms_i_consdr       1.000                               0.862    0.862
+    norms_i_bad          0.897    0.022   41.123    0.000    0.774    0.774
+    norms_i_supprt       0.818    0.022   36.401    0.000    0.705    0.705
+  Symbolism =~                                                             
+    symb_envresp         1.000                               0.766    0.766
+    symb_modern          0.770    0.025   30.477    0.000    0.590    0.590
+  AoC =~                                                                   
+    aoc_transport        1.000                               0.837    0.837
+    aoc_overstated       0.915    0.020   46.733    0.000    0.765    0.765
+    aoc_minor            0.941    0.019   49.200    0.000    0.788    0.788
+  BEnv =~                                                                  
+    ben_env_reduce       1.000                               0.846    0.846
+    ben_env_shift        0.926    0.018   52.030    0.000    0.783    0.783
+    ben_env_nodiff       0.917    0.020   45.827    0.000    0.775    0.775
+  Intention =~                                                             
+    nextv_bev            1.000                               0.924    0.924
+    nextv_phev           0.801    0.020   40.478    0.000    0.740    0.740
+    nextv_icev           0.818    0.020   40.061    0.000    0.756    0.756
+
+Regressions:
+                    Estimate  Std.Err  z-value  P(>|z|)   Std.lv  Std.all
+  Intention ~                                                            
+    Attitude           0.635    0.029   21.674    0.000    0.676    0.676
+    PBC                0.223    0.029    7.606    0.000    0.214    0.214
+    InjunctiveNrms     0.068    0.068    0.998    0.318    0.064    0.064
+    DescriptivNrms     0.139    0.054    2.578    0.010    0.120    0.120
+  Attitude ~                                                             
+    BEnv               0.969    0.016   59.619    0.000    0.833    0.833
+  BEnv ~                                                                 
+    AoC                1.005    0.019   52.265    0.000    0.995    0.995
+  InjunctiveNorms ~                                                      
+    Symbolism          1.130    0.028   40.094    0.000    1.004    1.004
+
+Covariances:
+                      Estimate  Std.Err  z-value  P(>|z|)   Std.lv  Std.all
+  PBC ~~                                                                   
+    DescriptivNrms       0.282    0.021   13.596    0.000    0.399    0.399
+    Symbolism            0.317    0.019   17.117    0.000    0.466    0.466
+    AoC                  0.349    0.019   18.303    0.000    0.470    0.470
+  DescriptiveNorms ~~                                                      
+    Symbolism            0.468    0.018   25.816    0.000    0.766    0.766
+    AoC                  0.413    0.019   22.231    0.000    0.619    0.619
+  Symbolism ~~                                                             
+    AoC                  0.576    0.017   33.030    0.000    0.899    0.899
+
+Thresholds:
+                   Estimate  Std.Err  z-value  P(>|z|)   Std.lv  Std.all
+    att_appelng|t1   -0.598    0.035  -17.235    0.000   -0.598   -0.598
+    att_appelng|t2   -0.130    0.033   -3.990    0.000   -0.130   -0.130
+    att_appelng|t3    0.273    0.033    8.283    0.000    0.273    0.273
+    att_appelng|t4    1.009    0.039   25.674    0.000    1.009    1.009
+    att_desirbl|t1   -0.611    0.035  -17.529    0.000   -0.611   -0.611
+    att_desirbl|t2   -0.138    0.033   -4.227    0.000   -0.138   -0.138
+    att_desirbl|t3    0.285    0.033    8.627    0.000    0.285    0.285
+    att_desirbl|t4    1.013    0.039   25.715    0.000    1.013    1.013
+    att_goodide|t1   -0.722    0.036  -20.037    0.000   -0.722   -0.722
+    att_goodide|t2   -0.185    0.033   -5.609    0.000   -0.185   -0.185
+    att_goodide|t3    0.206    0.033    6.234    0.000    0.206    0.206
+    att_goodide|t4    0.958    0.039   24.675    0.000    0.958    0.958
+    att_pleasnt|t1   -0.901    0.039  -23.075    0.000   -0.901   -0.901
+    att_pleasnt|t2   -0.367    0.034  -10.662    0.000   -0.367   -0.367
+    att_pleasnt|t3    0.263    0.034    7.732    0.000    0.263    0.263
+    att_pleasnt|t4    1.093    0.042   26.026    0.000    1.093    1.093
+    pbc_barrier|t1   -0.551    0.035  -15.834    0.000   -0.551   -0.551
+    pbc_barrier|t2    0.315    0.034    9.406    0.000    0.315    0.315
+    pbc_barrier|t3    0.754    0.037   20.634    0.000    0.754    0.754
+    pbc_barrier|t4    1.306    0.045   28.734    0.000    1.306    1.306
+    pbc_could|t1     -1.175    0.042  -27.696    0.000   -1.175   -1.175
+    pbc_could|t2     -0.765    0.036  -20.974    0.000   -0.765   -0.765
+    pbc_could|t3     -0.412    0.034  -12.204    0.000   -0.412   -0.412
+    pbc_could|t4      0.353    0.033   10.548    0.000    0.353    0.353
+    pbc_resorcs|t1   -0.703    0.036  -19.407    0.000   -0.703   -0.703
+    pbc_resorcs|t2   -0.314    0.034   -9.323    0.000   -0.314   -0.314
+    pbc_resorcs|t3    0.017    0.033    0.528    0.598    0.017    0.017
+    pbc_resorcs|t4    0.659    0.036   18.396    0.000    0.659    0.659
+    norms_d_mny|t1   -0.068    0.033   -2.080    0.038   -0.068   -0.068
+    norms_d_mny|t2    0.563    0.035   16.278    0.000    0.563    0.563
+    norms_d_mny|t3    0.987    0.039   25.254    0.000    0.987    0.987
+    norms_d_mny|t4    1.714    0.058   29.733    0.000    1.714    1.714
+    nrms_d_cmmn|t1   -0.443    0.034  -13.035    0.000   -0.443   -0.443
+    nrms_d_cmmn|t2    0.146    0.033    4.446    0.000    0.146    0.146
+    nrms_d_cmmn|t3    0.847    0.037   22.596    0.000    0.847    0.847
+    nrms_d_cmmn|t4    1.645    0.055   29.732    0.000    1.645    1.645
+    norms_d_few|t1   -0.111    0.033   -3.420    0.001   -0.111   -0.111
+    norms_d_few|t2    0.627    0.035   17.939    0.000    0.627    0.627
+    norms_d_few|t3    0.875    0.037   23.357    0.000    0.875    0.875
+    norms_d_few|t4    1.492    0.050   29.987    0.000    1.492    1.492
+    nrms__cnsdr|t1   -0.493    0.036  -13.626    0.000   -0.493   -0.493
+    nrms__cnsdr|t2   -0.111    0.035   -3.201    0.001   -0.111   -0.111
+    nrms__cnsdr|t3    0.704    0.038   18.557    0.000    0.704    0.704
+    nrms__cnsdr|t4    1.510    0.054   28.191    0.000    1.510    1.510
+    norms_i_bad|t1   -1.393    0.049  -28.548    0.000   -1.393   -1.393
+    norms_i_bad|t2   -0.779    0.038  -20.647    0.000   -0.779   -0.779
+    norms_i_bad|t3   -0.136    0.034   -4.007    0.000   -0.136   -0.136
+    norms_i_bad|t4    0.402    0.035   11.561    0.000    0.402    0.402
+    nrms__spprt|t1   -1.809    0.062  -28.996    0.000   -1.809   -1.809
+    nrms__spprt|t2   -1.377    0.047  -29.151    0.000   -1.377   -1.377
+    nrms__spprt|t3   -0.531    0.035  -15.310    0.000   -0.531   -0.531
+    nrms__spprt|t4    0.255    0.033    7.663    0.000    0.255    0.255
+    symb_envrsp|t1   -1.525    0.051  -29.782    0.000   -1.525   -1.525
+    symb_envrsp|t2   -1.204    0.043  -27.957    0.000   -1.204   -1.204
+    symb_envrsp|t3   -0.650    0.035  -18.342    0.000   -0.650   -0.650
+    symb_envrsp|t4    0.337    0.033   10.073    0.000    0.337    0.337
+    symb_modern|t1   -1.526    0.052  -29.486    0.000   -1.526   -1.526
+    symb_modern|t2   -1.073    0.041  -26.124    0.000   -1.073   -1.073
+    symb_modern|t3   -0.104    0.033   -3.142    0.002   -0.104   -0.104
+    symb_modern|t4    0.984    0.040   24.809    0.000    0.984    0.984
+    aoc_trnsprt|t1   -1.304    0.045  -29.181    0.000   -1.304   -1.304
+    aoc_trnsprt|t2   -1.019    0.039  -25.915    0.000   -1.019   -1.019
+    aoc_trnsprt|t3   -0.767    0.036  -21.237    0.000   -0.767   -0.767
+    aoc_trnsprt|t4   -0.082    0.032   -2.531    0.011   -0.082   -0.082
+    aoc_ovrsttd|t1   -1.196    0.043  -27.931    0.000   -1.196   -1.196
+    aoc_ovrsttd|t2   -0.609    0.035  -17.398    0.000   -0.609   -0.609
+    aoc_ovrsttd|t3   -0.348    0.033  -10.415    0.000   -0.348   -0.348
+    aoc_ovrsttd|t4    0.270    0.033    8.131    0.000    0.270    0.270
+    aoc_minor|t1     -1.295    0.045  -28.987    0.000   -1.295   -1.295
+    aoc_minor|t2     -0.692    0.036  -19.478    0.000   -0.692   -0.692
+    aoc_minor|t3     -0.457    0.034  -13.516    0.000   -0.457   -0.457
+    aoc_minor|t4      0.243    0.033    7.386    0.000    0.243    0.243
+    ben_env_rdc|t1   -1.150    0.042  -27.388    0.000   -1.150   -1.150
+    ben_env_rdc|t2   -0.714    0.036  -19.832    0.000   -0.714   -0.714
+    ben_env_rdc|t3   -0.434    0.034  -12.811    0.000   -0.434   -0.434
+    ben_env_rdc|t4    0.471    0.034   13.791    0.000    0.471    0.471
+    ben_nv_shft|t1   -0.820    0.038  -21.546    0.000   -0.820   -0.820
+    ben_nv_shft|t2   -0.023    0.034   -0.697    0.486   -0.023   -0.023
+    ben_nv_shft|t3    0.321    0.034    9.362    0.000    0.321    0.321
+    ben_nv_shft|t4    1.061    0.041   25.583    0.000    1.061    1.061
+    ben_nv_ndff|t1   -1.339    0.046  -28.972    0.000   -1.339   -1.339
+    ben_nv_ndff|t2   -0.746    0.036  -20.454    0.000   -0.746   -0.746
+    ben_nv_ndff|t3   -0.436    0.034  -12.811    0.000   -0.436   -0.436
+    ben_nv_ndff|t4    0.273    0.033    8.175    0.000    0.273    0.273
+    nextv_bev|t1      0.171    0.034    5.050    0.000    0.171    0.171
+    nextv_bev|t2      0.533    0.036   15.018    0.000    0.533    0.533
+    nextv_bev|t3      0.786    0.038   20.802    0.000    0.786    0.786
+    nextv_bev|t4      1.537    0.053   28.990    0.000    1.537    1.537
+    nextv_phev|t1    -0.372    0.034  -10.814    0.000   -0.372   -0.372
+    nextv_phev|t2    -0.040    0.034   -1.204    0.228   -0.040   -0.040
+    nextv_phev|t3     0.235    0.034    6.926    0.000    0.235    0.235
+    nextv_phev|t4     1.267    0.045   27.879    0.000    1.267    1.267
+    nextv_icev|t1    -0.094    0.033   -2.816    0.005   -0.094   -0.094
+    nextv_icev|t2     0.472    0.035   13.599    0.000    0.472    0.472
+    nextv_icev|t3     0.690    0.036   18.977    0.000    0.690    0.690
+    nextv_icev|t4     1.032    0.041   25.388    0.000    1.032    1.032
+
+Variances:
+                   Estimate  Std.Err  z-value  P(>|z|)   Std.lv  Std.all
+   .att_appealing     0.033                               0.033    0.033
+   .att_desirable     0.040                               0.040    0.040
+   .att_goodidea      0.104                               0.104    0.104
+   .att_pleasant      0.188                               0.188    0.188
+   .pbc_barrier       0.212                               0.212    0.212
+   .pbc_could         0.385                               0.385    0.385
+   .pbc_resources     0.517                               0.517    0.517
+   .norms_d_many      0.363                               0.363    0.363
+   .norms_d_common    0.026                               0.026    0.026
+   .norms_d_few       0.611                               0.611    0.611
+   .norms_i_consdr    0.256                               0.256    0.256
+   .norms_i_bad       0.402                               0.402    0.402
+   .norms_i_supprt    0.503                               0.503    0.503
+   .symb_envresp      0.413                               0.413    0.413
+   .symb_modern       0.652                               0.652    0.652
+   .aoc_transport     0.300                               0.300    0.300
+   .aoc_overstated    0.414                               0.414    0.414
+   .aoc_minor         0.380                               0.380    0.380
+   .ben_env_reduce    0.285                               0.285    0.285
+   .ben_env_shift     0.387                               0.387    0.387
+   .ben_env_nodiff    0.399                               0.399    0.399
+   .nextv_bev         0.146                               0.146    0.146
+   .nextv_phev        0.453                               0.453    0.453
+   .nextv_icev        0.429                               0.429    0.429
+   .Attitude          0.295    0.017   17.673    0.000    0.306    0.306
+    PBC               0.788    0.052   15.196    0.000    1.000    1.000
+    DescriptivNrms    0.637    0.024   26.308    0.000    1.000    1.000
+   .InjunctiveNrms   -0.006    0.020   -0.327    0.744   -0.009   -0.009
+    Symbolism         0.587    0.023   25.960    0.000    1.000    1.000
+    AoC               0.700    0.021   32.633    0.000    1.000    1.000
+   .BEnv              0.007    0.011    0.660    0.509    0.010    0.010
+   .Intention         0.148    0.019    7.951    0.000    0.174    0.174
+
+R-Square:
+                   Estimate
+    att_appealing     0.967
+    att_desirable     0.960
+    att_goodidea      0.896
+    att_pleasant      0.812
+    pbc_barrier       0.788
+    pbc_could         0.615
+    pbc_resources     0.483
+    norms_d_many      0.637
+    norms_d_common    0.974
+    norms_d_few       0.389
+    norms_i_consdr    0.744
+    norms_i_bad       0.598
+    norms_i_supprt    0.497
+    symb_envresp      0.587
+    symb_modern       0.348
+    aoc_transport     0.700
+    aoc_overstated    0.586
+    aoc_minor         0.620
+    ben_env_reduce    0.715
+    ben_env_shift     0.613
+    ben_env_nodiff    0.601
+    nextv_bev         0.854
+    nextv_phev        0.547
+    nextv_icev        0.571
+    Attitude          0.694
+    InjunctiveNrms       NA
+    BEnv              0.990
+    Intention         0.826
+

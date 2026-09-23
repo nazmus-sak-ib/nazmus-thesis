@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "models": [
+    {
+      "id": "B2.1.1",
+      "title": "Model B2.1.1",
+      "image": "models/B2.1.1.svg",
+      "results": "results/B2.1.1.json"
+    },
+    {
+      "id": "B2.2",
+      "title": "Model B2.2",
+      "image": "models/B2.2.svg",
+      "results": "results/B2.2.json"
+    }
+  ]
+}
