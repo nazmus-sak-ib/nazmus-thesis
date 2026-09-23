@@ -12,6 +12,24 @@
       "title": "Model B2.2",
       "image": "models/B2.2.svg",
       "results": "results/B2.2.json"
+    },
+    {
+      "id": "B2.1",
+      "title": "Model B2.1",
+      "image": "models/B2.1.svg",
+      "results": "results/B2.1.json"
+    },
+    {
+      "id": "B1.2",
+      "title": "Model B1.2",
+      "image": "models/B1.2.svg",
+      "results": "results/B1.2.json"
+    },
+    {
+      "id": "B2.2a",
+      "title": "Model B2.2a",
+      "image": "models/B2.2a.svg",
+      "results": "results/B2.2a.json"
     }
   ]
 }
