@@ -1,143 +1,33 @@
 {
-  "schema_version": "7.0",
-  "model_sizes": {
-    "B1.2": {
-      "width": 320,
-      "height": 260
-    },
-    "B1": {
-      "width": 320,
-      "height": 260
-    },
-    "B2.1a": {
-      "width": 397,
-      "height": 254
-    },
-    "B2.1b_ml": {
-      "width": 320,
-      "height": 260
-    },
-    "B2.1b2": {
-      "width": 320,
-      "height": 260
-    },
-    "B2.1b2_ml": {
-      "width": 320,
-      "height": 260
-    },
-    "B2.1b3": {
-      "width": 320,
-      "height": 260
-    },
-    "B2.1b4": {
-      "width": 320,
-      "height": 260
-    },
-    "B2.1b5": {
-      "width": 320,
-      "height": 260
-    },
-    "B2.1.1a": {
-      "width": 320,
-      "height": 260
-    },
-    "B2.1.2": {
-      "width": 320,
-      "height": 260
-    },
-    "B2.1.1b": {
-      "width": 320,
-      "height": 260
-    }
-  },
-  "model_notes": {
-    "B1.2": "<span style=\"font-weight: bold;\">Findings</span>:<div>Model B1.2 worsens on global fit statistics compared to Model B1 on every account and the robust CFI and TLI go below the guideline of 0.9.</div>",
-    "B1": "This is the first TPB model fit in an ordinal way.<div><br></div><div><span style=\"font-weight: bold;\">Findings</span><br><div><ul><li>Descriptive norms have a negative loading and a non-significant p-value. </li><li>78% of intentions variance is explained by this model. </li></ul></div></div>",
-    "B2.1a": "<div><span style=\"font-size: medium; font-weight: bold;\">Model related discussion:</span></div><span style=\"font-size: small;\">Interesting thing: if I don't allow the <span style=\"color: rgb(62, 38, 64);\"><span style=\"background-color: rgb(255, 168, 248);\">pink-ish covariance arrow</span> </span>between injunctive norms and attitude, the <span style=\"font-weight: bold;\">ORDINAL </span>model fails to converge. </span><div><p style=\"font-size: 10pt;\"><span style=\"font-style: italic;\"><span style=\"color: rgb(100, 72, 13);\">Warning message</span><span style=\"color: black;\">:\nlavaan-&gt;lav_step11_estoptim(): the optimizer (NLMINB) claimed the model\nconverged, but not all elements of the gradient are (near) zero; the optimizer\nmay not have found a local solution use check.gradient = FALSE to skip this\ncheck. </span></span></p><p><span style=\"font-size: 10pt;\">\n</span><span style=\"font-size: small;\">That, I think, is a bummer because I have introduced possible explanatory mechanisms for both attitude and injunctive norms in this model. That's not sufficient. Even after that the two variables still have unexplained correlated parts. Kind of beats the purpose of predictors.</span></p><p><span style=\"font-size: small;\"><br></span></p><p><span style=\"font-size: small;\">The continuous version of the model, however, fits very nicely. Just like any continuous model compared to its ordinal counterpart, this continuous model seems to be doing very well in terms of the global fit statistics. </span></p><p><span style=\"font-size: small;\"><br></span></p><p><span style=\"font-size: small;\">I'm going to show that in Model 2.1B. </span></p><p><br></p><div><span style=\"font-size: medium; font-weight: bold;\">Model 2.1 main hypothesis:</span></div><p><span style=\"font-size: small;\">Awareness of consequences is a direct predictor of attitude</span>\n\n</p><p style=\"font-size: 10pt;\"><span style=\"color: black;\"><br></span></p>\n\n\n\n\n</div>",
-    "B2.1b_ml": "<span style=\"font-weight: bold;\">Model discussion:</span><div>Model 2.1B doesn't have the attitude-injunctive norm covariance pathway. It assumes that the upstream stuff adequately explains attitude and injunctive norm and the residual terms don't have any covariance. Whatever is observed is just noise. </div><div><br></div><div><span style=\"color: rgb(248, 18, 18);\">This model didn't fit in the ordinal way</span>. There was a convergence issue. The continuous one fit. Don't be fooled by its high global fit statistics -- it's a feature of the continuous estimator in general. </div>",
-    "B2.1b2": "<span style=\"font-weight: bold;\">Model discussion:</span><div>this one further deletes the covarying path between awareness of consequences and injunctive norms. </div><div><span style=\"color: rgb(100, 72, 13); font-size: 13.3333px;\">Warning messages</span><span style=\"color: rgb(0, 0, 0); font-size: 13.3333px;\">:\n1: lavaan-&gt;lav_object_post_check():  \n   some estimated lv variances are negative </span>\n\n</div><div>This is the first time the negative error variance issue is occurring and occurs with injunctive norms. Check the <span style=\"font-weight: bold;\">variance tab</span>. </div><div><br></div><div>This means that symbolism and environmental benefits together explain more than 100% of the variance in injunctive norms in these current settings. </div>",
-    "B2.1b2_ml": "Model discussion:<div>This is the ML version. </div>",
-    "B2.1b3": "<span style=\"font-weight: bold;\">Model discussions</span>:<div> this one further deletes the covariance path between injunctive and descriptive norms. </div><div><span style=\"color: rgb(100, 72, 13); font-size: 13.3333px;\">Warning messages</span><span style=\"color: rgb(0, 0, 0); font-size: 13.3333px;\">:\n1: lavaan-&gt;lav_object_post_check():  \n   some estimated lv variances are negative </span>\n\n</div>",
-    "B2.1b5": "Model discussion:<div> no exogenous variable has been allowed to covary with any endogenous variable, which has actually been the case for all models so far with <span style=\"font-weight: bold; font-style: italic;\">auto.cov.y = F</span>. In other models, I explicitly had to allow the exogenous variables to covary with some endogenous variables. Here I haven't done so. </div><div><br></div><div>Here you see the negative variance problem again. </div><div><br></div><div>The lesson is that when you claim that you are fully explaining your endogenous variable with some predictors, it clearly covaries strongly independently -- it might lead to incorrect specification and counterintuitive results. </div><div><br></div><div>In this model symbolism and environmental benefits both have significant loadings on injunctive norms but one of them is negative and the other one is positive. </div>",
-    "B2.1.1a": "<div><span style=\"font-weight: bold;\">Model discussion:</span> the purpose of this model was to specifically test it against Model 2.1A to check for the mechanism of the environmental variables</div><div><br></div><div>--------------------------------------------------------------------------------------------------------------------------------</div><div><span style=\"color: blue;\">&gt; </span><span style=\"color: blue;\">lavTestLRT(fit_semB21a, fit_semB211a)\n</span>\nScaled and Shifted Chi-Squared Difference Test (method = “satorra.2000”)\n\nlavaan-&gt;lavTestLRT():  \n   lavaan NOTE: The “Chisq” column contains standard test statistics, not the robust test that should be reported per model. A robust difference \n   test is a function of two standard (not robust) statistics.\n\n              Df AIC BIC  Chisq Chisq diff Df diff Pr(&gt;Chisq)    \nfit_semB21a  227         1203.7                                  \nfit_semB211a 231         1513.7     265.65       4  &lt; 2.2e-16 ***\n---\nSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n\n--------------------------------------------------------------------------------------------------------------------------------\n<br></div><div>The significance test shows that this current model is preferable to Model 2.1A but let's take a look at other things. </div><div><br></div><div><br></div><div><br></div><div><br></div><div><br></div><div><br></div><div>\n\n</div>",
-    "B2.1.1b": "<span style=\"font-weight: bold;\">Model discussion:</span><div>Partial mediation model where the mediator is environmental benefits, the X variable is awareness of consequences, and we have two Y variables: attitude and injunctive norms </div>"
-  },
-  "stacks": [
-    {
-      "id": "stack-73150b27-347f-4d9c-a6ca-9a666a30a0ea",
-      "title": "B2.1 family",
-      "members": [
-        "B2.1a",
-        "B2.1b_ml",
-        "B2.1b2",
-        "B2.1b2_ml",
-        "B2.1b3",
-        "B2.1b4",
-        "B2.1b5"
-      ],
-      "active_model": "B2.1a",
-      "position": {
-        "x": -767.81,
-        "y": -1067.29
-      },
-      "width": 320,
-      "height": 260,
-      "in_use": true,
-      "hidden": false,
-      "has_position": true
-    }
-  ],
+  "schema_version": "5.0",
+  "stacks": [],
   "used_models": [
+    "B2.1.1",
+    "B2.2",
+    "B2.1",
     "B1.2",
-    "B1",
-    "B2.1.1a",
-    "B2.1.2",
-    "B2.1.1b"
+    "B2.2a"
   ],
   "model_positions": {
+    "B2.1.1": {
+      "x": -634.69,
+      "y": -574
+    },
+    "B2.2": {
+      "x": -405.23,
+      "y": -929.69
+    },
+    "B2.1": {
+      "x": -1366.79,
+      "y": -886.28
+    },
     "B1.2": {
-      "x": -1253.81,
-      "y": -585.72
+      "x": -1391.31,
+      "y": -587.59
     },
-    "B1": {
-      "x": -1249.81,
-      "y": -1062.15
-    },
-    "B2.1a": {
-      "x": -543.03,
-      "y": -1063.06
-    },
-    "B2.1b_ml": {
-      "x": -169.35,
-      "y": -710.13
-    },
-    "B2.1b2": {
-      "x": -294.07,
-      "y": -1043.14
-    },
-    "B2.1b3": {
-      "x": -681.5,
-      "y": -758.39
-    },
-    "B2.1b4": {
-      "x": -179.39,
-      "y": -1048.76
-    },
-    "B2.1b5": {
-      "x": -393.37,
-      "y": -1019.73
-    },
-    "B2.1.1a": {
-      "x": -909.88,
-      "y": -1642.05
-    },
-    "B2.1.2": {
-      "x": -550.32,
-      "y": -1403.57
-    },
-    "B2.1.1b": {
-      "x": -1497.64,
-      "y": -1319.42
+    "B2.2a": {
+      "x": -99.83,
+      "y": -1179.73
     }
   },
   "hidden_models": [],
@@ -146,126 +36,16 @@
       "id": "note-1790130681733",
       "type": "note",
       "position": {
-        "x": -1134.72,
-        "y": -1915.87
+        "x": -1355.18,
+        "y": -1434
       },
-      "width": 800,
+      "width": 1372,
       "height": 214,
       "data": {
         "title": "as",
-        "text": "",
-        "collapsed": false,
-        "expandedSize": {
-          "width": 800,
-          "height": 214
-        }
-      }
-    },
-    {
-      "id": "note-1790185733564",
-      "type": "note",
-      "position": {
-        "x": -756.41,
-        "y": -800
-      },
-      "width": 240,
-      "height": 64,
-      "data": {
-        "title": "B2.1 family",
-        "text": "Model 2.1 main hypothesis: Awareness of consequences is a direct predictor of attitude\n\nModels B2.1b onwards are more like exploratory excursions to understand the data.\n\nOne big takeaway is that forcing covarying between the residual term of an endogenous variable and something else can make the results counterintuitive and inflate the strength of the structural relationships manifold. \n\nSee how, compared to Model 2.1A, in this model the structural loadings increase 10, 20 times. Regression of attitude on symbolism, for example, changes from 0.2 to 2.7.\n\nAttitude on environmental benefits: 0.53 to -1.2  \n ",
-        "collapsed": true,
-        "expandedSize": {
-          "width": 612,
-          "height": 332
-        }
+        "text": ""
       }
     }
   ],
-  "edges": [
-    {
-      "type": "annotated",
-      "data": {
-        "appearance": {
-          "color": "#dc2626",
-          "thickness": 2,
-          "head": "filled",
-          "size": 36
-        },
-        "noteHtml": "<div><span style=\"font-weight: bold;\">Why?</span></div>In B1, descriptive norms had a negative loading so want to merge norms and see what happens, although in the CFA of the covary model, the two-norms model had a better fit than the one-norms model (which was also statistically significant)."
-      },
-      "id": "xy-edge__B1source-bottom-B1.2target-top",
-      "source": "B1",
-      "target": "B1.2",
-      "sourceHandle": "source-bottom",
-      "targetHandle": "target-top"
-    },
-    {
-      "type": "annotated",
-      "data": {
-        "appearance": {
-          "color": "#64748b",
-          "thickness": 3,
-          "head": "filled",
-          "size": 36
-        },
-        "noteHtml": "<span style=\"font-weight: bold;\">Why?</span><div>Add environmental stuff to core TPB</div>"
-      },
-      "id": "xy-edge__B1source-right-B2.1atarget-left",
-      "source": "B1",
-      "target": "stack-73150b27-347f-4d9c-a6ca-9a666a30a0ea",
-      "sourceHandle": "source-right",
-      "targetHandle": "target-left"
-    },
-    {
-      "type": "annotated",
-      "data": {
-        "appearance": {
-          "color": "#64748b",
-          "thickness": 2.5,
-          "head": "filled",
-          "size": 36
-        },
-        "noteHtml": ""
-      },
-      "id": "xy-edge__B2.1.1asource-bottom-stack-73150b27-347f-4d9c-a6ca-9a666a30a0eatarget-top",
-      "source": "B2.1.1a",
-      "target": "stack-73150b27-347f-4d9c-a6ca-9a666a30a0ea",
-      "sourceHandle": "source-bottom",
-      "targetHandle": "target-top"
-    },
-    {
-      "type": "annotated",
-      "data": {
-        "appearance": {
-          "color": "#64748b",
-          "thickness": 2,
-          "head": "filled",
-          "size": 35
-        },
-        "noteHtml": "These two models are essentially the same. The covariances are repackaged as a structural relationship. <div><br></div><div>This is an interesting excursion into how SEM really works and what happens underneath. </div><div><ul><li>Leaving everything unchanged, just repackaging a covariance into a structural path has no effect on the downstream structural paths. For example everything that goes into intention remains unchanged. </li><li>Even the Symbolism ~ Attitude, AoC ~ Attitude, and BEnv ~ attitude paths remain the same. </li><li>Since injunctive norms now got a new arrow pointed towards it, the other arrows pointed towards it change in values. If I care about the magnitude of the structural paths of things explaining injunctive norms in this bigger model, in that case I need to be prudent about drawing other arrows as well. </li><li>And the interesting thing is that their ordering in strength also changed. The BEnv path dropped from 0.485 to 0.222 and the symbolism path dropped from 0.303 to 0.263. So the inclusion of ALC to injunctive norms matters for that ordering if we cared about that too. </li><li>The R-square of injunctive norms increases from 0.645 to 0.676 so I might ask myself: What is it that I'm gaining by drawing this arrow? What is it that I'm losing by replacing it with just a covariance term? </li><li><br></li></ul></div>"
-      },
-      "id": "xy-edge__B2.1.2source-bottom-stack-73150b27-347f-4d9c-a6ca-9a666a30a0eatarget-top",
-      "source": "B2.1.2",
-      "target": "stack-73150b27-347f-4d9c-a6ca-9a666a30a0ea",
-      "sourceHandle": "source-bottom",
-      "targetHandle": "target-top"
-    },
-    {
-      "type": "annotated",
-      "data": {
-        "appearance": {
-          "color": "#64748b",
-          "thickness": 2,
-          "head": "filled",
-          "size": 30
-        },
-        "noteHtml": ""
-      },
-      "id": "xy-edge__B2.1.1bsource-right-stack-73150b27-347f-4d9c-a6ca-9a666a30a0eatarget-top",
-      "source": "B2.1.1b",
-      "target": "stack-73150b27-347f-4d9c-a6ca-9a666a30a0ea",
-      "sourceHandle": "source-right",
-      "targetHandle": "target-top"
-    }
-  ]
+  "edges": []
 }
