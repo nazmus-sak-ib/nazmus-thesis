@@ -27,9 +27,11 @@ import { Rnd } from 'react-rnd';
 
 import '@xyflow/react/dist/style.css';
 import './App.css';
+import Workspace from './Workspace.jsx';
+import { PAGE_TYPES, validViewport } from './workspaceState.js';
 
 const BASE = import.meta.env.BASE_URL;
-const STORAGE_KEY = 'sem-model-layout';
+
 
 // ======================================================
 // Connection handles
@@ -90,6 +92,7 @@ function getMethodSummary(data) {
     .filter(value => typeof value === 'string' && value.trim());
   const declared = settingText(metadata.data_treatment, '').toLowerCase();
   const hasThresholds = parameterRows(data, 'threshold').length > 0;
+  const hasPaths = parameterRows(data, 'regression').length > 0;
   const exportedCount = metadata.number_ordered_variables;
   const orderedCount = typeof exportedCount === 'number' && Number.isFinite(exportedCount) && exportedCount >= 0
     ? exportedCount : (Array.isArray(metadata.ordered_variables) || typeof metadata.ordered_variables === 'string') ? ordered.length : null;
@@ -99,6 +102,7 @@ function getMethodSummary(data) {
   const labels = { ordinal: 'Ordinal', mixed: 'Mixed', continuous: 'Continuous', ordered: 'Ordinal / mixed', unknown: 'Type unknown' };
   return {
     metadata, ordered, orderedCount, treatment, treatmentLabel: labels[treatment], hasThresholds,
+    hasPaths,
     hasDefined: parameterRows(data, 'defined').length > 0,
     supportsThresholds: hasThresholds || ['ordinal', 'mixed', 'ordered'].includes(treatment),
     estimator: settingText(metadata.estimator_requested, '') || settingText(metadata.estimator_actual, '') || settingText(metadata.estimator, ''),
@@ -113,7 +117,7 @@ function sampleSizeTotal(data) {
 }
 
 function resultViewsFor(summary) {
-  return RESULT_VIEWS.filter(([key]) => (key !== 'thresholds' || summary?.supportsThresholds) && (key !== 'defined' || summary?.hasDefined));
+  return RESULT_VIEWS.filter(([key]) => (key !== 'thresholds' || summary?.supportsThresholds) && (key !== 'defined' || summary?.hasDefined) && (key !== 'paths' || summary?.hasPaths));
 }
 
 function keyModelSettings(data) {
@@ -330,7 +334,7 @@ function RichModelNotes({ value, onChange, label = 'Model notes', placeholder = 
       role="textbox" aria-label={label} aria-multiline="true" data-placeholder={placeholder}
       onInput={publish} onMouseUp={rememberSelection} onKeyUp={rememberSelection}
       onBlur={rememberSelection} onPaste={paste} onDrop={event => event.preventDefault()} />
-    <p className="notes-save-hint">Saved in your browser as you type. Use Save layout to keep notes in your layout file.</p>
+    <p className="notes-save-hint">Saved on this page as you type. Use Save workspace to keep notes in your workspace file.</p>
   </div>;
 }
 function ModelNode({ data, selected }) {
@@ -1883,7 +1887,7 @@ function ComparisonWindow({
       </div>
 
       <div className="result-tabs comparison-tabs">
-        {COMPARISON_VIEWS.filter(([key]) => (key !== 'thresholds' || windowData.models?.some(model => getMethodSummary(model.data).supportsThresholds)) && (key !== 'defined' || windowData.models?.some(model => parameterRows(model.data, 'defined').length > 0))).map(([key, label]) => (
+        {COMPARISON_VIEWS.filter(([key]) => (key !== 'paths' || windowData.models?.some(model=>parameterRows(model.data,'regression').length>0)) && (key !== 'thresholds' || windowData.models?.some(model => getMethodSummary(model.data).supportsThresholds)) && (key !== 'defined' || windowData.models?.some(model => parameterRows(model.data, 'defined').length > 0))).map(([key, label]) => (
           <button
             key={key}
             className={(windowData.view === key ? 'active ' : '') + (key === 'defined' ? 'defined-tab' : '')}
@@ -1922,7 +1926,15 @@ function ComparisonWindow({
 // Main app
 // ======================================================
 
-export default function App() {
+let sharedCatalogPromise = null;
+
+export default function App() { return <Workspace Canvas={PageCanvas} />; }
+
+function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controllerRef }) {
+  const supportsModels = PAGE_TYPES[pageType].models;
+  const [initialPageLayout] = useState(initialLayout);
+  const publishedLayout = useRef(null);
+  const [viewport, setViewport] = useState(() => validViewport(initialLayout.viewport));
   const [
     nodes,
     setNodes,
@@ -1940,12 +1952,9 @@ export default function App() {
   const [libraryNotice, setLibraryNotice] = useState('');
   const [refreshingLibrary, setRefreshingLibrary] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
-  const [libraryOpen, setLibraryOpen] = useState(true);
+  const [libraryOpen, setLibraryOpen] = useState(supportsModels);
   const [libraryQuery, setLibraryQuery] = useState('');
   const refreshPending = useRef(false);
-  const [layoutHandle, setLayoutHandle] = useState(null);
-  const [savingLayout, setSavingLayout] = useState(false);
-  const savePending = useRef(false);
   const [flowInstance, setFlowInstance] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
   const [arrowMenu, setArrowMenu] = useState(null);
@@ -1976,7 +1985,7 @@ export default function App() {
   const [stackDialog, setStackDialog] = useState(null);
   const [resultWindow, setResultWindow] = useState(null);
 
-  const [comparisonIds, setComparisonIds] = useState([]);
+  const [comparisonIds, setComparisonIds] = useState(() => Array.isArray(initialLayout.comparison_ids) ? initialLayout.comparison_ids : []);
   const [comparisonWindow, setComparisonWindow] = useState(null);
 
   const canvasRef = useRef(null);
@@ -1986,9 +1995,9 @@ export default function App() {
   const [drawPreview,setDrawPreview]=useState(null);
   const drawStart=useRef(null), resizeBefore=useRef(new Map());
   const [canvasNotice,setCanvasNotice]=useState('');
-  const [libraryPrefs,setLibraryPrefs]=useState(()=>{try{return JSON.parse(localStorage.getItem('sem-library-sections')||'{}')||{};}catch{return {};}});
+  const [libraryPrefs,setLibraryPrefs]=useState(()=>{try{return JSON.parse(localStorage.getItem('sem-library-sections:'+pageId)||'{}')||{};}catch{return {};}});
   function updateLibraryPrefs(change) {
-    setLibraryPrefs(current=>{const next={...current,...change};try{localStorage.setItem('sem-library-sections',JSON.stringify(next));}catch{/* unavailable */}return next;});
+    setLibraryPrefs(current=>{const next={...current,...change};try{localStorage.setItem('sem-library-sections:'+pageId,JSON.stringify(next));}catch{/* unavailable */}return next;});
   }
   useEffect(()=> {
     const close=event=>{if(event.button===0 && !event.target.closest('.decoration-menu'))setDecorationMenu(null);};
@@ -2198,9 +2207,32 @@ export default function App() {
       return saved;
     });
 
+    const liveModelIds=new Set(nodes.filter(node=>node.type==='model').map(node=>node.id));
+    const missingModelIds=new Set([...Object.keys(initialLayout.model_positions??{}),...Object.keys(initialLayout.model_notes??{}),...(initialLayout.used_models??[]),...(initialLayout.stacks??[]).flatMap(stack=>stack.members??[])].filter(id=>!liveModelIds.has(id)));
+    for(const id of missingModelIds){
+      if(initialLayout.model_positions?.[id])modelPositions[id]=initialLayout.model_positions[id];
+      if(initialLayout.model_notes?.[id])modelNotes[id]=initialLayout.model_notes[id];
+      if(initialLayout.model_sizes?.[id])modelSizes[id]=initialLayout.model_sizes[id];
+      if(initialLayout.used_models?.includes(id)&&!usedModels.includes(id))usedModels.push(id);
+      if(initialLayout.hidden_models?.includes(id)&&!hiddenModels.includes(id))hiddenModels.push(id);
+    }
+    const missingStackIds=new Set();
+    for(const saved of initialLayout.stacks??[]){
+      const missing=(saved.members??[]).filter(id=>missingModelIds.has(id));if(!missing.length)continue;
+      const present=stacks.find(stack=>stack.id===saved.id);
+      if(present)present.members=[...new Set([...present.members,...missing])];
+      else {stacks.push(saved);missingStackIds.add(saved.id);}
+    }
+    for(const edge of initialLayout.edges??[])if((missingModelIds.has(edge.source)||missingModelIds.has(edge.target)||missingStackIds.has(edge.source)||missingStackIds.has(edge.target))&&!savedEdges.some(item=>item.id===edge.id))savedEdges.push(edge);
+    const decorations=nodes.filter(isDecoration).map(node=>{
+      const saved=initialLayout.decorations?.find(item=>item.id===node.id);
+      return normalizeDecoration({...node,data:{...node.data,members:[...new Set([...(node.data.members??[]),...(saved?.data?.members??[]).filter(id=>missingModelIds.has(id)||missingStackIds.has(id))])]}});
+    });
     return {
+      viewport: validViewport(flowInstance?.getViewport()) ?? viewport,
+      comparison_ids: comparisonIds,
       schema_version: '9.0',
-      decorations: nodes.filter(isDecoration).map(normalizeDecoration),
+      decorations,
       model_sizes: modelSizes,
       model_notes: modelNotes,
       stacks,
@@ -2231,7 +2263,9 @@ export default function App() {
     ]);
   }
 
-  async function fetchCatalog() {
+  async function fetchCatalog(force = false) {
+    if (force) sharedCatalogPromise = null;
+    if (!sharedCatalogPromise) sharedCatalogPromise = (async () => {
     const response = await fetch(
       BASE + 'models.json',
       { cache: 'no-store' }
@@ -2254,6 +2288,9 @@ export default function App() {
       ids.add(model.id);
     }
     return await verifyModelFiles(catalog.models);
+  
+    })().catch(error => { sharedCatalogPromise = null; throw error; });
+    return sharedCatalogPromise;
   }
 
   function createModelNode(model) {
@@ -2280,28 +2317,10 @@ export default function App() {
     async function loadEverything() {
       setLibraryError('');
       try {
-        const checkedCatalog = await fetchCatalog();
+        const checkedCatalog = supportsModels ? await fetchCatalog() : {models:[],missing:[]};
         const catalog = checkedCatalog.models;
-        let browserLayout = {};
-        try {
-          const saved = localStorage.getItem(STORAGE_KEY);
-          browserLayout = JSON.parse(saved || '{}') || {};
-          // Keep the pre-library browser layout for rollback, once only.
-          if (saved && !localStorage.getItem(STORAGE_KEY + '-before-version-stacks')) {
-            localStorage.setItem(STORAGE_KEY + '-before-version-stacks', saved);
-          }
-        } catch {
-          // A blocked storage API must not prevent loading the file layout.
-        }
-
-        let fileLayout = {};
-        try {
-          const response = await fetch(BASE + 'layout.json', { cache: 'no-store' });
-          if (response.ok) fileLayout = (await response.json()) || {};
-        } catch {
-          // A layout file is optional; new models start in the library.
-        }
-
+        const browserLayout = initialPageLayout;
+        const fileLayout = {};
         const browserPositions = getModelPositions(browserLayout);
         const filePositions = getModelPositions(fileLayout);
         const hiddenModels = new Set(
@@ -2339,14 +2358,14 @@ export default function App() {
         setNodes([...restoreStacks(modelNodes, savedStacks), ...noteSource.map(normalizeNote), ...loadDecorations(browserLayout.decorations ?? fileLayout.decorations)]);
         setEdges(loadedEdges);
         setModelsLoaded(true);
-        setLibraryNotice(libraryRefreshMessage(checkedCatalog));
+        setLibraryNotice(libraryRefreshMessage(checkedCatalog) + ((initialPageLayout.used_models??[]).some(id=>!catalog.some(model=>model.id===id)) ? ' Some saved models are unavailable; their page data is retained until the source files return.' : ''));
       } catch (error) {
         if (!cancelled) setLibraryError(error.message);
       }
     }
     loadEverything();
     return () => { cancelled = true; };
-  }, [setNodes, setEdges, loadAttempt]);
+  }, [setNodes, setEdges, loadAttempt, supportsModels, initialPageLayout]);
 
   async function refreshLibrary() {
     if (!modelsLoaded) {
@@ -2359,7 +2378,7 @@ export default function App() {
     setLibraryError('');
     setLibraryNotice('');
     try {
-      const checkedCatalog = await fetchCatalog();
+      const checkedCatalog = await fetchCatalog(true);
       setNodes(current => reconcileModelLibrary(current, checkedCatalog.models, createModelNode));
       setLibraryNotice(libraryRefreshMessage(checkedCatalog));
     } catch (error) {
@@ -2543,7 +2562,7 @@ export default function App() {
 
   function onLibraryDrop(event) {
     const nodeId = event.dataTransfer.getData('application/x-sem-model');
-    if (!nodeId || !flowInstance) return;
+    if (!supportsModels || !nodeId || !flowInstance) return;
     event.preventDefault();
     activateModel(nodeId, flowInstance.screenToFlowPosition({
       x: event.clientX,
@@ -2552,20 +2571,20 @@ export default function App() {
   }
 
   // ====================================================
-  // Automatic local browser backup
-  // ====================================================
-
+  // Publish this page only; the workspace owns storage and file operations.
+  // A keyed PageCanvas unmounts when switching pages, isolating async requests.
   useEffect(() => {
-    if (!modelsLoaded) {
-      return;
-    }
-
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(getCurrentLayout()));
-    } catch {
-      setLibraryError('Browser backup is unavailable. Use Save layout to keep your changes.');
-    }
-  }, [nodes, edges, modelsLoaded]);
+    if (!modelsLoaded) return;
+    const layout=getCurrentLayout(), encoded=JSON.stringify(layout);
+    if (publishedLayout.current===encoded) return;
+    publishedLayout.current=encoded;
+    onLayoutChange(pageId,layout);
+  });
+  useEffect(() => {
+    const api = { id: pageId, ready: modelsLoaded, snapshot: getCurrentLayout };
+    controllerRef.current = api;
+    return () => { if (controllerRef.current === api) controllerRef.current = null; };
+  });
 
   // ====================================================
   // Connect nodes
@@ -2845,150 +2864,6 @@ export default function App() {
   // Apply layout.json
   // ====================================================
 
-  function applyLayout(layout) {
-    setArrowNoteId(null); setArrowMenu(null);
-    if (!layout || typeof layout !== 'object' || Array.isArray(layout)) {
-      throw new Error('The layout file must contain a JSON object.');
-    }
-    setComparisonIds([]);
-    setContextMenu(null);
-    setResultWindow(null);
-    const positions = getModelPositions(layout);
-    const usedModels = getUsedModelIds(layout);
-
-    const hiddenModels = new Set(
-      Array.isArray(layout.hidden_models)
-        ? layout.hidden_models
-        : []
-    );
-
-    setNodes(currentNodes => {
-      const modelNodes = currentNodes
-        .filter(node => node.type === 'model')
-        .map(node => ({
-          ...node,
-          ...modelDimensions(layout.model_sizes?.[node.id]),
-          position: positions[node.id] ?? node.position,
-          hidden: usedModels.has(node.id) && hiddenModels.has(node.id),
-          selected: false,
-          data: {
-            ...node.data,
-            stackId: null,
-            noteHtml: cleanNoteHtml(layout.model_notes?.[node.id]),
-            inUse: usedModels.has(node.id),
-            hasPosition: Boolean(positions[node.id]) || node.data.hasPosition
-          }
-        }));
-
-      const noteNodes = Array.isArray(layout.notes)
-        ? layout.notes.map(normalizeNote)
-        : [];
-
-      return [
-        ...restoreStacks(modelNodes, layout.stacks),
-        ...noteNodes,
-        ...loadDecorations(layout.decorations)
-      ];
-    });
-
-    setEdges(
-      Array.isArray(layout.edges)
-        ? layout.edges
-        : []
-    );
-  }
-
-  // ====================================================
-  // Open permanent layout file
-  // ====================================================
-
-  async function openLayoutFile() {
-    if (!window.showOpenFilePicker) {
-      alert('Use Chrome or Edge for direct file editing.');
-      return;
-    }
-
-    try {
-      const [handle] = await window.showOpenFilePicker({
-        types: [
-          {
-            description: 'JSON files',
-            accept: {
-              'application/json': ['.json']
-            }
-          }
-        ],
-        multiple: false
-      });
-
-      const file = await handle.getFile();
-      const text = await file.text();
-      const layout = JSON.parse(text);
-
-      applyLayout(layout);
-      setLayoutHandle(handle);
-    } catch (error) {
-      if (error.name !== 'AbortError') {
-        alert(`Could not open layout: ${error.message}`);
-      }
-    }
-  }
-
-  // ====================================================
-  // Save layout
-  // ====================================================
-
-  async function saveLayout() {
-    if (savePending.current) return;
-    savePending.current = true;
-    setSavingLayout(true);
-
-    try {
-      // Snapshot the current canvas before the picker opens. Choosing a file
-      // for saving must never read or apply its existing contents.
-      const contents = JSON.stringify(getCurrentLayout(), null, 2);
-      let handle = layoutHandle;
-
-      if (!handle) {
-        const types = [{
-          description: 'Layout JSON',
-          accept: { 'application/json': ['.json'] }
-        }];
-        if (window.showSaveFilePicker) {
-          handle = await window.showSaveFilePicker({
-            suggestedName: 'layout.json',
-            types
-          });
-        } else if (window.showOpenFilePicker) {
-          // Fallback: select an existing destination, without reading it.
-          [handle] = await window.showOpenFilePicker({ types, multiple: false });
-        } else {
-          alert('Use Chrome or Edge to save directly to a layout file.');
-          return;
-        }
-      }
-
-      const writable = await handle.createWritable();
-      try {
-        await writable.write(contents);
-        await writable.close();
-      } catch (error) {
-        // Discard a failed partial write when the browser supports abort.
-        try { await writable.abort(); } catch { /* Preserve the original error. */ }
-        throw error;
-      }
-      setLayoutHandle(handle);
-      alert('Layout saved.');
-    } catch (error) {
-      if (error.name !== 'AbortError') {
-        alert('Could not save layout: ' + error.message);
-      }
-    } finally {
-      savePending.current = false;
-      setSavingLayout(false);
-    }
-  }
-
   // ====================================================
   // Hidden edges
   // ====================================================
@@ -3090,17 +2965,7 @@ export default function App() {
             {allNotesCollapsed ? 'Expand All' : 'Collapse All'}
           </button>
 
-          <button onClick={openLayoutFile} disabled={!modelsLoaded || savingLayout}
-            title="Replace the current canvas with a saved layout">
-            Load layout
-          </button>
-
-          <button onClick={saveLayout} disabled={!modelsLoaded || savingLayout}
-            title="Save the current layout without loading or changing the canvas">
-            {savingLayout ? 'Saving…' : 'Save layout'}
-          </button>
-
-          <button
+          {supportsModels && <><button
             className={comparisonIds.length >= 2 ? 'compare-ready' : ''}
             onClick={() => openComparison('overview')}
             disabled={comparisonIds.length < 2}
@@ -3128,6 +2993,7 @@ export default function App() {
               Restore hidden ({hiddenModelCount})
             </button>
           )}
+          </>}
           </div>}
         </div>
 
@@ -3153,14 +3019,16 @@ export default function App() {
           onNodeContextMenu={(event, node) => { setArrowMenu(null); if(isDecoration(node)){openDecorationMenu(event,node);return;} setDecorationMenu(null);onNodeContextMenu(event, node); }}
           onPaneClick={() => { setContextMenu(null); setArrowMenu(null); }}
           deleteKeyCode={stackDialog ? null : ['Backspace', 'Delete']}
-          fitView
+          defaultViewport={validViewport(initialPageLayout.viewport) ?? {x:0,y:0,zoom:1}}
+          fitView={!validViewport(initialPageLayout.viewport) && Boolean(initialPageLayout.used_models?.length || initialPageLayout.notes?.length || initialPageLayout.decorations?.length || initialPageLayout.stacks?.some(stack=>stack.in_use))}
+          onMoveEnd={(_event,nextViewport)=>setViewport(nextViewport)}
         >
           <Background />
           <Controls />
         </ReactFlow>
       </div>
 
-      {libraryOpen && (
+      {supportsModels && libraryOpen && (
         <aside className="model-library" id="model-library" aria-label="Model library" onKeyDown={event => event.stopPropagation()}>
           <div className="library-header">
             <h2>Model library</h2>
