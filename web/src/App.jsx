@@ -7,6 +7,9 @@ import {
 
 import {
   ReactFlow,
+  BaseEdge,
+  EdgeLabelRenderer,
+  getSmoothStepPath,
   Background,
   Controls,
   Handle,
@@ -14,6 +17,7 @@ import {
   MarkerType,
   NodeResizer,
   addEdge,
+  applyNodeChanges,
   useNodesState,
   useEdgesState,
   useReactFlow
@@ -46,19 +50,303 @@ function ConnectionHandles() {
 // Model node
 // ======================================================
 
-function ModelNode({ data }) {
+// Exported metadata is optional. Unknown settings stay unknown, rather than
+// being silently converted to FALSE, continuous, or a guessed estimator.
+function resultRows(value) {
+  return Array.isArray(value) ? value.filter(row => row && typeof row === 'object' && !Array.isArray(row)) : [];
+}
+
+function normalizeResultData(value) {
+  const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const data = { ...source, metadata: source.metadata && typeof source.metadata === 'object' && !Array.isArray(source.metadata) ? source.metadata : {} };
+  for (const key of ['sample_size', 'missing_patterns', 'fit_measures', 'parameters', 'r_squared', 'modification_indices']) {
+    data[key] = resultRows(source[key]);
+  }
+  return data;
+}
+
+function settingText(value, fallback = 'Not exported') {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === 'boolean') return value ? 'TRUE' : 'FALSE';
+  if (typeof value === 'number') return Number.isFinite(value) ? String(value) : fallback;
+  if (typeof value === 'string') return value.trim() || fallback;
+  if (Array.isArray(value)) return value.map(item => settingText(item, '')).filter(Boolean).join(', ') || fallback;
+  return fallback;
+}
+
+function parameterRows(data, section) {
+  const operators = { threshold: '|', loading: '=~', regression: '~' };
+  return resultRows(data?.parameters).filter(row => row.section === section ||
+    (!row.section && operators[section] && row.op === operators[section]) ||
+    (section === 'threshold' && row.op === '|') ||
+    (section === 'defined' && row.op === ':=') ||
+    (!row.section && row.op === '~~' && ((section === 'variance' && row.lhs === row.rhs) || (section === 'covariance' && row.lhs !== row.rhs))));
+}
+
+function getMethodSummary(data) {
+  const metadata = data?.metadata && typeof data.metadata === 'object' && !Array.isArray(data.metadata) ? data.metadata : {};
+  const ordered = (Array.isArray(metadata.ordered_variables) ? metadata.ordered_variables
+    : typeof metadata.ordered_variables === 'string' ? [metadata.ordered_variables] : [])
+    .filter(value => typeof value === 'string' && value.trim());
+  const declared = settingText(metadata.data_treatment, '').toLowerCase();
+  const hasThresholds = parameterRows(data, 'threshold').length > 0;
+  const exportedCount = metadata.number_ordered_variables;
+  const orderedCount = typeof exportedCount === 'number' && Number.isFinite(exportedCount) && exportedCount >= 0
+    ? exportedCount : (Array.isArray(metadata.ordered_variables) || typeof metadata.ordered_variables === 'string') ? ordered.length : null;
+  const treatment = ['ordinal', 'mixed', 'continuous'].includes(declared) ? declared
+    : (hasThresholds || ordered.length > 0 || orderedCount > 0) ? 'ordered'
+      : orderedCount === 0 ? 'continuous' : 'unknown';
+  const labels = { ordinal: 'Ordinal', mixed: 'Mixed', continuous: 'Continuous', ordered: 'Ordinal / mixed', unknown: 'Type unknown' };
+  return {
+    metadata, ordered, orderedCount, treatment, treatmentLabel: labels[treatment], hasThresholds,
+    hasDefined: parameterRows(data, 'defined').length > 0,
+    supportsThresholds: hasThresholds || ['ordinal', 'mixed', 'ordered'].includes(treatment),
+    estimator: settingText(metadata.estimator_requested, '') || settingText(metadata.estimator_actual, '') || settingText(metadata.estimator, ''),
+    missing: settingText(metadata.missing, '')
+  };
+}
+
+function sampleSizeTotal(data) {
+  const rows = resultRows(data?.sample_size);
+  if (!rows.length || rows.some(row => typeof row.n !== 'number' || !Number.isFinite(row.n))) return undefined;
+  return rows.reduce((sum, row) => sum + row.n, 0);
+}
+
+function resultViewsFor(summary) {
+  return RESULT_VIEWS.filter(([key]) => (key !== 'thresholds' || summary?.supportsThresholds) && (key !== 'defined' || summary?.hasDefined));
+}
+
+function keyModelSettings(data) {
+  const summary = getMethodSummary(data);
+  const m = summary.metadata;
+  return [
+    { argument: 'model (R object name)', value: 'Not exported; specification below' },
+    { argument: 'data (R object name)', value: 'Not exported' },
+    { argument: 'estimator (requested)', value: settingText(m.estimator_requested) },
+    { argument: 'estimator (actual)', value: settingText(m.estimator_actual ?? m.estimator) },
+    { argument: 'data treatment', value: summary.treatmentLabel },
+    { argument: 'ordered (resolved)', value: summary.orderedCount !== null
+      ? summary.orderedCount + ' ordered variable(s)' : summary.supportsThresholds ? 'Ordered variables present; count not exported' : 'Not exported' },
+    { argument: 'missing', value: settingText(m.missing) },
+    { argument: 'std.lv', value: settingText(m.std_lv) },
+    { argument: 'auto.cov.lv.x', value: settingText(m.auto_cov_lv_x) },
+    { argument: 'auto.cov.y', value: settingText(m.auto_cov_y) },
+    { argument: 'meanstructure', value: settingText(m.meanstructure) },
+    { argument: 'fixed.x', value: settingText(m.fixed_x) },
+    { argument: 'parameterization', value: settingText(m.parameterization) },
+    { argument: 'SE method', value: settingText(m.se_method) },
+    { argument: 'test', value: settingText(m.test) }
+  ];
+}
+
+function ModelFooter({ title, summary }) {
+  const method = summary ?? getMethodSummary(null);
+  const cue = [method.estimator || 'Estimator unknown', method.treatmentLabel, method.missing].filter(Boolean).join(' · ');
+  return <div className="model-footer">
+    <div className="model-title">{title}</div>
+    <div className="model-method-cue" title={cue}>{cue}</div>
+  </div>;
+}
+
+function KeyModelSettings({ data }) {
+  const summary = getMethodSummary(data);
+  return <section className="key-model-settings">
+    <h3>Key model settings</h3>
+    <p className="method-help">Resolved settings from the fitted model. Original R object names and the literal ordered argument are not exported.</p>
+    <DataTable rows={keyModelSettings(data)} preferredColumns={['argument', 'value']} />
+    {summary.ordered.length > 0 && <details className="ordered-variable-list">
+      <summary>Ordered variables ({summary.ordered.length})</summary>
+      <p>{summary.ordered.join(', ')}</p>
+    </details>}
+  </section>;
+}
+
+function ThresholdResults({ data }) {
+  const rows = parameterRows(data, 'threshold');
+  if (!rows.length) {
+    const summary = getMethodSummary(data);
+    return <p className="empty-message">{summary.treatment === 'continuous'
+      ? 'Thresholds do not apply to this continuous model.'
+      : 'No threshold estimates were exported for this model.'}</p>;
+  }
+  return <DataTable rows={rows} preferredColumns={[
+    'group', 'lhs', 'op', 'rhs', 'est', 'se', 'z', 'pvalue', 'ci.lower', 'ci.upper', 'std.lv', 'std.all'
+  ]} />;
+}
+const NOTE_LIMITS = { minWidth: 180, minHeight: 110, maxWidth: 800, maxHeight: 600 };
+const MODEL_LIMITS = { minWidth: 200, minHeight: 140, maxWidth: 1000, maxHeight: 900 };
+const COLLAPSED_NOTE = { width: 240, height: 64 };
+
+function boundedSize(value, fallback, min, max) {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
+}
+
+function modelDimensions(value = {}) {
+  value = value && typeof value === 'object' ? value : {};
+  return {
+    width: boundedSize(value.width, 320, MODEL_LIMITS.minWidth, MODEL_LIMITS.maxWidth),
+    height: boundedSize(value.height, 260, MODEL_LIMITS.minHeight, MODEL_LIMITS.maxHeight)
+  };
+}
+
+function expandedNoteSize(node) {
+  const source = node.data?.collapsed ? node.data.expandedSize ?? {} : node;
+  return {
+    width: boundedSize(source.width, 260, NOTE_LIMITS.minWidth, NOTE_LIMITS.maxWidth),
+    height: boundedSize(source.height, 180, NOTE_LIMITS.minHeight, NOTE_LIMITS.maxHeight)
+  };
+}
+
+function setNoteCollapsed(node, collapsed) {
+  if (node.type !== 'note') return node;
+  const expandedSize = expandedNoteSize(node);
+  const size = collapsed ? COLLAPSED_NOTE : expandedSize;
+  return { ...node, ...size, style: { ...node.style, ...size },
+    data: { ...node.data, collapsed, expandedSize } };
+}
+
+// Store only simple formatting. Pasted/imported markup cannot introduce
+// scripts, event handlers, links, images, or external content.
+function cleanNoteHtml(html) {
+  if (typeof html !== 'string' || !html) return '';
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  const allowed = new Set(['P', 'DIV', 'BR', 'SPAN', 'B', 'STRONG', 'I', 'EM', 'U', 'S', 'STRIKE', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'FONT']);
+  const forbidden = new Set(['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'SVG', 'MATH', 'IMG', 'VIDEO', 'AUDIO', 'LINK', 'META']);
+  function cleanChildren(parent) {
+    for (const child of [...parent.childNodes]) {
+      if (child.nodeType === 3) continue;
+      if (child.nodeType !== 1 || forbidden.has(child.tagName)) { child.remove(); continue; }
+      cleanChildren(child);
+      if (!allowed.has(child.tagName)) { child.replaceWith(...child.childNodes); continue; }
+      const styles = {};
+      for (const property of ['color', 'background-color', 'font-size', 'font-weight', 'font-style', 'text-decoration', 'text-align']) {
+        const value = child.style.getPropertyValue(property);
+        if (value && !/url\s*\(|var\s*\(|expression/i.test(value)) styles[property] = value;
+      }
+      const fontColor = child.tagName === 'FONT' ? child.getAttribute('color') : null;
+      const fontSize = child.tagName === 'FONT' ? child.getAttribute('size') : null;
+      const textBox = child.classList.contains('note-text-box');
+      for (const attribute of [...child.attributes]) child.removeAttribute(attribute.name);
+      for (const [property, value] of Object.entries(styles)) child.style.setProperty(property, value);
+      if (fontColor && CSS.supports('color', fontColor)) child.setAttribute('color', fontColor);
+      if (fontSize && /^[1-7]$/.test(fontSize)) child.setAttribute('size', fontSize);
+      if (textBox) child.className = 'note-text-box';
+    }
+  }
+  cleanChildren(template.content);
+  if (!template.content.textContent.replace(/[\s\u200b\u00a0]/g, '')) return '';
+  return template.innerHTML;
+}
+
+function ModelNoteButton({ data }) {
+  if (!data.noteHtml) return null;
+  return <button type="button" className="model-note-icon nodrag nopan"
+    title="Open this model's notes" aria-label={'Open notes for ' + (data.activeTitle ?? data.title)}
+    onClick={event => { event.stopPropagation(); data.onOpenNotes?.(); }}>
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+      <path d="M5 3h10l4 4v14H5z M14 3v5h5 M8 12h8 M8 16h6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+    </svg>
+  </button>;
+}
+
+function RichModelNotes({ value, onChange, label = 'Model notes', placeholder = 'Write notes for this model…' }) {
+  const editorRef = useRef(null);
+  const initialized = useRef(false);
+  const selectionRef = useRef(null);
+  const [message, setMessage] = useState('');
+  useEffect(() => {
+    if (!initialized.current && editorRef.current) {
+      editorRef.current.innerHTML = cleanNoteHtml(value);
+      initialized.current = true;
+    }
+  }, [value]);
+
+  function rememberSelection() {
+    const selection = window.getSelection();
+    if (selection?.rangeCount && editorRef.current?.contains(selection.anchorNode) && editorRef.current?.contains(selection.focusNode)) {
+      selectionRef.current = selection.getRangeAt(0).cloneRange();
+    }
+  }
+
+  function restoreSelection() {
+    const editor = editorRef.current;
+    editor.focus();
+    const selection = window.getSelection();
+    const saved = selectionRef.current;
+    const range = saved && editor.contains(saved.commonAncestorContainer) ? saved : document.createRange();
+    if (range !== saved) { range.selectNodeContents(editor); range.collapse(false); }
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+
+  function publish() {
+    onChange(cleanNoteHtml(editorRef.current.innerHTML));
+    rememberSelection();
+  }
+
+  function format(command, value = null) {
+    restoreSelection();
+    if (typeof document.execCommand !== 'function') {
+      setMessage('This browser supports text editing but not these formatting controls. Use Chrome or Edge for formatting.');
+      return;
+    }
+    document.execCommand('styleWithCSS', false, true);
+    document.execCommand(command, false, value);
+    publish();
+  }
+
+  function paste(event) {
+    event.preventDefault();
+    rememberSelection();
+    const html = event.clipboardData.getData('text/html');
+    if (html) format('insertHTML', cleanNoteHtml(html));
+    else format('insertText', event.clipboardData.getData('text/plain'));
+  }
+
+  return <div className="model-notes-panel" onKeyDown={event => event.stopPropagation()}>
+    <div className="notes-format-toolbar" role="toolbar" aria-label="Note formatting">
+      {[
+        ['bold', 'Bold', 'B'], ['italic', 'Italic', 'I'], ['strikeThrough', 'Strikethrough', 'S̶'],
+        ['underline', 'Underline', 'U'], ['insertUnorderedList', 'Bulleted list', '• List'],
+        ['insertOrderedList', 'Numbered list', '1. List']
+      ].map(([command, label, text]) => <button key={command} type="button" title={label} aria-label={label}
+        onMouseDown={event => event.preventDefault()} onClick={() => format(command)}>{text}</button>)}
+      <label>Size <select aria-label="Note font size" defaultValue="" onMouseDown={rememberSelection}
+        onChange={event => format('fontSize', event.target.value)}>
+        <option value="" disabled>Font size</option>
+        {[[1,10],[2,13],[3,16],[4,18],[5,24],[6,32],[7,48]].map(([value, pixels]) => <option key={value} value={value}>{pixels}px</option>)}
+      </select></label>
+      <label>Text <input type="color" aria-label="Note text color" defaultValue="#263341"
+        onMouseDown={rememberSelection} onChange={event => format('foreColor', event.target.value)} /></label>
+      <label>Highlight <input type="color" aria-label="Note background color" defaultValue="#fff2a8"
+        onMouseDown={rememberSelection} onChange={event => format('hiliteColor', event.target.value)} /></label>
+      <button type="button" onMouseDown={event => event.preventDefault()}
+        onClick={() => format('insertHTML', '<div class="note-text-box">Text box</div><p><br></p>')}>Text box</button>
+      <button type="button" onMouseDown={event => event.preventDefault()} onClick={() => format('removeFormat')}>Clear formatting</button>
+    </div>
+    {message && <p className="method-help" role="status">{message}</p>}
+    <div ref={editorRef} className="model-note-editor nodrag nopan nowheel" contentEditable suppressContentEditableWarning
+      role="textbox" aria-label={label} aria-multiline="true" data-placeholder={placeholder}
+      onInput={publish} onMouseUp={rememberSelection} onKeyUp={rememberSelection}
+      onBlur={rememberSelection} onPaste={paste} onDrop={event => event.preventDefault()} />
+    <p className="notes-save-hint">Saved in your browser as you type. Use Save layout to keep notes in your layout file.</p>
+  </div>;
+}
+function ModelNode({ data, selected }) {
   return (
-    <div className="model-node">
+    <div className={"model-node method-" + (data.methodSummary?.treatment ?? "unknown")}>
+      <NodeResizer isVisible={selected} {...MODEL_LIMITS} handleStyle={{ width: 12, height: 12 }} />
+      <ModelNoteButton data={data} />
       <ConnectionHandles />
 
       <img
         src={`${BASE}${data.image}`}
         alt={data.title}
+        draggable={false}
       />
 
-      <div className="model-title">
-        {data.title}
-      </div>
+      <ModelFooter title={data.title} summary={data.methodSummary} />
     </div>
   );
 }
@@ -68,14 +356,13 @@ function ModelNode({ data }) {
 // ======================================================
 
 function NoteNode({ id, data, selected }) {
-  const { updateNodeData } = useReactFlow();
+  const { updateNodeData, setNodes } = useReactFlow();
 
   return (
-    <div className="note-node">
+    <div className={"note-node" + (data.collapsed ? " note-collapsed" : "")}>
       <NodeResizer
-        isVisible={selected}
-        minWidth={150}
-        minHeight={90}
+        isVisible={selected && !data.collapsed}
+        {...NOTE_LIMITS}
         handleStyle={{
           width: 14,
           height: 14
@@ -83,12 +370,16 @@ function NoteNode({ id, data, selected }) {
       />
 
       <ConnectionHandles />
+      <button className="note-toggle nodrag nopan" title={data.collapsed ? 'Expand note' : 'Collapse note'}
+        aria-label={data.collapsed ? 'Expand note' : 'Collapse note'}
+        onClick={() => setNodes(current => current.map(node => node.id === id ? setNoteCollapsed(node, !node.data.collapsed) : node))}>
+        {data.collapsed ? '▸' : '▾'}
+      </button>
 
       <input
         className="note-title nodrag"
         value={data.title ?? ''}
         placeholder="Heading"
-        onContextMenu={event => event.stopPropagation()}
         onChange={event =>
           updateNodeData(id, {
             title: event.target.value
@@ -96,22 +387,98 @@ function NoteNode({ id, data, selected }) {
         }
       />
 
-      <textarea
+      {!data.collapsed && <textarea
         className="note-text nodrag nowheel"
         value={data.text ?? ''}
         placeholder="Type here..."
-        onContextMenu={event => event.stopPropagation()}
         onChange={event =>
           updateNodeData(id, {
             text: event.target.value
           })
         }
-      />
+      />}
     </div>
   );
 }
 
 // Stack nodes own canvas geometry; model nodes retain individual results identity.
+// Verify catalog entries against their actual files, not cached images or the
+// catalog alone. Only definite absence removes an entry; errors abort refresh.
+async function modelFileExists(filePath, kind) {
+  const options = { cache: 'no-store', signal: AbortSignal.timeout(15000) };
+  let response = await fetch(BASE + filePath, {
+    ...options, method: kind === 'image' ? 'HEAD' : 'GET'
+  });
+  if (kind === 'image' && (response.status === 405 || response.status === 501)) {
+    response = await fetch(BASE + filePath, options);
+  }
+  if (response.status === 404 || response.status === 410) return false;
+  if (!response.ok) {
+    throw new Error('Could not verify ' + filePath + ' (' + response.status + '). Library unchanged.');
+  }
+  const contentType = (response.headers.get('content-type') || '').toLowerCase();
+  // Some development/static servers return index.html with HTTP 200 for a
+  // missing asset. That is not a valid model image or result file.
+  if (contentType.includes('text/html')) return false;
+  if (kind === 'results') {
+    try {
+      const data = await response.json();
+      if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Invalid result');
+      return getMethodSummary(data);
+    } catch {
+      throw new Error('Could not read ' + filePath + ' as result JSON. Library unchanged; retry after the file finishes writing.');
+    }
+  }
+  return true;
+}
+
+async function verifyModelFiles(models) {
+  const valid = new Array(models.length);
+  const summaries = new Array(models.length);
+  let next = 0;
+  // Limit parallel requests when the library contains many models.
+  await Promise.all(Array.from({ length: Math.min(4, models.length) }, async () => {
+    while (next < models.length) {
+      const index = next++;
+      const model = models[index];
+      const [imageExists, resultsExist] = await Promise.all([
+        modelFileExists(model.image, 'image'),
+        modelFileExists(model.results, 'results')
+      ]);
+      valid[index] = Boolean(imageExists && resultsExist);
+      summaries[index] = resultsExist || null;
+    }
+  }));
+  return {
+    models: models.flatMap((model, index) => valid[index] ? [{ ...model, methodSummary: summaries[index] }] : []),
+    missing: models.filter((_, index) => !valid[index]).map(model => model.id)
+  };
+}
+
+function reconcileModelLibrary(current, catalog, makeNode) {
+  const byId = new Map(catalog.map(model => [model.id, model]));
+  const existingIds = new Set(current.map(node => node.id));
+  const updated = current.flatMap(node => {
+    if (node.type === 'note' || isDecoration(node)) return [node];
+    if (node.type === 'stack') {
+      const members = node.data.memberIds.filter(id => byId.has(id));
+      if (!members.length) return [];
+      return [{ ...node, data: { ...node.data, memberIds: members,
+        activeId: members.includes(node.data.activeId) ? node.data.activeId : members[0] } }];
+    }
+    const model = byId.get(node.id);
+    if (!model) return [];
+    return [{ ...node, data: { ...node.data,
+      title: model.title || model.id, image: model.image, results: model.results, methodSummary: model.methodSummary } }];
+  });
+  return [...updated, ...catalog.filter(model => !existingIds.has(model.id)).map(makeNode)];
+}
+
+function libraryRefreshMessage(catalog) {
+  return 'Library checked: ' + catalog.models.length + ' model(s) with both files.' +
+    (catalog.missing.length ? ' Skipped ' + catalog.missing.length + ' catalog entry/entries with missing files.' : '');
+}
+
 function restoreStacks(modelNodes, savedStacks = []) {
   const models = modelNodes.map(node => ({ ...node, data: { ...node.data, stackId: null } }));
   const byId = new Map(models.map(node => [node.id, node]));
@@ -131,7 +498,7 @@ function restoreStacks(modelNodes, savedStacks = []) {
       model.selected = false;
     }
     stackNodes.push({
-      id: saved.id, type: 'stack', deletable: false,
+      id: saved.id, type: 'stack', deletable: false, ...modelDimensions(saved),
       position: saved.position ?? { x: 100, y: 100 },
       hidden: Boolean(saved.in_use && saved.hidden),
       data: {
@@ -187,7 +554,7 @@ function groupVersionModels(nodes, edges, memberIds, targetId, title, anchorId, 
       data: { ...node.data, stackId: destinationId, inUse: false } }];
   });
   updated.push(target ? { ...target, data: { ...target.data, memberIds: members } } : {
-    id: destinationId, type: 'stack', deletable: false,
+    id: destinationId, type: 'stack', deletable: false, ...modelDimensions(anchor),
     position: { ...anchor.position }, hidden: Boolean(anchor.hidden),
     data: { title: title.trim() || 'Version stack', memberIds: members,
       activeId: selected.includes(anchorId) ? anchorId : selected[0],
@@ -222,37 +589,180 @@ function splitVersionStack(nodes, edges, stackId, detachedId = null) {
 function displayVersionNodes(nodes) {
   const byId = new Map(nodes.map(node => [node.id, node]));
   return nodes.map(node => {
-    if (node.type === 'note') return node;
+    if (node.type === 'note' || isDecoration(node)) return node;
     if (node.type === 'model') return node.data.stackId || !node.data.inUse
       ? { ...node, hidden: true, selected: false } : node;
     const active = byId.get(node.data.activeId);
     return { ...node, hidden: !node.data.inUse || node.hidden,
-      data: { ...node.data, image: active?.data.image,
+      data: { ...node.data, image: active?.data.image, methodSummary: active?.data.methodSummary,
         activeTitle: active?.data.title ?? node.data.activeId,
         versionIndex: node.data.memberIds.indexOf(node.data.activeId) + 1 } };
   });
 }
 
-function StackNode({ data }) {
+function StackNode({ data, selected }) {
   return (
-    <div className="model-node version-stack">
+    <div className={"model-node version-stack method-" + (data.methodSummary?.treatment ?? "unknown")}>
+      <NodeResizer isVisible={selected} {...MODEL_LIMITS} handleStyle={{ width: 12, height: 12 }} />
+      <ModelNoteButton data={data} />
       <ConnectionHandles />
       <div className="stack-caption">{data.title} <span>{data.versionIndex} of {data.memberIds.length}</span></div>
-      <img src={BASE + data.image} alt={data.activeTitle} />
-      <div className="model-title">{data.activeTitle}</div>
+      <img src={BASE + data.image} alt={data.activeTitle} draggable={false} />
+      <ModelFooter title={data.activeTitle} summary={data.methodSummary} />
     </div>
   );
 }
 
 
+const DECORATION_TYPES = ['shape', 'container'];
+const isDecoration = node => DECORATION_TYPES.includes(node.type);
+const isGroupItem = node => node.type === 'note' || (['model','stack'].includes(node.type) && node.data.inUse && !node.data.stackId);
+function itemBox(node) {
+  return { x: node.position.x, y: node.position.y, width: node.width ?? node.measured?.width ?? 320, height: node.height ?? node.measured?.height ?? 260 };
+}
+function encloses(a,b) { return b.x >= a.x - .01 && b.y >= a.y - .01 && b.x+b.width <= a.x+a.width+.01 && b.y+b.height <= a.y+a.height+.01; }
+function overlaps(a,b) { return a.x < b.x+b.width-.01 && a.x+a.width > b.x+.01 && a.y < b.y+b.height-.01 && a.y+a.height > b.y+.01; }
+function decorationStyle(data = {}) {
+  return { fill: /^#[0-9a-f]{6}$/i.test(data.fill) ? data.fill : '#fff2b3', border: /^#[0-9a-f]{6}$/i.test(data.border) ? data.border : '#a68b32',
+    thickness: boundedSize(data.thickness,2,0,12), line: ['solid','dashed','dotted'].includes(data.line) ? data.line : 'solid' };
+}
+function normalizeDecoration(node) {
+  const type = node.type === 'container' ? 'container' : 'shape';
+  const kind = type === 'container' ? 'rectangle' : ['rectangle','circle','rounded'].includes(node.data?.kind) ? node.data.kind : 'rectangle';
+  const width = boundedSize(node.width,300,60,5000), height = kind === 'circle' ? width : boundedSize(node.height,200,60,5000);
+  return { id: node.id, type, position: { x: Number.isFinite(node.position?.x) ? node.position.x : 0, y: Number.isFinite(node.position?.y) ? node.position.y : 0 },
+    width,height, dragHandle: '.decoration-drag', data: { ...decorationStyle(node.data), kind, order: Number.isFinite(node.data?.order) ? node.data.order : 0,
+      members: type === 'container' && Array.isArray(node.data?.members) ? [...new Set(node.data.members.filter(id=>typeof id==='string'))] : [] } };
+}
+function loadDecorations(value) { return Array.isArray(value) ? value.filter(node => node && typeof node.id === 'string' && DECORATION_TYPES.includes(node.type)).map(normalizeDecoration) : []; }
+// Shrink only: keep every fully enclosed eligible item, and exclude partial or already-owned items.
+function fitContainer(box, nodes, containerId) {
+  const others = nodes.filter(node => node.type === 'container' && node.id !== containerId);
+  const owned = new Set(others.flatMap(node => node.data.members ?? []));
+  const items = nodes.filter(node => isGroupItem(node) && !node.hidden);
+  const desired = items.filter(node => !owned.has(node.id) && encloses(box,itemBox(node)));
+  const obstacles = items.filter(node => owned.has(node.id) || !encloses(box,itemBox(node))).map(itemBox);
+  let candidates = [box];
+  for (const obstacle of obstacles) {
+    const next=[];
+    for (const rect of candidates) {
+      if (!overlaps(rect,obstacle)) { next.push(rect); continue; }
+      const right=rect.x+rect.width, bottom=rect.y+rect.height;
+      next.push({ ...rect,width:obstacle.x-rect.x-2 },{ ...rect,x:obstacle.x+obstacle.width+2,width:right-obstacle.x-obstacle.width-2 },
+        { ...rect,height:obstacle.y-rect.y-2 },{ ...rect,y:obstacle.y+obstacle.height+2,height:bottom-obstacle.y-obstacle.height-2 });
+    }
+    candidates=next.filter(rect=>rect.width>=60 && rect.height>=60 && desired.every(node=>encloses(rect,itemBox(node))))
+      .sort((a,b)=>b.width*b.height-a.width*a.height).slice(0,256);
+    if (!candidates.length) return null;
+  }
+  const result=candidates.sort((a,b)=>b.width*b.height-a.width*a.height)[0];
+  return { box:result,members:desired.map(node=>node.id) };
+}
+function maintainMembership(nodes) {
+  const byId=new Map(nodes.map(node=>[node.id,node])), claimed=new Set();
+  return nodes.map(node=> {
+    if (node.type !== 'container') return node;
+    const members=[];
+    for (const id of node.data.members ?? []) {
+      const original=byId.get(id), item=original?.data.stackId ? byId.get(original.data.stackId) : original;
+      if (item && isGroupItem(item) && !claimed.has(item.id) && (item.id===id || encloses(itemBox(node),itemBox(item)))) { members.push(item.id); claimed.add(item.id); }
+    }
+    return members.length === (node.data.members??[]).length && members.every((id,i)=>id===node.data.members[i]) ? node : { ...node,data:{...node.data,members} };
+  });
+}
+function assignItems(nodes, ids) {
+  let updated=maintainMembership(nodes);
+  for (const id of ids) {
+    const item=updated.find(node=>node.id===id);
+    if (!item || !isGroupItem(item) || item.hidden) continue;
+    const containers=updated.filter(node=>node.type==='container');
+    const previous=containers.find(node=>node.data.members.includes(id));
+    const owner=(previous && encloses(itemBox(previous),itemBox(item)) ? previous : containers.find(node=>encloses(itemBox(node),itemBox(item))))?.id;
+    updated=updated.map(node=>node.type==='container' ? { ...node,data:{...node.data,members:[...node.data.members.filter(member=>member!==id),...(node.id===owner?[id]:[])]} } : node);
+  }
+  return updated;
+}
+function DecorationNode({ data, selected, type }) {
+  const container=type==='container';
+  return <div className={'decoration-body '+(data.kind==='circle'?'shape-circle':data.kind==='rounded'?'shape-rounded':'')}
+    style={{backgroundColor:data.fill,borderColor:data.border,borderWidth:data.thickness,borderStyle:data.line}}>
+    <NodeResizer isVisible={selected} minWidth={60} minHeight={60} maxWidth={5000} maxHeight={5000} keepAspectRatio={data.kind==='circle'}
+      onResizeStart={data.onResizeStart} onResizeEnd={data.onResizeEnd} />
+    <div className="decoration-drag" title="Drag this badge to move">{container ? '▣ Container · '+data.members.length+(data.members.length===1?' item':' items') : '◇ Shape · '+({rectangle:'Rectangle',circle:'Circle',rounded:'Rounded rectangle'}[data.kind])}</div>
+  </div>;
+}
+
 const nodeTypes = {
+  shape: DecorationNode,
+  container: DecorationNode,
   stack: StackNode,
   model: ModelNode,
   note: NoteNode
 };
 
+
+const ARROW_DEFAULTS = { color: '#64748b', thickness: 2, head: 'filled', size: 18, ends: 'end' };
+function arrowAppearance(edge) {
+  const value = edge.data?.appearance ?? {};
+  return { color: /^#[0-9a-f]{6}$/i.test(value.color) ? value.color : ARROW_DEFAULTS.color,
+    thickness: boundedSize(value.thickness, 2, 1, 6),
+    head: ['none','open','filled'].includes(value.head) ? value.head : 'filled',
+    ends: ['none','start','end','both'].includes(value.ends) ? value.ends : 'end',
+    size: boundedSize(value.size, 18, 8, 36) };
+}
+function arrowBend(value) {
+  return value && Number.isFinite(value.x) && Number.isFinite(value.y) ? { x: value.x, y: value.y } : null;
+}
+function arrowMarker(edge, end) {
+  const style = arrowAppearance(edge);
+  if (style.head === 'none' || (style.ends !== 'both' && style.ends !== end)) return undefined;
+  return { type: style.head === 'open' ? MarkerType.Arrow : MarkerType.ArrowClosed,
+    color: style.color, width: style.size, height: style.size, markerUnits: 'userSpaceOnUse', orient: 'auto-start-reverse' };
+}
+function routedArrow(props) {
+  const bend = arrowBend(props.data?.bend);
+  if (!bend) return getSmoothStepPath(props);
+  const { sourceX: sx, sourceY: sy, targetX: tx, targetY: ty } = props;
+  const x = (sx + tx) / 2 + bend.x, y = (sy + ty) / 2 + bend.y;
+  const direction = position => ({ left: [-1,0], right: [1,0], top: [0,-1], bottom: [0,1] }[position] ?? [1,0]);
+  const source = direction(props.sourcePosition), target = direction(props.targetPosition);
+  const length = Math.hypot(tx - sx, ty - sy) || 1;
+  const ux = (tx - sx) / length, uy = (ty - sy) / length;
+  const first = Math.max(20, Math.hypot(x - sx, y - sy) / 3), last = Math.max(20, Math.hypot(tx - x, ty - y) / 3);
+  return ['M ' + sx + ',' + sy + ' C ' + (sx + source[0]*first) + ',' + (sy + source[1]*first) + ' ' + (x-ux*first) + ',' + (y-uy*first) + ' ' + x + ',' + y
+    + ' C ' + (x+ux*last) + ',' + (y+uy*last) + ' ' + (tx+target[0]*last) + ',' + (ty+target[1]*last) + ' ' + tx + ',' + ty, x, y];
+}
+function AnnotatedEdge(props) {
+  const { screenToFlowPosition, setEdges } = useReactFlow();
+  const dragging = useRef(false);
+  const [path, x, y] = routedArrow(props);
+  function move(point) {
+    const bend = { x: point.x - (props.sourceX + props.targetX) / 2, y: point.y - (props.sourceY + props.targetY) / 2 };
+    setEdges(current => current.map(edge => edge.id === props.id ? { ...edge, data: { ...edge.data, bend } } : edge));
+  }
+  return <>
+    <BaseEdge id={props.id} path={path} markerStart={props.markerStart} markerEnd={props.markerEnd} style={props.style} interactionWidth={24} />
+    <EdgeLabelRenderer>
+      {props.selected && <button className="arrow-bend-handle nodrag nopan" aria-label="Move arrow bend" title="Drag to bend the arrow; arrow keys also move it"
+        style={{ transform: 'translate(-50%, -50%) translate(' + x + 'px, ' + y + 'px)' }}
+        onPointerDown={event => { if (event.button !== 0) return; event.stopPropagation(); dragging.current = true; event.currentTarget.setPointerCapture(event.pointerId); }}
+        onPointerMove={event => { if (dragging.current) { event.stopPropagation(); move(screenToFlowPosition({ x: event.clientX, y: event.clientY })); } }}
+        onPointerUp={event => { dragging.current = false; if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); }}
+        onPointerCancel={() => { dragging.current = false; }}
+        onKeyDown={event => { event.stopPropagation(); const delta = { ArrowLeft: [-10,0], ArrowRight: [10,0], ArrowUp: [0,-10], ArrowDown: [0,10] }[event.key];
+          if (delta) { event.preventDefault(); move({ x: x + delta[0], y: y + delta[1] }); } }}
+        onContextMenu={event => props.data.onMenu(event)}>◆</button>}
+      {props.data?.noteHtml && <button className="arrow-note-icon nodrag nopan" aria-label="Open arrow note" title="Open arrow note"
+        style={{ transform: 'translate(-50%, -50%) translate(' + x + 'px, ' + (y - (props.selected ? 30 : 0)) + 'px)' }}
+        onClick={event => { event.stopPropagation(); props.data.onOpenNote(); }}
+        onContextMenu={event => props.data.onMenu(event)}>▤</button>}
+    </EdgeLabelRenderer>
+  </>;
+}
+const edgeTypes = { annotated: AnnotatedEdge };
+
 const defaultEdgeOptions = {
-  type: 'smoothstep',
+  type: 'annotated',
   markerEnd: {
     type: MarkerType.ArrowClosed
   }
@@ -343,16 +853,37 @@ const RESULT_VIEWS = [
   ['fit', 'Fit'],
   ['paths', 'Paths'],
   ['loadings', 'Loadings'],
+  ['defined', 'Defined parameters'],
+  ['variances', 'Variances'],
+  ['covariances', 'Covariances'],
+  ['thresholds', 'Thresholds'],
   ['r2', 'R²'],
-  ['mi', 'Modification indices']
+  ['mi', 'Modification indices'],
+  ['notes', 'Notes']
 ];
+
+function ModelSpecification({ syntax, title = 'Model specification' }) {
+  const hasSyntax = typeof syntax === 'string' && syntax.trim().length > 0;
+
+  return (
+    <section className="model-specification" aria-label={title}>
+      <h3>{title}</h3>
+      {hasSyntax ? (
+        <pre className="model-specification-code"><code>{syntax}</code></pre>
+      ) : (
+        <p className="empty-message">No model specification was included in this result file.</p>
+      )}
+    </section>
+  );
+}
 
 function ResultContent({ data, view }) {
   if (!data) {
     return null;
   }
 
-  const metadata = data.metadata ?? {};
+  data = normalizeResultData(data);
+  const metadata = data.metadata;
 
   function fit(name) {
     return data.fit_measures
@@ -361,13 +892,13 @@ function ResultContent({ data, view }) {
   }
 
   if (view === 'overview') {
-    const totalN = data.sample_size
-      ?.reduce((sum, row) => sum + Number(row.n || 0), 0);
+    const totalN = sampleSizeTotal(data);
 
     const rows = [
       { item: 'Model ID', value: metadata.model_id },
       { item: 'Model name', value: metadata.model_name },
-      { item: 'Estimator', value: metadata.estimator },
+      { item: 'Estimator', value: getMethodSummary(data).estimator || undefined },
+      { item: 'Data treatment', value: getMethodSummary(data).treatmentLabel },
       { item: 'N', value: totalN },
       { item: 'Parameters', value: metadata.number_parameters },
       { item: 'Groups', value: metadata.number_groups },
@@ -375,16 +906,25 @@ function ResultContent({ data, view }) {
       { item: 'Robust CFI', value: fit('cfi.robust') },
       { item: 'Robust TLI', value: fit('tli.robust') },
       { item: 'Robust RMSEA', value: fit('rmsea.robust') },
-      { item: 'SRMR', value: fit('srmr') }
+      { item: 'SRMR', value: fit('srmr') },
+      { item: 'CFI', value: fit('cfi') },
+      { item: 'TLI', value: fit('tli') },
+      { item: 'RMSEA', value: fit('rmsea') }
     ].filter(row => row.value !== null && row.value !== undefined);
 
     return (
-      <DataTable
-        rows={rows}
-        preferredColumns={['item', 'value']}
-      />
+      <>
+        <DataTable
+          rows={rows}
+          preferredColumns={['item', 'value']}
+        />
+        <KeyModelSettings data={data} />
+        <ModelSpecification syntax={data.model_syntax} />
+      </>
     );
   }
+
+  if (view === 'thresholds') return <ThresholdResults data={data} />;
 
   if (view === 'fit') {
     return (
@@ -396,8 +936,7 @@ function ResultContent({ data, view }) {
   }
 
   if (view === 'paths') {
-    const rows = data.parameters
-      ?.filter(row => row.section === 'regression') ?? [];
+    const rows = parameterRows(data, 'regression');
 
     return (
       <DataTable
@@ -420,9 +959,8 @@ function ResultContent({ data, view }) {
     );
   }
 
-  if (view === 'loadings') {
-    const rows = data.parameters
-      ?.filter(row => row.section === 'loading') ?? [];
+  if (['loadings', 'variances', 'covariances', 'defined'].includes(view)) {
+    const rows = parameterRows(data, view === 'defined' ? 'defined' : view === 'variances' ? 'variance' : view === 'covariances' ? 'covariance' : 'loading');
 
     return (
       <DataTable
@@ -479,7 +1017,9 @@ function ResultContent({ data, view }) {
 function ResultWindow({
   windowData,
   onClose,
-  onChangeView
+  onChangeView,
+  noteHtml,
+  onNotesChange
 }) {
   if (!windowData) {
     return null;
@@ -559,10 +1099,10 @@ function ResultWindow({
       </div>
 
       <div className="result-tabs">
-        {RESULT_VIEWS.map(([key, label]) => (
+        {resultViewsFor(getMethodSummary(windowData.data)).map(([key, label]) => (
           <button
             key={key}
-            className={windowData.view === key ? 'active' : ''}
+            className={(windowData.view === key ? 'active ' : '') + (key === 'defined' ? 'defined-tab' : '')}
             onClick={() => onChangeView(key)}
           >
             {label}
@@ -570,8 +1110,10 @@ function ResultWindow({
         ))}
       </div>
 
-      <div className="result-window-body">
-        {windowData.loading ? (
+      <div className={"result-window-body" + (windowData.view === 'notes' ? ' notes-window-body' : '')}>
+        {windowData.view === 'notes' ? (
+          <RichModelNotes key={windowData.nodeId} value={noteHtml} onChange={onNotesChange} />
+        ) : windowData.loading ? (
           <p>Loading...</p>
         ) : windowData.error ? (
           <p className="error-message">
@@ -597,6 +1139,10 @@ const COMPARISON_VIEWS = [
   ['fit', 'Fit'],
   ['paths', 'Paths'],
   ['loadings', 'Loadings'],
+  ['defined', 'Defined parameters'],
+  ['variances', 'Variances'],
+  ['covariances', 'Covariances'],
+  ['thresholds', 'Thresholds'],
   ['r2', 'R²'],
   ['mi', 'Modification indices']
 ];
@@ -635,16 +1181,16 @@ function getFitValue(data, measure) {
 }
 
 function getOverviewItems(model) {
-  const data = model.data ?? {};
+  const data = normalizeResultData(model.data);
   const metadata = data.metadata ?? {};
 
-  const totalN = data.sample_size
-    ?.reduce((sum, row) => sum + Number(row.n || 0), 0);
+  const totalN = sampleSizeTotal(data);
 
   return {
     'Model ID': metadata.model_id,
     'Model name': metadata.model_name,
-    'Estimator': metadata.estimator,
+    'Estimator': getMethodSummary(data).estimator || undefined,
+    'Data treatment': getMethodSummary(data).treatmentLabel,
     'N': totalN,
     'Parameters': metadata.number_parameters,
     'Groups': metadata.number_groups,
@@ -652,7 +1198,10 @@ function getOverviewItems(model) {
     'Robust CFI': getFitValue(data, 'cfi.robust'),
     'Robust TLI': getFitValue(data, 'tli.robust'),
     'Robust RMSEA': getFitValue(data, 'rmsea.robust'),
-    'SRMR': getFitValue(data, 'srmr')
+    'SRMR': getFitValue(data, 'srmr'),
+    'CFI': getFitValue(data, 'cfi'),
+    'TLI': getFitValue(data, 'tli'),
+    'RMSEA': getFitValue(data, 'rmsea')
   };
 }
 
@@ -811,11 +1360,12 @@ function ParameterComparisonTable({
 }) {
   const { keys, maps } = buildAlignedRows(
     models,
-    data => (data.parameters ?? []).filter(row => row.section === section),
-    parameterKey
+    data => parameterRows(data, section),
+    section === 'defined' ? row => String(row.lhs ?? '') : parameterKey
   );
 
   const fieldLabels = Object.fromEntries(PARAMETER_FIELDS);
+  const methodSummaries = models.map(model => getMethodSummary(model.data));
 
   if (keys.length === 0) {
     return <p className="empty-message">No results available.</p>;
@@ -834,10 +1384,10 @@ function ParameterComparisonTable({
       <table className="result-table compare-table compare-multilevel">
         <thead>
           <tr>
-            <th rowSpan="2">Group</th>
+            {section !== 'defined' && <th rowSpan="2">Group</th>}
             <th rowSpan="2">lhs</th>
-            <th rowSpan="2">op</th>
-            <th rowSpan="2">rhs</th>
+            {section !== 'defined' && <th rowSpan="2">op</th>}
+            {section !== 'defined' && <th rowSpan="2">rhs</th>}
 
             {grouping === 'model'
               ? models.map(model => (
@@ -891,10 +1441,10 @@ function ParameterComparisonTable({
 
             return (
               <tr key={key}>
-                <td>{formatValue(identity.group)}</td>
+                {section !== 'defined' && <td>{formatValue(identity.group)}</td>}
                 <td>{formatValue(identity.lhs)}</td>
-                <td>{formatValue(identity.op)}</td>
-                <td>{formatValue(identity.rhs)}</td>
+                {section !== 'defined' && <td>{formatValue(identity.op)}</td>}
+                {section !== 'defined' && <td>{formatValue(identity.rhs)}</td>}
 
                 {grouping === 'model'
                   ? models.flatMap((model, modelIndex) =>
@@ -903,7 +1453,8 @@ function ParameterComparisonTable({
                           key={`${model.id}-${field}`}
                           className={fieldIndex === 0 ? 'compare-divider-left' : ''}
                         >
-                          {formatValue(maps[modelIndex].get(key)?.[field])}
+                          {section === 'threshold' && !methodSummaries[modelIndex].supportsThresholds && methodSummaries[modelIndex].treatment === 'continuous'
+                            ? 'N/A' : formatValue(maps[modelIndex].get(key)?.[field])}
                         </td>
                       ))
                     )
@@ -913,7 +1464,8 @@ function ParameterComparisonTable({
                           key={`${field}-${model.id}`}
                           className={modelIndex === 0 ? 'compare-divider-left' : ''}
                         >
-                          {formatValue(maps[modelIndex].get(key)?.[field])}
+                          {section === 'threshold' && !methodSummaries[modelIndex].supportsThresholds && methodSummaries[modelIndex].treatment === 'continuous'
+                            ? 'N/A' : formatValue(maps[modelIndex].get(key)?.[field])}
                         </td>
                       ))
                     )}
@@ -1066,6 +1618,8 @@ function ComparisonContent({
     );
   }
 
+  models = models.map(model => ({ ...model, data: normalizeResultData(model.data) }));
+
   if (view === 'overview') {
     const overviewMaps = models.map(getOverviewItems);
 
@@ -1074,14 +1628,32 @@ function ComparisonContent({
     );
 
     return (
-      <SimpleComparisonTable
-        models={models}
-        rowLabels={rowLabels}
-        valueGetter={(model, label) => {
-          const index = models.findIndex(item => item.id === model.id);
-          return overviewMaps[index]?.[label];
-        }}
-      />
+      <>
+        <SimpleComparisonTable
+          models={models}
+          rowLabels={rowLabels}
+          valueGetter={(model, label) => {
+            const index = models.findIndex(item => item.id === model.id);
+            return overviewMaps[index]?.[label];
+          }}
+        />
+        <section className="key-model-settings">
+          <h3>Key model settings</h3>
+          <p className="method-help">Resolved fitted-model settings; original model/data object names and the literal ordered argument are not exported.</p>
+          <SimpleComparisonTable models={models} firstColumnLabel="Argument"
+            rowLabels={keyModelSettings({}).map(row => row.argument)}
+            valueGetter={(model, argument) => keyModelSettings(model.data).find(row => row.argument === argument)?.value} />
+        </section>
+        <div className="comparison-specifications">
+          {models.map(model => (
+            <ModelSpecification
+              key={model.id}
+              title={(modelLabel(model) === model.id ? model.id : modelLabel(model) + ' (' + model.id + ')') + ' — Model specification'}
+              syntax={model.data?.model_syntax}
+            />
+          ))}
+        </div>
+      </>
     );
   }
 
@@ -1106,7 +1678,7 @@ function ComparisonContent({
     );
   }
 
-  if (view === 'paths' || view === 'loadings') {
+  if (['paths', 'loadings', 'thresholds', 'variances', 'covariances', 'defined'].includes(view)) {
     return (
       <>
         <div className="compare-controls">
@@ -1122,9 +1694,15 @@ function ComparisonContent({
           />
         </div>
 
+        {view === 'thresholds' && <div className="threshold-applicability">
+          {models.filter(model => parameterRows(model.data, 'threshold').length === 0).map(model => (
+            <p className="empty-message" key={model.id}>{modelLabel(model)}: {getMethodSummary(model.data).treatment === 'continuous'
+              ? 'Not applicable — continuous model.' : 'No threshold estimates exported.'}</p>
+          ))}
+        </div>}
         <ParameterComparisonTable
           models={models}
-          section={view === 'paths' ? 'regression' : 'loading'}
+          section={view === 'paths' ? 'regression' : view === 'thresholds' ? 'threshold' : view === 'defined' ? 'defined' : view === 'variances' ? 'variance' : view === 'covariances' ? 'covariance' : 'loading'}
           selectedFields={parameterFields}
           grouping={grouping}
         />
@@ -1305,10 +1883,10 @@ function ComparisonWindow({
       </div>
 
       <div className="result-tabs comparison-tabs">
-        {COMPARISON_VIEWS.map(([key, label]) => (
+        {COMPARISON_VIEWS.filter(([key]) => (key !== 'thresholds' || windowData.models?.some(model => getMethodSummary(model.data).supportsThresholds)) && (key !== 'defined' || windowData.models?.some(model => parameterRows(model.data, 'defined').length > 0))).map(([key, label]) => (
           <button
             key={key}
-            className={windowData.view === key ? 'active' : ''}
+            className={(windowData.view === key ? 'active ' : '') + (key === 'defined' ? 'defined-tab' : '')}
             onClick={() => onChangeView(key)}
           >
             {label}
@@ -1348,7 +1926,7 @@ export default function App() {
   const [
     nodes,
     setNodes,
-    onNodesChange
+    // Changes are handled below to move container members.
   ] = useNodesState([]);
 
   const [
@@ -1359,6 +1937,7 @@ export default function App() {
 
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [libraryError, setLibraryError] = useState('');
+  const [libraryNotice, setLibraryNotice] = useState('');
   const [refreshingLibrary, setRefreshingLibrary] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [libraryOpen, setLibraryOpen] = useState(true);
@@ -1369,6 +1948,31 @@ export default function App() {
   const savePending = useRef(false);
   const [flowInstance, setFlowInstance] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
+  const [arrowMenu, setArrowMenu] = useState(null);
+  const [arrowNoteId, setArrowNoteId] = useState(null);
+  const [toolsOpen, setToolsOpen] = useState(() => {
+    try { return localStorage.getItem('sem-tools-open') === 'true'; } catch { return false; }
+  });
+  useEffect(() => {
+    const dismiss = event => {
+      if (!event.target.closest('.arrow-menu') && event.button === 0) setArrowMenu(null);
+    };
+    document.addEventListener('pointerdown', dismiss);
+    return () => document.removeEventListener('pointerdown', dismiss);
+  }, []);
+  function toggleTools() {
+    const next = !toolsOpen; setToolsOpen(next);
+    try { localStorage.setItem('sem-tools-open', String(next)); } catch { /* Storage unavailable */ }
+  }
+  function openArrowMenu(event, edge) {
+    event.preventDefault(); event.stopPropagation(); setContextMenu(null);
+    setArrowMenu({ id: edge.id, x: Math.max(8, Math.min(event.clientX, window.innerWidth - 270)),
+      y: Math.max(8, Math.min(event.clientY, window.innerHeight - 400)) });
+  }
+  function updateArrow(id, change) {
+    setEdges(current => current.map(edge => edge.id === id ? { ...edge, data: { ...edge.data, ...change } } : edge));
+  }
+
   const [stackDialog, setStackDialog] = useState(null);
   const [resultWindow, setResultWindow] = useState(null);
 
@@ -1376,6 +1980,84 @@ export default function App() {
   const [comparisonWindow, setComparisonWindow] = useState(null);
 
   const canvasRef = useRef(null);
+  const [decorationMenu,setDecorationMenu]=useState(null);
+  const [drawMode,setDrawMode]=useState(null);
+  const [shapeKind,setShapeKind]=useState('rectangle');
+  const [drawPreview,setDrawPreview]=useState(null);
+  const drawStart=useRef(null), resizeBefore=useRef(new Map());
+  const [canvasNotice,setCanvasNotice]=useState('');
+  const [libraryPrefs,setLibraryPrefs]=useState(()=>{try{return JSON.parse(localStorage.getItem('sem-library-sections')||'{}')||{};}catch{return {};}});
+  function updateLibraryPrefs(change) {
+    setLibraryPrefs(current=>{const next={...current,...change};try{localStorage.setItem('sem-library-sections',JSON.stringify(next));}catch{/* unavailable */}return next;});
+  }
+  useEffect(()=> {
+    const close=event=>{if(event.button===0 && !event.target.closest('.decoration-menu'))setDecorationMenu(null);};
+    const cancel=event=>{if(event.key==='Escape'){setDrawMode(null);setDrawPreview(null);drawStart.current=null;setDecorationMenu(null);}};
+    document.addEventListener('pointerdown',close);document.addEventListener('keydown',cancel);
+    return ()=>{document.removeEventListener('pointerdown',close);document.removeEventListener('keydown',cancel);};
+  },[]);
+  // Remove deleted/released members and transfer grouped models to their visible stack.
+  useEffect(()=>{setNodes(current=>{const next=maintainMembership(current);return next.some((node,i)=>node!==current[i])?next:current;});},[nodes,setNodes]);
+  function handleNodeChanges(changes) {
+    setNodes(current=>{
+      let next=applyNodeChanges(changes,current);
+      const directlyMoved=new Set(changes.filter(change=>change.type==='position'&&change.position).map(change=>change.id));
+      for(const change of changes) {
+        const before=current.find(node=>node.id===change.id);
+        if(change.type!=='position'||!change.position||!change.dragging||before?.type!=='container')continue;
+        const dx=change.position.x-before.position.x,dy=change.position.y-before.position.y;
+        next=next.map(node=>before.data.members.includes(node.id)&&!directlyMoved.has(node.id)?{...node,position:{x:node.position.x+dx,y:node.position.y+dy}}:node);
+      }
+      const finished=changes.filter(change=>(change.type==='position'&&change.dragging===false)||(change.type==='dimensions'&&change.resizing===false)).map(change=>change.id);
+      return finished.length?assignItems(next,finished):next;
+    });
+  }
+  function finishDecorationResize(id,params) {
+    setNodes(current=>{
+      const node=current.find(item=>item.id===id);if(!node)return current;
+      const box={x:params.x,y:params.y,width:params.width,height:params.height};
+      const fitted=node.type==='container'?fitContainer(box,current,id):{box,members:[]};
+      const previous=resizeBefore.current.get(id);
+      if(!fitted){setCanvasNotice('Resize rejected: no rectangle can keep the enclosed items without overlapping other items.');return previous?current.map(item=>item.id===id?previous:item):current;}
+      if(node.type==='container' && (Math.abs(fitted.box.width-box.width)>.1||Math.abs(fitted.box.height-box.height)>.1))setCanvasNotice('Container boundary adjusted to exclude partial overlaps or items in another container.');
+      return current.map(item=>item.id===id?{...item,position:{x:fitted.box.x,y:fitted.box.y},width:fitted.box.width,height:fitted.box.height,
+        style:{...item.style,width:fitted.box.width,height:fitted.box.height},data:{...item.data,members:node.type==='container'?[...fitted.members,...item.data.members.filter(member=>current.find(n=>n.id===member)?.hidden)]:[]}}:item);
+    });
+  }
+  function drawingBox(start,end) {
+    let dx=end.x-start.x,dy=end.y-start.y;
+    if(drawMode==='shape'&&shapeKind==='circle'){const size=Math.max(Math.abs(dx),Math.abs(dy));dx=(dx<0?-1:1)*size;dy=(dy<0?-1:1)*size;}
+    return {x:Math.min(start.x,start.x+dx),y:Math.min(start.y,start.y+dy),width:Math.abs(dx),height:Math.abs(dy)};
+  }
+  function finishDrawing(event) {
+    if(!drawStart.current||!flowInstance)return;
+    const screen=drawingBox(drawStart.current,{x:event.clientX,y:event.clientY});drawStart.current=null;setDrawPreview(null);
+    const topLeft=flowInstance.screenToFlowPosition({x:screen.x,y:screen.y}),bottomRight=flowInstance.screenToFlowPosition({x:screen.x+screen.width,y:screen.y+screen.height});
+    const box={...topLeft,width:bottomRight.x-topLeft.x,height:bottomRight.y-topLeft.y};
+    if(box.width<60||box.height<60){setCanvasNotice('Draw a larger area (at least 60 × 60 canvas units).');return;}
+    const kind=drawMode;setDrawMode(null);
+    setNodes(current=>{
+      const fitted=kind==='container'?fitContainer(box,current,null):{box,members:[]};
+      if(!fitted){setCanvasNotice('Container rejected: it cannot enclose these items without overlapping another item.');return current;}
+      const id=kind+'-'+crypto.randomUUID();
+      const node=normalizeDecoration({id,type:kind,position:{x:fitted.box.x,y:fitted.box.y},width:fitted.box.width,height:fitted.box.height,
+        data:{kind:kind==='container'?'rectangle':shapeKind,members:fitted.members,order:Math.max(0,...current.filter(n=>n.type==='shape').map(n=>n.data.order??0))+1}});
+      setCanvasNotice(kind==='container'?'Container added with '+fitted.members.length+' item(s).':'Shape added.');
+      return [...current.map(n=>({...n,selected:false})),{...node,selected:true}];
+    });
+  }
+  function openDecorationMenu(event,node){event.preventDefault();event.stopPropagation();setContextMenu(null);setArrowMenu(null);setDecorationMenu({id:node.id,x:Math.max(8,Math.min(event.clientX,window.innerWidth-275)),y:Math.max(8,Math.min(event.clientY,window.innerHeight-480))});}
+  function updateDecoration(change){setNodes(current=>current.map(node=>node.id===decorationMenu?.id?{...node,data:{...node.data,...change}}:node));}
+  function orderShape(action) {
+    setNodes(current=>{
+      const ordered=current.filter(node=>node.type==='shape').sort((a,b)=>(a.data.order??0)-(b.data.order??0));
+      const index=ordered.findIndex(node=>node.id===decorationMenu?.id);if(index<0)return current;
+      const target=action==='front'?ordered.length-1:action==='back'?0:Math.max(0,Math.min(ordered.length-1,index+(action==='forward'?1:-1)));
+      const [item]=ordered.splice(index,1);ordered.splice(target,0,item);const ranks=new Map(ordered.map((node,i)=>[node.id,i]));
+      return current.map(node=>ranks.has(node.id)?{...node,data:{...node.data,order:ranks.get(node.id)}}:node);
+    });
+  }
+
 
   // ====================================================
   // Older layout compatibility
@@ -1406,20 +2088,23 @@ export default function App() {
   // ====================================================
 
   function normalizeNote(note) {
-    return {
+    const normalized = {
       id: note.id ?? `note-${Date.now()}`,
       type: 'note',
       position: note.position ?? {
         x: 200,
         y: 200
       },
-      width: note.width ?? 230,
-      height: note.height ?? 150,
+      width: boundedSize(note.width, 260, NOTE_LIMITS.minWidth, NOTE_LIMITS.maxWidth),
+      height: boundedSize(note.height, 180, NOTE_LIMITS.minHeight, NOTE_LIMITS.maxHeight),
       data: {
         title: note.data?.title ?? 'Finding',
-        text: note.data?.text ?? ''
+        text: note.data?.text ?? '',
+        collapsed: note.data?.collapsed === true,
+        expandedSize: note.data?.expandedSize
       }
     };
+    return setNoteCollapsed(normalized, normalized.data.collapsed);
   }
 
   // ====================================================
@@ -1432,6 +2117,8 @@ export default function App() {
     const hiddenModels = [];
     const usedModels = [];
     const stacks = [];
+    const modelSizes = {};
+    const modelNotes = {};
 
     const round = value =>
       Math.round(value * 100) / 100;
@@ -1443,6 +2130,8 @@ export default function App() {
       };
 
       if (node.type === 'model') {
+        modelSizes[node.id] = modelDimensions(node);
+        if (node.data.noteHtml) modelNotes[node.id] = node.data.noteHtml;
         if (node.data.hasPosition || node.data.inUse) {
           modelPositions[node.id] = position;
         }
@@ -1458,7 +2147,7 @@ export default function App() {
 
       if (node.type === 'stack') {
         stacks.push({ id: node.id, title: node.data.title, members: node.data.memberIds,
-          active_model: node.data.activeId, position,
+          active_model: node.data.activeId, position, ...modelDimensions(node),
           in_use: node.data.inUse, hidden: Boolean(node.hidden), has_position: node.data.hasPosition });
       }
 
@@ -1481,7 +2170,9 @@ export default function App() {
           height: round(height),
           data: {
             title: node.data.title ?? '',
-            text: node.data.text ?? ''
+            text: node.data.text ?? '',
+            collapsed: node.data.collapsed === true,
+            expandedSize: expandedNoteSize(node)
           }
         });
       }
@@ -1489,6 +2180,8 @@ export default function App() {
 
     const savedEdges = edges.map(edge => {
       const saved = {
+        type: 'annotated',
+        data: { appearance: arrowAppearance(edge), bend: arrowBend(edge.data?.bend), noteHtml: cleanNoteHtml(edge.data?.noteHtml) },
         id: edge.id,
         source: edge.source,
         target: edge.target
@@ -1506,7 +2199,10 @@ export default function App() {
     });
 
     return {
-      schema_version: '5.0',
+      schema_version: '9.0',
+      decorations: nodes.filter(isDecoration).map(normalizeDecoration),
+      model_sizes: modelSizes,
+      model_notes: modelNotes,
       stacks,
       used_models: usedModels,
       model_positions: modelPositions,
@@ -1557,13 +2253,14 @@ export default function App() {
       }
       ids.add(model.id);
     }
-    return catalog.models;
+    return await verifyModelFiles(catalog.models);
   }
 
   function createModelNode(model) {
     return {
       id: model.id,
       type: 'model',
+      ...modelDimensions(),
       deletable: false,
       hidden: false,
       position: { x: 100, y: 100 },
@@ -1571,6 +2268,7 @@ export default function App() {
         title: model.title || model.id,
         image: model.image,
         results: model.results,
+        methodSummary: model.methodSummary ?? getMethodSummary(null),
         inUse: false,
         hasPosition: false
       }
@@ -1582,7 +2280,8 @@ export default function App() {
     async function loadEverything() {
       setLibraryError('');
       try {
-        const catalog = await fetchCatalog();
+        const checkedCatalog = await fetchCatalog();
+        const catalog = checkedCatalog.models;
         let browserLayout = {};
         try {
           const saved = localStorage.getItem(STORAGE_KEY);
@@ -1616,8 +2315,11 @@ export default function App() {
             ? getUsedModelIds(fileLayout)
             : new Set([...getUsedModelIds(fileLayout), ...getUsedModelIds(browserLayout)]);
 
+        const savedModelSizes = browserLayout.model_sizes ?? fileLayout.model_sizes ?? {};
+        const savedModelNotes = browserLayout.model_notes ?? fileLayout.model_notes ?? {};
         const modelNodes = catalog.map(model => {
-          const node = createModelNode(model);
+          const node = { ...createModelNode(model), ...modelDimensions(savedModelSizes[model.id]) };
+          node.data.noteHtml = cleanNoteHtml(savedModelNotes[model.id]);
           const position = browserPositions[model.id] ?? filePositions[model.id];
           node.position = position ?? node.position;
           node.data.hasPosition = Boolean(position);
@@ -1634,9 +2336,10 @@ export default function App() {
         if (cancelled) return;
         const savedStacks = Array.isArray(browserLayout.stacks) ? browserLayout.stacks
           : Array.isArray(browserLayout.used_models) ? [] : fileLayout.stacks;
-        setNodes([...restoreStacks(modelNodes, savedStacks), ...noteSource.map(normalizeNote)]);
+        setNodes([...restoreStacks(modelNodes, savedStacks), ...noteSource.map(normalizeNote), ...loadDecorations(browserLayout.decorations ?? fileLayout.decorations)]);
         setEdges(loadedEdges);
         setModelsLoaded(true);
+        setLibraryNotice(libraryRefreshMessage(checkedCatalog));
       } catch (error) {
         if (!cancelled) setLibraryError(error.message);
       }
@@ -1654,30 +2357,11 @@ export default function App() {
     refreshPending.current = true;
     setRefreshingLibrary(true);
     setLibraryError('');
+    setLibraryNotice('');
     try {
-      const catalog = await fetchCatalog();
-      setNodes(current => {
-        const byId = new Map(catalog.map(model => [model.id, model]));
-        const existingIds = new Set(current.map(node => node.id));
-        // Retain layout and notes, even if an entry is temporarily absent.
-        const updated = current.map(node => {
-          const model = byId.get(node.id);
-          if (node.type !== 'model' || !model) return node;
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              title: model.title || model.id,
-              image: model.image,
-              results: model.results
-            }
-          };
-        });
-        return [
-          ...updated,
-          ...catalog.filter(model => !existingIds.has(model.id)).map(createModelNode)
-        ];
-      });
+      const checkedCatalog = await fetchCatalog();
+      setNodes(current => reconcileModelLibrary(current, checkedCatalog.models, createModelNode));
+      setLibraryNotice(libraryRefreshMessage(checkedCatalog));
     } catch (error) {
       setLibraryError(error.message);
     } finally {
@@ -1685,6 +2369,24 @@ export default function App() {
       setRefreshingLibrary(false);
     }
   }
+
+  // Remove references only after a successful catalog reconciliation. Notes,
+  // remaining model positions, and connections with surviving endpoints stay.
+  useEffect(() => {
+    if (!modelsLoaded) return;
+    const nodeIds = new Set(nodes.map(node => node.id));
+    const modelIds = new Set(nodes.filter(node => node.type === 'model').map(node => node.id));
+    setEdges(current => {
+      const kept = current.filter(edge => nodeIds.has(edge.source) && nodeIds.has(edge.target));
+      return kept.length === current.length ? current : kept;
+    });
+    setComparisonIds(current => {
+      const kept = current.filter(id => modelIds.has(id));
+      return kept.length === current.length ? current : kept;
+    });
+    setResultWindow(current => current && !modelIds.has(current.nodeId) ? null : current);
+    setComparisonWindow(current => current?.models?.some(model => !modelIds.has(model.id)) ? null : current);
+  }, [nodes, modelsLoaded, setEdges]);
 
   function selectVersion(stackId, modelId) {
     setNodes(current => current.map(node => node.id === stackId && node.data.memberIds?.includes(modelId)
@@ -1711,7 +2413,8 @@ export default function App() {
 
   function splitStack(stackId, modelId = null) {
     const change = splitVersionStack(nodes, edges, stackId, modelId);
-    setNodes(change.nodes);
+    const released = modelId ? [modelId] : nodes.find(node=>node.id===stackId)?.data.memberIds ?? [];
+    setNodes(assignItems(change.nodes,released));
     setEdges(change.edges);
     setContextMenu(null);
   }
@@ -1744,6 +2447,7 @@ export default function App() {
           <img src={BASE + active?.data.image} alt="" draggable={false} />
           <div className="library-card-body">
             <strong>{node.data.title}</strong>
+            <span className="library-status">{active?.data.methodSummary ? [active.data.methodSummary.estimator, active.data.methodSummary.treatmentLabel, active.data.methodSummary.missing].filter(Boolean).join(' · ') : 'Type unknown'}</span>
             <span className="library-status">{isStack ? node.data.memberIds.length + ' versions · ' : ''}
               {node.data.inUse ? (node.hidden ? 'Hidden on canvas' : 'On canvas') : 'Available to use'}</span>
             <div className="library-actions">
@@ -1903,11 +2607,12 @@ export default function App() {
         id,
         type: 'note',
         position,
-        width: 230,
-        height: 150,
+        width: 260,
+        height: 180,
         data: {
           title: 'Finding',
-          text: ''
+          text: '',
+          collapsed: false
         }
       }
     ]);
@@ -1976,8 +2681,8 @@ export default function App() {
         return current.filter(id => id !== nodeId);
       }
 
-      if (current.length >= 3) {
-        alert('You can compare up to three models at a time.');
+      if (current.length >= 5) {
+        alert('You can compare up to five models at a time.');
         return current;
       }
 
@@ -2030,11 +2735,14 @@ export default function App() {
           return {
             id: node.id,
             title: node.data.title,
-            data: await response.json()
+            data: normalizeResultData(await response.json())
           };
         })
       );
 
+      const latestSummaries = new Map(loadedModels.map(model => [model.id, getMethodSummary(model.data)]));
+      setNodes(current => current.map(node => latestSummaries.has(node.id)
+        ? { ...node, data: { ...node.data, methodSummary: latestSummaries.get(node.id) } } : node));
       setComparisonWindow(current => ({
         ...current,
         models: loadedModels,
@@ -2055,14 +2763,14 @@ export default function App() {
 
   const onNodeContextMenu = useCallback(
     (event, node) => {
-      if (event.target.closest('input, textarea')) {
+      if (node.type !== 'note' && event.target.closest('input, textarea, [contenteditable]')) {
         return;
       }
 
       event.preventDefault();
 
       const menuWidth = 230;
-      const menuHeight = node.type === 'note' ? 100 : 580;
+      const menuHeight = node.type === 'note' ? 145 : 650;
 
       setContextMenu({
         nodeId: node.id,
@@ -2115,19 +2823,21 @@ export default function App() {
         );
       }
 
-      const data = await response.json();
+      const data = normalizeResultData(await response.json());
 
-      setResultWindow(current => ({
+      setNodes(current => current.map(item => item.id === nodeId
+        ? { ...item, data: { ...item.data, methodSummary: getMethodSummary(data) } } : item));
+      setResultWindow(current => current?.nodeId === nodeId ? ({
         ...current,
         data,
         loading: false
-      }));
+      }) : current);
     } catch (error) {
-      setResultWindow(current => ({
+      setResultWindow(current => current?.nodeId === nodeId ? ({
         ...current,
         loading: false,
         error: error.message
-      }));
+      }) : current);
     }
   }
 
@@ -2136,11 +2846,13 @@ export default function App() {
   // ====================================================
 
   function applyLayout(layout) {
+    setArrowNoteId(null); setArrowMenu(null);
     if (!layout || typeof layout !== 'object' || Array.isArray(layout)) {
       throw new Error('The layout file must contain a JSON object.');
     }
     setComparisonIds([]);
     setContextMenu(null);
+    setResultWindow(null);
     const positions = getModelPositions(layout);
     const usedModels = getUsedModelIds(layout);
 
@@ -2155,12 +2867,14 @@ export default function App() {
         .filter(node => node.type === 'model')
         .map(node => ({
           ...node,
+          ...modelDimensions(layout.model_sizes?.[node.id]),
           position: positions[node.id] ?? node.position,
           hidden: usedModels.has(node.id) && hiddenModels.has(node.id),
           selected: false,
           data: {
             ...node.data,
             stackId: null,
+            noteHtml: cleanNoteHtml(layout.model_notes?.[node.id]),
             inUse: usedModels.has(node.id),
             hasPosition: Boolean(positions[node.id]) || node.data.hasPosition
           }
@@ -2172,7 +2886,8 @@ export default function App() {
 
       return [
         ...restoreStacks(modelNodes, layout.stacks),
-        ...noteNodes
+        ...noteNodes,
+        ...loadDecorations(layout.decorations)
       ];
     });
 
@@ -2280,7 +2995,20 @@ export default function App() {
 
   // Keep unused models in state so their positions and connections survive.
   // Only the rendered copy uses hidden for library membership.
-  const renderedNodes = displayVersionNodes(nodes);
+  const shapeRanks = new Map(nodes.filter(node=>node.type==='shape').sort((a,b)=>(a.data.order??0)-(b.data.order??0)).map((node,i)=>[node.id,-1000000+i]));
+  const renderedNodes = displayVersionNodes(nodes).map(original => {
+    const node={...original,zIndex:10};
+    if(isDecoration(node)) return {...node,zIndex:node.type==='container'?-2000000:shapeRanks.get(node.id),data:{...node.data,
+      onResizeStart:()=>resizeBefore.current.set(node.id,{...original,position:{...original.position},data:{...original.data}}),
+      onResizeEnd:(_event,params)=>finishDecorationResize(node.id,params)}};
+    if (node.type === 'note' || isDecoration(node)) return node;
+    const modelId = node.type === 'stack' ? node.data.activeId : node.id;
+    const model = nodes.find(item => item.id === modelId);
+    return { ...node, data: { ...node.data, noteHtml: model?.data.noteHtml ?? '',
+      onOpenNotes: () => openResults(modelId, 'notes') } };
+  });
+  const canvasNotes = nodes.filter(node => node.type === 'note');
+  const allNotesCollapsed = canvasNotes.length > 0 && canvasNotes.every(node => node.data.collapsed);
   const hiddenIds = new Set(
     renderedNodes
       .filter(node => node.hidden)
@@ -2289,6 +3017,13 @@ export default function App() {
 
   const renderedEdges = edges.map(edge => ({
     ...edge,
+    type: 'annotated',
+    style: { stroke: arrowAppearance(edge).color, strokeWidth: arrowAppearance(edge).thickness },
+    markerStart: arrowMarker(edge, 'start'),
+    markerEnd: arrowMarker(edge, 'end'),
+    data: { ...edge.data, noteHtml: cleanNoteHtml(edge.data?.noteHtml),
+      onOpenNote: () => { setArrowNoteId(edge.id); setArrowMenu(null); },
+      onMenu: event => openArrowMenu(event, edge) },
     hidden:
       hiddenIds.has(edge.source) ||
       hiddenIds.has(edge.target)
@@ -2310,13 +3045,18 @@ export default function App() {
   const query = libraryQuery.trim().toLowerCase();
   const matchesQuery = node =>
     (node.id + ' ' + node.data.title).toLowerCase().includes(query);
-  const libraryItems = nodes.filter(node => node.type !== 'note' && !node.data.stackId);
+  const libraryItems = nodes.filter(node => ['model','stack'].includes(node.type) && !node.data.stackId);
   const matchesItem = node => matchesQuery(node) || (node.type === 'stack' && node.data.memberIds.some(id => {
     const model = nodes.find(item => item.id === id);
     return model && matchesQuery(model);
   }));
   const availableModels = libraryItems.filter(node => !node.data.inUse);
-  const usedModels = libraryItems.filter(node => node.data.inUse);
+  const usedModels = libraryItems.filter(node => node.data.inUse && !node.hidden);
+  const hiddenLibraryModels = libraryItems.filter(node=>node.data.inUse && node.hidden);
+  const editedDecoration=nodes.find(node=>node.id===decorationMenu?.id);
+  const editedArrow = edges.find(edge => edge.id === arrowMenu?.id);
+  const arrowSettings = editedArrow ? arrowAppearance(editedArrow) : ARROW_DEFAULTS;
+  const notedArrow = edges.find(edge => edge.id === arrowNoteId);
   const menuNode = nodes.find(node => node.id === contextMenu?.nodeId);
   const menuModelId = menuNode?.type === 'stack' ? menuNode.data.activeId : menuNode?.id;
 
@@ -2334,8 +3074,20 @@ export default function App() {
         }}
       >
         <div className="layout-toolbar">
+          <button aria-label={toolsOpen ? 'Hide tools' : 'Show tools'} title={toolsOpen ? 'Hide tools' : 'Show tools'}
+            aria-expanded={toolsOpen} aria-controls="canvas-tools" onClick={toggleTools}>☰</button>
+          {toolsOpen && <div id="canvas-tools" className="toolbar-items">
+          <button disabled={!modelsLoaded} onClick={()=>{setDrawMode('container');setCanvasNotice('Drag on the canvas to draw a container. Escape cancels.');}}>Draw container</button>
+          <select aria-label="Shape type" value={shapeKind} onChange={event=>setShapeKind(event.target.value)}><option value="rectangle">Rectangle</option><option value="circle">Circle</option><option value="rounded">Rounded rectangle</option></select>
+          <button disabled={!modelsLoaded} onClick={()=>{setDrawMode('shape');setCanvasNotice('Drag on the canvas to draw a shape. Escape cancels.');}}>Draw shape</button>
           <button onClick={addNote} disabled={!modelsLoaded}>
             + Note
+          </button>
+
+          <button disabled={!modelsLoaded || canvasNotes.length === 0}
+            title="Expand or collapse all canvas notes"
+            onClick={() => setNodes(current => current.map(node => setNoteCollapsed(node, !allNotesCollapsed)))}>
+            {allNotesCollapsed ? 'Expand All' : 'Collapse All'}
           </button>
 
           <button onClick={openLayoutFile} disabled={!modelsLoaded || savingLayout}
@@ -2376,19 +3128,30 @@ export default function App() {
               Restore hidden ({hiddenModelCount})
             </button>
           )}
+          </div>}
         </div>
 
+        {canvasNotice && <div className="canvas-notice" role="status">{canvasNotice}<button aria-label="Dismiss canvas message" onClick={()=>setCanvasNotice('')}>×</button></div>}
+        {drawMode && <div className="drawing-overlay" onPointerDown={event=>{if(event.button!==0)return;event.currentTarget.setPointerCapture(event.pointerId);drawStart.current={x:event.clientX,y:event.clientY};}}
+          onPointerMove={event=>{if(drawStart.current){const rect=event.currentTarget.getBoundingClientRect();setDrawPreview({...drawingBox(drawStart.current,{x:event.clientX,y:event.clientY}),offsetX:rect.left,offsetY:rect.top});}}}
+          onPointerUp={finishDrawing} onPointerCancel={()=>{drawStart.current=null;setDrawPreview(null);setDrawMode(null);}}>
+          {drawPreview && <div className="drawing-preview" style={{left:drawPreview.x-drawPreview.offsetX,top:drawPreview.y-drawPreview.offsetY,width:drawPreview.width,height:drawPreview.height,borderRadius:drawMode==='shape'&&shapeKind==='circle'?'50%':drawMode==='shape'&&shapeKind==='rounded'?20:0}} />}
+        </div>}
         <ReactFlow
           nodes={renderedNodes}
           edges={renderedEdges}
-          onNodesChange={onNodesChange}
+          onNodesChange={handleNodeChanges}
+          elevateNodesOnSelect={false}
+          selectionOnDrag={false}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          onEdgeContextMenu={openArrowMenu}
           defaultEdgeOptions={defaultEdgeOptions}
           onInit={setFlowInstance}
-          onNodeContextMenu={onNodeContextMenu}
-          onPaneClick={() => setContextMenu(null)}
+          onNodeContextMenu={(event, node) => { setArrowMenu(null); if(isDecoration(node)){openDecorationMenu(event,node);return;} setDecorationMenu(null);onNodeContextMenu(event, node); }}
+          onPaneClick={() => { setContextMenu(null); setArrowMenu(null); }}
           deleteKeyCode={stackDialog ? null : ['Backspace', 'Delete']}
           fitView
         >
@@ -2415,28 +3178,71 @@ export default function App() {
             onChange={event => setLibraryQuery(event.target.value)}
           />
           {libraryError && <p className="library-error" role="alert">{libraryError}</p>}
+          {libraryNotice && !libraryError && <p className="library-help" role="status">{libraryNotice}</p>}
           {!modelsLoaded && !libraryError && <p role="status">Loading models…</p>}
           <div className="library-sections">
-            {[
-              ['Available', availableModels],
-              ['In use', usedModels]
-            ].map(([label, items]) => (
-              <section className="library-section" key={label}>
-                <h3>{label} <span>{items.length}</span></h3>
-                {items.filter(matchesItem).map(renderLibraryItem)}
-                {items.filter(matchesItem).length === 0 && (
-                  <p className="library-empty">
-                    {query ? 'No matching models.' : label === 'Available'
-                      ? 'No unused models. Refresh after adding models to the catalog.'
-                      : 'Choose a model from Available to begin.'}
-                  </p>
-                )}
-              </section>
-            ))}
+            {[['Available',availableModels],['In Use',usedModels],['Hidden',hiddenLibraryModels]].map(([label,items])=>{
+              const visible=items.filter(matchesItem).filter(node=>label!=='In Use'||!libraryPrefs.filter||libraryPrefs.filter==='all'||(libraryPrefs.filter==='stacks'?node.type==='stack':node.type==='model'));
+              const collapsed=Boolean(libraryPrefs[label]);
+              return <section className="library-section" key={label}>
+                <h3><button className="library-section-toggle" aria-expanded={!collapsed} onClick={()=>updateLibraryPrefs({[label]:!collapsed})}>{collapsed?'▸':'▾'} {label} <span>{items.length}</span></button></h3>
+                {!collapsed && <>
+                  {label==='In Use' && <label className="library-filter">Show <select aria-label="Filter in-use library items" value={libraryPrefs.filter??'all'} onChange={event=>updateLibraryPrefs({filter:event.target.value})}>
+                    <option value="all">All</option><option value="stacks">Stacks only</option><option value="standalone">Standalone only</option></select></label>}
+                  {visible.map(renderLibraryItem)}
+                  {visible.length===0 && <p className="library-empty">{items.length?'No items match this search or filter.':label==='Hidden'?'No hidden models.':label==='Available'?'No unused models.':'No visible models in use.'}</p>}
+                </>}
+              </section>;
+            })}
           </div>
         </aside>
       )}
 
+
+      {decorationMenu && editedDecoration && <div className="context-menu decoration-menu" role="dialog" aria-label="Shape and container appearance" style={{left:decorationMenu.x,top:decorationMenu.y}} onKeyDown={event=>event.stopPropagation()}>
+        <div className="context-menu-title">{editedDecoration.type==='container'?'Container':'Shape'}<button aria-label="Close shape options" onClick={()=>setDecorationMenu(null)}>×</button></div>
+        <label>Fill <input type="color" aria-label="Fill color" value={editedDecoration.data.fill} onChange={event=>updateDecoration({fill:event.target.value})}/></label>
+        <label>Border <input type="color" aria-label="Border color" value={editedDecoration.data.border} onChange={event=>updateDecoration({border:event.target.value})}/></label>
+        <label>Thickness {editedDecoration.data.thickness}<input type="range" aria-label="Border thickness" min="0" max="12" value={editedDecoration.data.thickness} onChange={event=>updateDecoration({thickness:Number(event.target.value)})}/></label>
+        <label>Border style <select aria-label="Border style" value={editedDecoration.data.line} onChange={event=>updateDecoration({line:event.target.value})}><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option></select></label>
+        {editedDecoration.type==='shape' && <><hr/>{[['forward','Bring forward'],['backward','Send backward'],['front','Bring to front of shapes'],['back','Send to back of shapes']].map(([action,label])=><button key={action} onClick={()=>orderShape(action)}>{label}</button>)}</>}
+        <hr/><button className="danger" onClick={()=>{setNodes(current=>current.filter(node=>node.id!==editedDecoration.id));setDecorationMenu(null);}}>Delete {editedDecoration.type}</button>
+      </div>}
+      {arrowMenu && editedArrow && <div className="context-menu arrow-menu" role="dialog" aria-label="Arrow options"
+        style={{ left: arrowMenu.x, top: arrowMenu.y }} onContextMenu={event => event.preventDefault()}
+        onKeyDown={event => { event.stopPropagation(); if (event.key === 'Escape') setArrowMenu(null); }}>
+        <div className="context-menu-title">Arrow <button aria-label="Close arrow options" onClick={() => setArrowMenu(null)}>×</button></div>
+        <label>Color <input aria-label="Arrow color" type="color" value={arrowSettings.color}
+          onChange={event => updateArrow(editedArrow.id, { appearance: { ...arrowSettings, color: event.target.value } })} /></label>
+        <div className="arrow-swatches">{['#64748b','#2563eb','#dc2626','#16a34a','#9333ea','#111827'].map(color =>
+          <button key={color} title={color} aria-label={'Arrow color ' + color} style={{ backgroundColor: color }}
+            onClick={() => updateArrow(editedArrow.id, { appearance: { ...arrowSettings, color } })} />)}</div>
+        <label>Thickness {arrowSettings.thickness}<input aria-label="Arrow thickness" type="range" min="1" max="6" step="0.5" value={arrowSettings.thickness}
+          onChange={event => updateArrow(editedArrow.id, { appearance: { ...arrowSettings, thickness: Number(event.target.value) } })} /></label>
+        <label>Arrowhead <select aria-label="Arrowhead type" value={arrowSettings.head}
+          onChange={event => updateArrow(editedArrow.id, { appearance: { ...arrowSettings, head: event.target.value } })}>
+          <option value="none">None</option><option value="open">Open arrow</option><option value="filled">Filled triangle</option></select></label>
+        <label>Arrowhead ends <select aria-label="Arrowhead ends" value={arrowSettings.ends}
+          onChange={event => updateArrow(editedArrow.id, { appearance: { ...arrowSettings, ends: event.target.value } })}>
+          <option value="none">Neither end</option><option value="start">Start only</option><option value="end">End only</option><option value="both">Both ends</option></select></label>
+        <label>Arrowhead size {arrowSettings.size}<input aria-label="Arrowhead size" type="range" min="8" max="36" value={arrowSettings.size} disabled={arrowSettings.head === 'none'}
+          onChange={event => updateArrow(editedArrow.id, { appearance: { ...arrowSettings, size: Number(event.target.value) } })} /></label>
+        <button onClick={() => updateArrow(editedArrow.id, { appearance: { ...ARROW_DEFAULTS } })}>Reset appearance</button>
+        <button onClick={() => { setEdges(current => current.map(edge => ({ ...edge, selected: edge.id === editedArrow.id }))); setArrowMenu(null); }}>Adjust bend…</button>
+        <button onClick={() => updateArrow(editedArrow.id, { bend: null })}>Reset bend</button>
+        <hr />
+        <button onClick={() => { setArrowNoteId(editedArrow.id); setArrowMenu(null); }}>{cleanNoteHtml(editedArrow.data?.noteHtml) ? 'Edit note' : 'Add note'}</button>
+        {cleanNoteHtml(editedArrow.data?.noteHtml) && <button onClick={() => { updateArrow(editedArrow.id, { noteHtml: '' }); setArrowNoteId(null); setArrowMenu(null); }}>Delete note</button>}
+        <hr /><button className="danger" onClick={() => { setEdges(current => current.filter(edge => edge.id !== editedArrow.id)); setArrowMenu(null); }}>Delete arrow</button>
+      </div>}
+      {notedArrow && <Rnd key={notedArrow.id} className="result-window arrow-note-window" bounds="window"
+        default={{ x: Math.max(10, window.innerWidth / 2 - 300), y: 90, width: Math.min(600, window.innerWidth - 20), height: 420 }}
+        minWidth={350} minHeight={250} dragHandleClassName="arrow-note-dragbar">
+        <div className="result-window-header"><div className="arrow-note-dragbar">Arrow notes</div>
+          <button aria-label="Close arrow notes" onClick={() => setArrowNoteId(null)}>×</button></div>
+        <div className="result-window-body notes-window-body"><RichModelNotes key={notedArrow.id}
+          label="Arrow notes" placeholder="Write notes for this arrow…" value={notedArrow.data?.noteHtml ?? ''} onChange={html => updateArrow(notedArrow.id, { noteHtml: html })} /></div>
+      </Rnd>}
       {/* Right-click context menu */}
       {contextMenu && (
         <div
@@ -2465,7 +3271,7 @@ export default function App() {
                   ))}
                 </div>
               )}
-              {RESULT_VIEWS.map(([key, label]) => (
+              {resultViewsFor(nodes.find(node => node.id === menuModelId)?.data.methodSummary).filter(([key]) => key !== 'notes').map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() =>
@@ -2481,6 +3287,8 @@ export default function App() {
 
               <div className="context-divider" />
 
+              <button onClick={() => openResults(menuModelId, 'notes')}>Notes</button>
+              <div className="context-divider" />
               <button
                 className={
                   comparisonIds.includes(menuModelId)
@@ -2514,12 +3322,13 @@ export default function App() {
               </>}
             </>
           ) : (
-            <button
-              className="danger"
-              onClick={() => deleteNote(contextMenu.nodeId)}
-            >
-              Delete note
-            </button>
+            <>
+              <button onClick={() => {
+                setNodes(current => current.map(node => node.id === contextMenu.nodeId ? setNoteCollapsed(node, !node.data.collapsed) : node));
+                setContextMenu(null);
+              }}>{menuNode?.data.collapsed ? 'Expand note' : 'Collapse note'}</button>
+              <button className="danger" onClick={() => deleteNote(contextMenu.nodeId)}>Delete note</button>
+            </>
           )}
         </div>
       )}
@@ -2583,6 +3392,12 @@ export default function App() {
       {/* Single-model results */}
       <ResultWindow
         windowData={resultWindow}
+        noteHtml={nodes.find(node => node.id === resultWindow?.nodeId)?.data.noteHtml ?? ''}
+        onNotesChange={html => {
+          const modelId = resultWindow?.nodeId;
+          setNodes(current => current.map(node => node.id === modelId && node.type === 'model'
+            ? { ...node, data: { ...node.data, noteHtml: html } } : node));
+        }}
         onClose={() => setResultWindow(null)}
         onChangeView={view =>
           setResultWindow(current => ({

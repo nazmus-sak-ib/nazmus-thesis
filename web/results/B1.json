@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
   "metadata": {
-    "model_id": "B2.1",
-    "model_name": "Model B2.1",
-    "exported_at": "2026-09-22T22:47:43-0400",
+    "model_id": "B1",
+    "model_name": "Model B1",
+    "exported_at": "2026-09-23T12:09:08-0400",
     "lavaan_version": "0.7.2",
     "estimator": "DWLS",
     "se_method": "robust.sem",
@@ -28,7 +28,7 @@
       "n_patterns": 195
     }
   ],
-  "model_syntax": "\n  # =======================================\n  # Reflective Measurement Model\n  # =======================================\n  Attitude =~ att_appealing + att_desirable +\n              att_goodidea + att_pleasant\n\n  PBC =~ pbc_barrier + pbc_could +\n         pbc_resources\n\n  DescriptiveNorms =~ norms_d_many + norms_d_common +\n                      norms_d_few\n\n  InjunctiveNorms =~ norms_i_consider + norms_i_bad +\n                     norms_i_support\n\n  Intention =~ nextv_bev + nextv_phev + nextv_icev\n\n\n  # =======================================\n  # Structural path\n  # ======================================= \n  Intention  ~ Attitude + PBC + DescriptiveNorms + InjunctiveNorms\n  \n",
+  "model_syntax": "\n  # =======================================\n  # Reflective Measurement Model\n  # =======================================\n  Attitude =~ att_appealing + att_desirable +\n              att_goodidea + att_pleasant\n\n  PBC =~ pbc_barrier + pbc_could +\n         pbc_resources\n\n  DescriptiveNorms =~ norms_d_many + norms_d_common +\n                      norms_d_few\n\n  InjunctiveNorms =~ norms_i_consider + norms_i_bad +\n                     norms_i_support\n\n  Intention =~ nextv_bev + nextv_phev + nextv_icev\n\n\n  # =======================================\n  # Structural path\n  # ======================================= \n  Intention  ~ Attitude + PBC + DescriptiveNorms + InjunctiveNorms\n  \n  # =======================================\n  # Covariance paths\n  # =======================================   \n  \n  # all exo ~~ exo allowed with auto.cov.lv.x = TRUE\n  \n",
   "fit_measures": [
     {
       "measure": "npar",
