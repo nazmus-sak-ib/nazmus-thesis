@@ -14,6 +14,7 @@ import {
   Controls,
   Handle,
   Position,
+  ConnectionMode,
   MarkerType,
   NodeResizer,
   addEdge,
@@ -28,6 +29,8 @@ import { Rnd } from 'react-rnd';
 import '@xyflow/react/dist/style.css';
 import './App.css';
 import Workspace from './Workspace.jsx';
+import usePageHistory from './usePageHistory.js';
+import { closestArrowEnd, arrowSnapPoints, snapArrowEndpoint, reattachArrow } from './arrowReconnect.js';
 import { PAGE_TYPES, validViewport } from './workspaceState.js';
 
 const BASE = import.meta.env.BASE_URL;
@@ -40,8 +43,12 @@ const BASE = import.meta.env.BASE_URL;
 function ConnectionHandles() {
   return (
     <>
-      <Handle id="target-top" type="target" position={Position.Top} />
-      <Handle id="target-left" type="target" position={Position.Left} />
+      {/* Keep legacy target IDs so saved arrows still resolve. Loose connections
+          use the four visible handles for either end of new/repositioned arrows. */}
+      <Handle className="legacy-connection-handle" id="target-top" type="target" position={Position.Top} />
+      <Handle className="legacy-connection-handle" id="target-left" type="target" position={Position.Left} />
+      <Handle id="source-top" type="source" position={Position.Top} />
+      <Handle id="source-left" type="source" position={Position.Left} />
       <Handle id="source-right" type="source" position={Position.Right} />
       <Handle id="source-bottom" type="source" position={Position.Bottom} />
     </>
@@ -439,6 +446,7 @@ async function modelFileExists(filePath, kind) {
 async function verifyModelFiles(models) {
   const valid = new Array(models.length);
   const summaries = new Array(models.length);
+  const broken = [];
   let next = 0;
   // Limit parallel requests when the library contains many models.
   await Promise.all(Array.from({ length: Math.min(4, models.length) }, async () => {
@@ -450,16 +458,21 @@ async function verifyModelFiles(models) {
         modelFileExists(model.results, 'results')
       ]);
       valid[index] = Boolean(imageExists && resultsExist);
+      if(!valid[index])broken.push({id:model.id,title:model.title,image:Boolean(imageExists),results:Boolean(resultsExist),
+        imageFiles:imageExists?[decodeURIComponent(model.image.split('/').pop())]:[],
+        resultFiles:resultsExist?[decodeURIComponent(model.results.split('/').pop())]:[],
+        reason:'A file became unavailable during refresh. Restore the missing file, then refresh again.'});
       summaries[index] = resultsExist || null;
     }
   }));
   return {
+    broken,
     models: models.flatMap((model, index) => valid[index] ? [{ ...model, methodSummary: summaries[index] }] : []),
     missing: models.filter((_, index) => !valid[index]).map(model => model.id)
   };
 }
 
-function reconcileModelLibrary(current, catalog, makeNode) {
+function reconcileModelLibrary(current, catalog, makeNode, savedLayout = {}) {
   const byId = new Map(catalog.map(model => [model.id, model]));
   const existingIds = new Set(current.map(node => node.id));
   const updated = current.flatMap(node => {
@@ -475,12 +488,25 @@ function reconcileModelLibrary(current, catalog, makeNode) {
     return [{ ...node, data: { ...node.data,
       title: model.title || model.id, image: model.image, results: model.results, methodSummary: model.methodSummary } }];
   });
-  return [...updated, ...catalog.filter(model => !existingIds.has(model.id)).map(makeNode)];
+  const added = catalog.filter(model => !existingIds.has(model.id)).map(model => {
+    const node = makeNode(model), position = savedLayout.model_positions?.[model.id];
+    return { ...node, ...modelDimensions(savedLayout.model_sizes?.[model.id]),
+      position: position ?? node.position,
+      hidden: Boolean(savedLayout.used_models?.includes(model.id) && savedLayout.hidden_models?.includes(model.id)),
+      data: { ...node.data, hasPosition: Boolean(position), inUse: Boolean(savedLayout.used_models?.includes(model.id)),
+        noteHtml: cleanNoteHtml(savedLayout.model_notes?.[model.id]) } };
+  });
+  const reconciled = [...updated, ...added];
+  if (!Array.isArray(savedLayout.stacks)) return reconciled;
+  return [...restoreStacks(reconciled.filter(node=>node.type==='model'), savedLayout.stacks),
+    ...reconciled.filter(node=>node.type!=='model' && node.type!=='stack')];
 }
 
 function libraryRefreshMessage(catalog) {
-  return 'Library checked: ' + catalog.models.length + ' model(s) with both files.' +
-    (catalog.missing.length ? ' Skipped ' + catalog.missing.length + ' catalog entry/entries with missing files.' : '');
+  return 'Library checked: ' + catalog.models.length + ' model(s) with both files. ' +
+    (catalog.broken?.length ? catalog.broken.length + ' item(s) in Broken. ' : '') +
+    (catalog.warnings??[]).join(' ') +
+    (catalog.mode==='build' ? ' This is a built library snapshot; rebuild the site to include folder changes.' : '');
 }
 
 function restoreStacks(modelNodes, savedStacks = []) {
@@ -737,15 +763,70 @@ function routedArrow(props) {
     + ' C ' + (x+ux*last) + ',' + (y+uy*last) + ' ' + (tx+target[0]*last) + ',' + (ty+target[1]*last) + ' ' + tx + ',' + ty, x, y];
 }
 function AnnotatedEdge(props) {
-  const { screenToFlowPosition, setEdges } = useReactFlow();
+  const { screenToFlowPosition, setEdges, getInternalNode, getZoom } = useReactFlow();
   const dragging = useRef(false);
+  const endpointDrag = useRef(null);
+  const [endpointPreview, setEndpointPreview] = useState(null);
   const [path, x, y] = routedArrow(props);
+  useEffect(() => {
+    const cancel = event => {
+      if (event.key === 'Escape') { endpointDrag.current = null; setEndpointPreview(null); }
+    };
+    const blur = () => { endpointDrag.current = null; setEndpointPreview(null); };
+    document.addEventListener('keydown', cancel);
+    window.addEventListener('blur', blur);
+    return () => { document.removeEventListener('keydown', cancel); window.removeEventListener('blur', blur); };
+  }, []);
+  function endpointAt(event) {
+    const drag = endpointDrag.current;
+    if (!drag) return null;
+    const point = screenToFlowPosition({ x: event.clientX, y: event.clientY });
+    const points = arrowSnapPoints(getInternalNode(drag.nodeId));
+    return { end: drag.end, point, points, snap: snapArrowEndpoint(point, points, getZoom()) };
+  }
+  function startEndpoint(event) {
+    if (event.button !== 0) return;
+    event.stopPropagation();
+    const point = screenToFlowPosition({ x: event.clientX, y: event.clientY });
+    const end = closestArrowEnd(point, { x: props.sourceX, y: props.sourceY }, { x: props.targetX, y: props.targetY });
+    endpointDrag.current = { end, nodeId: end === 'source' ? props.source : props.target, x: event.clientX, y: event.clientY, moved: false };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setEdges(current=>current.map(edge=>({...edge,selected:edge.id===props.id})));
+  }
+  function moveEndpoint(event) {
+    const drag = endpointDrag.current;
+    if (!drag) return;
+    event.stopPropagation();
+    if (Math.hypot(event.clientX-drag.x,event.clientY-drag.y) >= 4) drag.moved = true;
+    if (drag.moved) setEndpointPreview(endpointAt(event));
+  }
+  function finishEndpoint(event, cancel = false) {
+    const drag = endpointDrag.current;
+    const preview = !cancel && drag?.moved ? endpointAt(event) : null;
+    if (preview?.snap) setEdges(current=>current.map(edge=>edge.id===props.id ? reattachArrow(edge,drag.end,preview.snap) : edge));
+    endpointDrag.current = null; setEndpointPreview(null);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+  }
+  const previewPoint = endpointPreview?.snap ?? endpointPreview?.point;
+  const previewProps = endpointPreview ? { ...props,
+    [endpointPreview.end+'X']: previewPoint.x, [endpointPreview.end+'Y']: previewPoint.y,
+    [endpointPreview.end+'Position']: endpointPreview.snap?.side ?? props[endpointPreview.end+'Position'] } : props;
+  const visiblePath = endpointPreview ? routedArrow(previewProps)[0] : path;
   function move(point) {
     const bend = { x: point.x - (props.sourceX + props.targetX) / 2, y: point.y - (props.sourceY + props.targetY) / 2 };
     setEdges(current => current.map(edge => edge.id === props.id ? { ...edge, data: { ...edge.data, bend } } : edge));
   }
   return <>
-    <BaseEdge id={props.id} path={path} markerStart={props.markerStart} markerEnd={props.markerEnd} style={props.style} interactionWidth={24} />
+    <BaseEdge id={props.id} path={visiblePath} markerStart={props.markerStart} markerEnd={props.markerEnd}
+      style={{...props.style,...(endpointPreview?{strokeDasharray:'6 4',opacity:0.7}:{})}} interactionWidth={0} />
+    <path d={visiblePath} fill="none" stroke="transparent" strokeWidth={24} className="arrow-endpoint-drag nodrag nopan"
+      onPointerDown={startEndpoint} onPointerMove={moveEndpoint} onPointerUp={event=>finishEndpoint(event)}
+      onPointerCancel={event=>finishEndpoint(event,true)} onLostPointerCapture={()=>{endpointDrag.current=null;setEndpointPreview(null);}}
+      onContextMenu={event=>props.data.onMenu(event)}>
+      <title>Drag near either end to move its connection on the same item. Escape cancels.</title>
+    </path>
+    {endpointPreview?.points.map(point=><circle key={point.side} cx={point.x} cy={point.y} r={8/getZoom()}
+      className={'arrow-snap-point'+(endpointPreview.snap?.side===point.side?' active':'')} />)}
     <EdgeLabelRenderer>
       {props.selected && <button className="arrow-bend-handle nodrag nopan" aria-label="Move arrow bend" title="Drag to bend the arrow; arrow keys also move it"
         style={{ transform: 'translate(-50%, -50%) translate(' + x + 'px, ' + y + 'px)' }}
@@ -1930,10 +2011,11 @@ let sharedCatalogPromise = null;
 
 export default function App() { return <Workspace Canvas={PageCanvas} />; }
 
-function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controllerRef }) {
+function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controllerRef, findRequest, onFindResult, historyStore }) {
   const supportsModels = PAGE_TYPES[pageType].models;
   const [initialPageLayout] = useState(initialLayout);
   const publishedLayout = useRef(null);
+  const retainedLayout = useRef(initialLayout);
   const [viewport, setViewport] = useState(() => validViewport(initialLayout.viewport));
   const [
     nodes,
@@ -1950,8 +2032,12 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [libraryError, setLibraryError] = useState('');
   const [libraryNotice, setLibraryNotice] = useState('');
+  const [brokenModels, setBrokenModels] = useState([]);
   const [refreshingLibrary, setRefreshingLibrary] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const [foundLibraryId,setFoundLibraryId]=useState(null);
+  const handledFind=useRef(null);
+  const libraryCards=useRef(new Map());
   const [libraryOpen, setLibraryOpen] = useState(supportsModels);
   const [libraryQuery, setLibraryQuery] = useState('');
   const refreshPending = useRef(false);
@@ -2208,30 +2294,31 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
     });
 
     const liveModelIds=new Set(nodes.filter(node=>node.type==='model').map(node=>node.id));
-    const missingModelIds=new Set([...Object.keys(initialLayout.model_positions??{}),...Object.keys(initialLayout.model_notes??{}),...(initialLayout.used_models??[]),...(initialLayout.stacks??[]).flatMap(stack=>stack.members??[])].filter(id=>!liveModelIds.has(id)));
+    const missingModelIds=new Set([...Object.keys(retainedLayout.current.model_positions??{}),...Object.keys(retainedLayout.current.model_notes??{}),...(retainedLayout.current.used_models??[]),...(retainedLayout.current.stacks??[]).flatMap(stack=>stack.members??[])].filter(id=>!liveModelIds.has(id)));
     for(const id of missingModelIds){
-      if(initialLayout.model_positions?.[id])modelPositions[id]=initialLayout.model_positions[id];
-      if(initialLayout.model_notes?.[id])modelNotes[id]=initialLayout.model_notes[id];
-      if(initialLayout.model_sizes?.[id])modelSizes[id]=initialLayout.model_sizes[id];
-      if(initialLayout.used_models?.includes(id)&&!usedModels.includes(id))usedModels.push(id);
-      if(initialLayout.hidden_models?.includes(id)&&!hiddenModels.includes(id))hiddenModels.push(id);
+      if(retainedLayout.current.model_positions?.[id])modelPositions[id]=retainedLayout.current.model_positions[id];
+      if(retainedLayout.current.model_notes?.[id])modelNotes[id]=retainedLayout.current.model_notes[id];
+      if(retainedLayout.current.model_sizes?.[id])modelSizes[id]=retainedLayout.current.model_sizes[id];
+      if(retainedLayout.current.used_models?.includes(id)&&!usedModels.includes(id))usedModels.push(id);
+      if(retainedLayout.current.hidden_models?.includes(id)&&!hiddenModels.includes(id))hiddenModels.push(id);
     }
     const missingStackIds=new Set();
-    for(const saved of initialLayout.stacks??[]){
+    for(const saved of retainedLayout.current.stacks??[]){
       const missing=(saved.members??[]).filter(id=>missingModelIds.has(id));if(!missing.length)continue;
       const present=stacks.find(stack=>stack.id===saved.id);
       if(present)present.members=[...new Set([...present.members,...missing])];
       else {stacks.push(saved);missingStackIds.add(saved.id);}
     }
-    for(const edge of initialLayout.edges??[])if((missingModelIds.has(edge.source)||missingModelIds.has(edge.target)||missingStackIds.has(edge.source)||missingStackIds.has(edge.target))&&!savedEdges.some(item=>item.id===edge.id))savedEdges.push(edge);
+    for(const edge of retainedLayout.current.edges??[])if((missingModelIds.has(edge.source)||missingModelIds.has(edge.target)||missingStackIds.has(edge.source)||missingStackIds.has(edge.target))&&!savedEdges.some(item=>item.id===edge.id))savedEdges.push(edge);
     const decorations=nodes.filter(isDecoration).map(node=>{
-      const saved=initialLayout.decorations?.find(item=>item.id===node.id);
+      const saved=retainedLayout.current.decorations?.find(item=>item.id===node.id);
       return normalizeDecoration({...node,data:{...node.data,members:[...new Set([...(node.data.members??[]),...(saved?.data?.members??[]).filter(id=>missingModelIds.has(id)||missingStackIds.has(id))])]}});
     });
     return {
       viewport: validViewport(flowInstance?.getViewport()) ?? viewport,
       comparison_ids: comparisonIds,
       schema_version: '9.0',
+      ...(retainedLayout.current.retained_content?{retained_content:retainedLayout.current.retained_content}:{}),
       decorations,
       model_sizes: modelSizes,
       model_notes: modelNotes,
@@ -2267,15 +2354,18 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
     if (force) sharedCatalogPromise = null;
     if (!sharedCatalogPromise) sharedCatalogPromise = (async () => {
     const response = await fetch(
-      BASE + 'models.json',
+      BASE + 'model-library.json',
       { cache: 'no-store' }
     );
     if (!response.ok) {
-      throw new Error('Could not load the model library (' + response.status + ').');
+      throw new Error('Could not scan the model folders (' + response.status + '). Library unchanged. Check the Vite plugin installation and restart the dev server.');
+    }
+    if (!(response.headers.get('content-type')||'').includes('application/json')) {
+      throw new Error('Folder discovery is unavailable. Install modelLibraryPlugin.js and the updated vite.config.js, then restart the dev server.');
     }
     const catalog = await response.json();
-    if (!Array.isArray(catalog.models)) {
-      throw new Error('models.json must contain a models array.');
+    if (catalog.source!=='folder-scan' || !Array.isArray(catalog.models) || !Array.isArray(catalog.broken)) {
+      throw new Error('The folder scanner returned an invalid library. Existing library unchanged.');
     }
     const ids = new Set();
     for (const model of catalog.models) {
@@ -2287,7 +2377,8 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
       }
       ids.add(model.id);
     }
-    return await verifyModelFiles(catalog.models);
+    const checked = await verifyModelFiles(catalog.models);
+    return { ...catalog, ...checked, broken: [...catalog.broken, ...checked.broken] };
   
     })().catch(error => { sharedCatalogPromise = null; throw error; });
     return sharedCatalogPromise;
@@ -2358,6 +2449,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
         setNodes([...restoreStacks(modelNodes, savedStacks), ...noteSource.map(normalizeNote), ...loadDecorations(browserLayout.decorations ?? fileLayout.decorations)]);
         setEdges(loadedEdges);
         setModelsLoaded(true);
+        setBrokenModels(checkedCatalog.broken??[]);
         setLibraryNotice(libraryRefreshMessage(checkedCatalog) + ((initialPageLayout.used_models??[]).some(id=>!catalog.some(model=>model.id===id)) ? ' Some saved models are unavailable; their page data is retained until the source files return.' : ''));
       } catch (error) {
         if (!cancelled) setLibraryError(error.message);
@@ -2379,7 +2471,10 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
     setLibraryNotice('');
     try {
       const checkedCatalog = await fetchCatalog(true);
-      setNodes(current => reconcileModelLibrary(current, checkedCatalog.models, createModelNode));
+      const savedLayout = controllerRef.current?.snapshot() ?? getCurrentLayout();
+      setNodes(current => reconcileModelLibrary(current, checkedCatalog.models, createModelNode, savedLayout));
+      setEdges(current => [...current, ...(savedLayout.edges??[]).filter(saved=>!current.some(edge=>edge.id===saved.id))]);
+      setBrokenModels(checkedCatalog.broken??[]);
       setLibraryNotice(libraryRefreshMessage(checkedCatalog));
     } catch (error) {
       setLibraryError(error.message);
@@ -2454,7 +2549,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
     const isStack = node.type === 'stack';
     const active = isStack ? nodes.find(model => model.id === node.data.activeId) : node;
     return (
-      <article className={'library-card' + (isStack ? ' library-stack' : '')} key={node.id}
+      <article ref={element=>{if(element)libraryCards.current.set(node.id,element);else libraryCards.current.delete(node.id);}} className={'library-card' + (isStack ? ' library-stack' : '')+(foundLibraryId===node.id?' found-content':'')} key={node.id}
         draggable={!node.data.inUse}
         onDragStart={event => {
           if (node.data.inUse) return;
@@ -2573,9 +2668,28 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
   // ====================================================
   // Publish this page only; the workspace owns storage and file operations.
   // A keyed PageCanvas unmounts when switching pages, isolating async requests.
+  function restoreHistory(document) {
+    retainedLayout.current = document;
+    const models = nodes.filter(node=>node.type==='model').map(node=>({
+      ...node, ...modelDimensions(document.model_sizes?.[node.id]),
+      selected:false, dragging:false,
+      position:document.model_positions?.[node.id]??{x:100,y:100},
+      hidden:Boolean(document.used_models?.includes(node.id)&&document.hidden_models?.includes(node.id)),
+      data:{...node.data,inUse:Boolean(document.used_models?.includes(node.id)),
+        hasPosition:Boolean(document.model_positions?.[node.id]),noteHtml:cleanNoteHtml(document.model_notes?.[node.id]),stackId:null}
+    }));
+    setNodes([...restoreStacks(models,document.stacks),...(document.notes??[]).map(normalizeNote),...loadDecorations(document.decorations)]);
+    setEdges(document.edges??[]);
+    setContextMenu(null);setArrowMenu(null);setDecorationMenu(null);setStackDialog(null);
+    setDrawMode(null);setDrawPreview(null);drawStart.current=null;
+  }
+  const history = usePageHistory({store:historyStore,pageId,ready:modelsLoaded&&!refreshingLibrary,
+    signature:nodes.filter(node=>node.type==='model').map(node=>node.id).sort().join('\n'),
+    layout:getCurrentLayout(),restore:restoreHistory});
   useEffect(() => {
     if (!modelsLoaded) return;
     const layout=getCurrentLayout(), encoded=JSON.stringify(layout);
+    retainedLayout.current=layout;
     if (publishedLayout.current===encoded) return;
     publishedLayout.current=encoded;
     onLayoutChange(pageId,layout);
@@ -2585,6 +2699,45 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
     controllerRef.current = api;
     return () => { if (controllerRef.current === api) controllerRef.current = null; };
   });
+
+  useEffect(() => {
+    if(!findRequest||!modelsLoaded||!flowInstance||handledFind.current===findRequest.token)return;
+    handledFind.current=findRequest.token;
+    const {item}=findRequest;
+    let node=nodes.find(n=>n.id===item.id);
+    const revealLibrary=n=>{
+      setLibraryOpen(true);setLibraryQuery('');setFoundLibraryId(n.id);
+      updateLibraryPrefs({Available:false,'In Use':false,Hidden:false,filter:'all'});
+      onFindResult(findRequest.token,'Shown in the model library. Use its controls to show, return, or unstack it.',false);
+    };
+    if(item.kind==='model-note'&&node){
+      if(node.data.stackId)selectVersion(node.data.stackId,node.id);
+      openResults(node.id,'notes');
+      onFindResult(findRequest.token,'Opened the model’s Notes editor. Clear its text to remove the note.',false);return;
+    }
+    if(node?.data.stackId)node=nodes.find(n=>n.id===node.data.stackId);
+    if(node){
+      if(['model','stack'].includes(node.type)&&(!node.data.inUse||node.hidden)){revealLibrary(node);return;}
+      setNodes(current=>current.map(n=>({...n,selected:n.id===node.id})));
+      setEdges(current=>current.map(e=>({...e,selected:false})));
+      flowInstance.fitView({nodes:[{id:node.id}],padding:0.5,maxZoom:1,duration:250});
+      onFindResult(findRequest.token,'Selected on the canvas. Use its right-click menu to remove it.',false);return;
+    }
+    const edge=item.kind==='edge'?edges.find(e=>e.id===item.id):null;
+    if(edge){
+      const endpoints=[edge.source,edge.target].map(id=>nodes.find(n=>n.id===id)).filter(Boolean);
+      const hidden=endpoints.find(n=>n.hidden||(['model','stack'].includes(n.type)&&!n.data.inUse));
+      if(hidden)revealLibrary(hidden);
+      else if(endpoints.length)flowInstance.fitView({nodes:endpoints,padding:0.5,maxZoom:1,duration:250});
+      setEdges(current=>current.map(e=>({...e,selected:e.id===edge.id})));
+      if(edge.data?.noteHtml)setArrowNoteId(edge.id);
+      onFindResult(findRequest.token,hidden?'This arrow connects a hidden or unused item. Its library entry is highlighted.':'Selected the arrow and centered its endpoints.',true);return;
+    }
+    onFindResult(findRequest.token,'This saved item cannot be displayed. Its source files may be missing. You can remove its saved data from this page.',true);
+  });
+  useEffect(()=>{
+    if(foundLibraryId&&libraryOpen)libraryCards.current.get(foundLibraryId)?.scrollIntoView({block:'nearest'});
+  },[foundLibraryId,libraryOpen,libraryQuery,libraryPrefs]);
 
   // ====================================================
   // Connect nodes
@@ -2952,6 +3105,8 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
           <button aria-label={toolsOpen ? 'Hide tools' : 'Show tools'} title={toolsOpen ? 'Hide tools' : 'Show tools'}
             aria-expanded={toolsOpen} aria-controls="canvas-tools" onClick={toggleTools}>☰</button>
           {toolsOpen && <div id="canvas-tools" className="toolbar-items">
+          <button disabled={!history.canUndo} onClick={history.undo} title="Undo on this page (Ctrl+Z)">↶ Undo</button>
+          <button disabled={!history.canRedo} onClick={history.redo} title="Redo on this page (Ctrl+Shift+Z or Ctrl+Y)">↷ Redo</button>
           <button disabled={!modelsLoaded} onClick={()=>{setDrawMode('container');setCanvasNotice('Drag on the canvas to draw a container. Escape cancels.');}}>Draw container</button>
           <select aria-label="Shape type" value={shapeKind} onChange={event=>setShapeKind(event.target.value)}><option value="rectangle">Rectangle</option><option value="circle">Circle</option><option value="rounded">Rounded rectangle</option></select>
           <button disabled={!modelsLoaded} onClick={()=>{setDrawMode('shape');setCanvasNotice('Drag on the canvas to draw a shape. Escape cancels.');}}>Draw shape</button>
@@ -3011,6 +3166,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
           selectionOnDrag={false}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          connectionMode={ConnectionMode.Loose}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           onEdgeContextMenu={openArrowMenu}
@@ -3062,6 +3218,24 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
                 </>}
               </section>;
             })}
+            <section className="library-section library-broken">
+              <h3><button className="library-section-toggle" aria-expanded={!libraryPrefs.Broken} onClick={()=>updateLibraryPrefs({Broken:!libraryPrefs.Broken})}>
+                {libraryPrefs.Broken?'▸':'▾'} Broken <span>{brokenModels.length}</span>
+              </button></h3>
+              {!libraryPrefs.Broken && <>
+                <p className="library-help">Match the filename before .svg and .json exactly, including case. Add or repair the file, then refresh.</p>
+                {brokenModels.filter(model=>(model.id+' '+model.title).toLowerCase().includes(query)).map(model=><article className="library-card broken-model-card" key={model.id}>
+                  <strong>{model.id}</strong>
+                  <span className={model.image?'file-present':'file-missing'}>SVG: {model.image?'Present':'Missing'}</span>
+                  <span className={model.results?'file-present':'file-missing'}>JSON: {model.results?'Present':'Missing'}</span>
+                  {model.imageFiles?.length>0&&<small>web/models/{model.imageFiles.join(', ')}</small>}
+                  {model.resultFiles?.length>0&&<small>web/results/{model.resultFiles.join(', ')}</small>}
+                  <p>{model.reason}</p>
+                </article>)}
+                {!brokenModels.length&&<p className="library-empty">No broken pairs.</p>}
+                {brokenModels.length>0&&!brokenModels.some(model=>(model.id+' '+model.title).toLowerCase().includes(query))&&<p className="library-empty">No broken items match this search.</p>}
+              </>}
+            </section>
           </div>
         </aside>
       )}

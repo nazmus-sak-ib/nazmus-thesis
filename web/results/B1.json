@@ -1,20 +1,36 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "metadata": {
-    "model_id": "B2.1",
-    "model_name": "Model B2.1",
-    "exported_at": "2026-09-22T22:47:43-0400",
+    "model_id": "B1",
+    "model_name": "Model B1",
+    "exported_at": "2026-09-27T12:37:55-0400",
     "lavaan_version": "0.7.2",
     "estimator": "DWLS",
+    "estimator_requested": "WLSMV",
+    "estimator_actual": "DWLS",
     "se_method": "robust.sem",
     "test": ["standard", "scaled.shifted"],
+    "information": ["expected", "expected"],
+    "h1_information": ["unstructured", "unstructured"],
+    "likelihood": "default",
+    "link": "default",
+    "data_treatment": "Ordinal",
     "missing": "pairwise",
+    "ordered_variables": ["att_appealing", "att_desirable", "att_goodidea", "att_pleasant", "pbc_barrier", "pbc_could", "pbc_resources", "norms_d_many", "norms_d_common", "norms_d_few", "norms_i_consider", "norms_i_bad", "norms_i_support", "nextv_bev", "nextv_phev", "nextv_icev"],
+    "number_ordered_variables": 16,
     "parameterization": "delta",
+    "std_lv": false,
+    "meanstructure": true,
+    "fixed_x": false,
+    "auto_var": true,
+    "auto_cov_lv_x": true,
+    "auto_cov_y": false,
+    "mimic": "lavaan",
+    "representation": "LISREL",
     "converged": true,
     "post_check": true,
     "number_parameters": 90,
-    "number_groups": 1,
-    "ordered_variables": ["att_appealing", "att_desirable", "att_goodidea", "att_pleasant", "pbc_barrier", "pbc_could", "pbc_resources", "norms_d_many", "norms_d_common", "norms_d_few", "norms_i_consider", "norms_i_bad", "norms_i_support", "nextv_bev", "nextv_phev", "nextv_icev"]
+    "number_groups": 1
   },
   "sample_size": [
     {
@@ -28,7 +44,7 @@
       "n_patterns": 195
     }
   ],
-  "model_syntax": "\n  # =======================================\n  # Reflective Measurement Model\n  # =======================================\n  Attitude =~ att_appealing + att_desirable +\n              att_goodidea + att_pleasant\n\n  PBC =~ pbc_barrier + pbc_could +\n         pbc_resources\n\n  DescriptiveNorms =~ norms_d_many + norms_d_common +\n                      norms_d_few\n\n  InjunctiveNorms =~ norms_i_consider + norms_i_bad +\n                     norms_i_support\n\n  Intention =~ nextv_bev + nextv_phev + nextv_icev\n\n\n  # =======================================\n  # Structural path\n  # ======================================= \n  Intention  ~ Attitude + PBC + DescriptiveNorms + InjunctiveNorms\n  \n",
+  "model_syntax": "\n  # =======================================\n  # Reflective Measurement Model\n  # =======================================\n  Attitude =~ att_appealing + att_desirable +\n              att_goodidea + att_pleasant\n\n  PBC =~ pbc_barrier + pbc_could +\n         pbc_resources\n\n  DescriptiveNorms =~ norms_d_many + norms_d_common +\n                      norms_d_few\n\n  InjunctiveNorms =~ norms_i_consider + norms_i_bad +\n                     norms_i_support\n\n  Intention =~ nextv_bev + nextv_phev + nextv_icev\n\n\n  # =======================================\n  # Structural path\n  # ======================================= \n  Intention  ~ Attitude + PBC + DescriptiveNorms + InjunctiveNorms\n  \n  # =======================================\n  # Covariance paths\n  # =======================================   \n  \n  # all exo ~~ exo allowed with auto.cov.lv.x = TRUE\n  \n",
   "fit_measures": [
     {
       "measure": "npar",
@@ -1906,7 +1922,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "att_desirable",
@@ -1920,7 +1936,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "att_goodidea",
@@ -1934,7 +1950,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "att_pleasant",
@@ -1948,7 +1964,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "pbc_barrier",
@@ -1962,7 +1978,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "pbc_could",
@@ -1976,7 +1992,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "pbc_resources",
@@ -1990,7 +2006,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "norms_d_many",
@@ -2004,7 +2020,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "norms_d_common",
@@ -2018,7 +2034,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "norms_d_few",
@@ -2032,7 +2048,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "norms_i_consider",
@@ -2046,7 +2062,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "norms_i_bad",
@@ -2060,7 +2076,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "norms_i_support",
@@ -2074,7 +2090,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "nextv_bev",
@@ -2088,7 +2104,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "nextv_phev",
@@ -2102,7 +2118,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "nextv_icev",
@@ -2116,7 +2132,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "att_appealing",
@@ -2130,7 +2146,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "att_desirable",
@@ -2144,7 +2160,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "att_goodidea",
@@ -2158,7 +2174,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "att_pleasant",
@@ -2172,7 +2188,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "pbc_barrier",
@@ -2186,7 +2202,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "pbc_could",
@@ -2200,7 +2216,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "pbc_resources",
@@ -2214,7 +2230,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "norms_d_many",
@@ -2228,7 +2244,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "norms_d_common",
@@ -2242,7 +2258,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "norms_d_few",
@@ -2256,7 +2272,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "norms_i_consider",
@@ -2270,7 +2286,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "norms_i_bad",
@@ -2284,7 +2300,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "norms_i_support",
@@ -2298,7 +2314,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "nextv_bev",
@@ -2312,7 +2328,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "nextv_phev",
@@ -2326,7 +2342,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "nextv_icev",
@@ -2340,7 +2356,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "Attitude",
@@ -2354,7 +2370,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "PBC",
@@ -2368,7 +2384,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "DescriptiveNorms",
@@ -2382,7 +2398,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "InjunctiveNorms",
@@ -2396,7 +2412,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "Intention",
@@ -2410,7 +2426,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     }
   ],
   "r_squared": [

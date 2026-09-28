@@ -1,11 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { WORKSPACE_KEY, LEGACY_KEY, PAGE_TYPES, newPage, normalizeWorkspace, workspaceFromLegacy, mergeLegacyLayouts, validateLayout, updatePageLayout, canDeletePage, deleteEmptyPage } from './workspaceState.js';
+import { WORKSPACE_KEY, LEGACY_KEY, PAGE_TYPES, newPage, normalizeWorkspace, workspaceFromLegacy, mergeLegacyLayouts, validateLayout, updatePageLayout, canDeletePage, deleteEmptyPage, pageContentItems, pageContentSummary, removePageContent } from './workspaceState.js';
 const BASE=import.meta.env.BASE_URL;
 export default function Workspace({ Canvas }) {
   const [workspace,setWorkspace]=useState(null),[error,setError]=useState(''),[notice,setNotice]=useState('');
   const [collapsed,setCollapsed]=useState(()=>{try{return localStorage.getItem('sem-pages-collapsed')==='true';}catch{return false;}});
   const [dialog,setDialog]=useState(null),[menu,setMenu]=useState(null),[busy,setBusy]=useState(false),[generation,setGeneration]=useState(0);
   const workspaceRef=useRef(null),canvasApi=useRef(null),fileHandle=useRef(null),pending=useRef(false),bootstrap=useRef(0);
+  const pageHistories=useRef(new Map());
+  const [findRequest,setFindRequest]=useState(null),[findResult,setFindResult]=useState(null);
+  const findCursor=useRef({}),findSerial=useRef(0);
+  const onFindResult=useCallback((token,message,removable)=>setFindResult({token,message,removable}),[]);
+  function findContent(id){
+    const current=capture();if(!current)return;
+    const page=current.pages.find(p=>p.id===id),items=pageContentItems(page);
+    if(!items.length){setNotice('This page has no saved content.');setFindRequest(null);return;}
+    const previous=items.findIndex(item=>item.key===findCursor.current[id]);
+    const index=(previous+1)%items.length,item=items[index];findCursor.current[id]=item.key;
+    setFindResult(null);setFindRequest({pageId:id,item,index,total:items.length,token:++findSerial.current});
+    commit({...current,active_page:id});setMenu(null);
+  }
   const commit=useCallback(value=>{workspaceRef.current=value;setWorkspace(value);},[]);
   useEffect(()=>{
     let cancelled=false;const ticket=++bootstrap.current;
@@ -44,8 +57,13 @@ export default function Workspace({ Canvas }) {
   function createDialog(){const current=capture();if(!current)return;commit(current);let n=current.pages.length+1;while(current.pages.some(p=>p.title.toLowerCase()==='page '+n))n++;setDialog({mode:'create',title:'Page '+n,type:'model'});setMenu(null);}
   function submitDialog(event){
     event.preventDefault();const current=capture();if(!current)return;
+    if(dialog.mode==='remove-content'){
+      const page=current.pages.find(p=>p.id===dialog.id);
+      if(page){pageHistories.current.delete(page.id);canvasApi.current=null;setGeneration(n=>n+1);commit(updatePageLayout(current,page.id,removePageContent(page.layout,dialog.item)));}
+      setDialog(null);setFindRequest(null);setFindResult(null);setNotice('Saved item removed from this page. Source files were not changed.');return;
+    }
     if(dialog.mode==='delete'){
-      try{commit(deleteEmptyPage(current,dialog.id));setDialog(null);setMenu(null);}catch(deleteError){setDialog({...dialog,error:deleteError.message});}
+      try{commit(deleteEmptyPage(current,dialog.id));pageHistories.current.delete(dialog.id);setDialog(null);setMenu(null);}catch(deleteError){setDialog({...dialog,error:deleteError.message});}
       return;
     }
     const title=dialog.title.trim();if(!title){setDialog({...dialog,error:'Enter a page name.'});return;}
@@ -71,7 +89,7 @@ export default function Workspace({ Canvas }) {
       const {handle,value}=await chooseFile();const incoming=normalizeWorkspace(value);
       if(workspaceRef.current&&!window.confirm('Replace all currently open pages with this workspace? Save workspace first if you want to keep the current version.'))return;
       const current=capture();if(current){try{localStorage.setItem(WORKSPACE_KEY+'-before-open',JSON.stringify(current));}catch{/* Export is also available. */}}
-      bootstrap.current++;canvasApi.current=null;fileHandle.current=handle;setGeneration(n=>n+1);commit(incoming);setError('');setNotice('Workspace opened.');setMenu(null);
+      bootstrap.current++;pageHistories.current.clear();canvasApi.current=null;fileHandle.current=handle;setGeneration(n=>n+1);commit(incoming);setError('');setNotice('Workspace opened.');setMenu(null);
     }catch(openError){if(openError.name!=='AbortError')setError(openError.message);}
     finally{pending.current=false;setBusy(false);}
   }
@@ -112,6 +130,8 @@ export default function Workspace({ Canvas }) {
           </button>
           {!collapsed&&<button className="page-more" aria-label={'Options for '+page.title} onClick={()=>setMenu(menu===page.id?null:page.id)}>⋯</button>}
           {menu===page.id&&!collapsed&&<div className="page-options">
+            <button disabled={busy} onClick={()=>findContent(page.id)}>Find content</button>
+            <small>{pageContentSummary(page)}</small>
             <button disabled={busy} onClick={()=>{setDialog({mode:'rename',id:page.id,title:page.title,type:page.type});setMenu(null);}}>Rename</button>
             <button disabled={!deletable||busy} title={deletable?'Delete empty page':workspace.pages.length===1?'Keep at least one page':'Page contains saved content'} onClick={()=>deletePage(page.id)}>Delete empty page</button>
             {!deletable&&<small>{workspace.pages.length===1?'At least one page must remain.':'Contains content; deletion is locked.'}</small>}
@@ -128,16 +148,23 @@ export default function Workspace({ Canvas }) {
       <header className="workspace-page-heading"><strong>{active?.title??'Workspace'}</strong><span>{active?PAGE_TYPES[active.type].label:'Loading…'}</span>{busy&&<span role="status">Working…</span>}</header>
       {error&&<div className="workspace-message error-message" role="alert">{error}<button aria-label="Dismiss error" onClick={()=>setError('')}>×</button></div>}
       {notice&&<div className="workspace-message" role="status">{notice}<button aria-label="Dismiss message" onClick={()=>setNotice('')}>×</button></div>}
-      {active&&<Canvas key={generation+':'+active.id} pageId={active.id} pageType={active.type} initialLayout={active.layout}
-        onLayoutChange={recordLayout} controllerRef={canvasApi} />}
+      {findRequest&&findRequest.pageId===active?.id&&<div className="content-finder" role="status">
+        <strong>{findRequest.index+1} / {findRequest.total} · {findRequest.item.label}</strong>
+        <span>{findResult?.token===findRequest.token?findResult.message:'Locating content…'}</span>
+        <button onClick={()=>findContent(active.id)}>Find next content</button>
+        {findResult?.token===findRequest.token&&findResult.removable&&<button onClick={()=>setDialog({mode:'remove-content',id:active.id,item:findRequest.item,title:findRequest.item.label})}>Remove saved item…</button>}
+        <button aria-label="Close content finder" onClick={()=>setFindRequest(null)}>×</button>
+      </div>}
+      {active&&<Canvas key={generation+':'+active.id} pageId={active.id} pageType={active.type} initialLayout={active.layout} historyStore={pageHistories}
+        onLayoutChange={recordLayout} controllerRef={canvasApi} findRequest={findRequest?.pageId===active.id?findRequest:null} onFindResult={onFindResult} />}
     </main>
     {dialog&&<div className="page-dialog-backdrop" onKeyDown={event=>{event.stopPropagation();if(event.key==='Escape')setDialog(null);}}>
-      <form className="page-dialog" role="dialog" aria-modal="true" aria-label={dialog.mode==='create'?'New page':dialog.mode==='delete'?'Delete empty page':'Rename page'} onSubmit={submitDialog}>
-        <h2>{dialog.mode==='create'?'New page':dialog.mode==='delete'?'Delete empty page':'Rename page'}</h2>
-        {dialog.mode==='delete'?<p>Delete the empty page “{dialog.title}”? This will not affect other pages.</p>:<label>Name<input autoFocus maxLength={120} value={dialog.title} onChange={event=>setDialog({...dialog,title:event.target.value,error:null})}/></label>}
+      <form className="page-dialog" role="dialog" aria-modal="true" aria-label={dialog.mode==='create'?'New page':dialog.mode==='remove-content'?'Remove saved item':dialog.mode==='delete'?'Delete empty page':'Rename page'} onSubmit={submitDialog}>
+        <h2>{dialog.mode==='create'?'New page':dialog.mode==='remove-content'?'Remove saved item':dialog.mode==='delete'?'Delete empty page':'Rename page'}</h2>
+        {dialog.mode==='remove-content'?<p>Remove “{dialog.title}” from this page? For a model or stack, this also removes its page notes and connected arrows. Shared source files and other pages are unaffected.</p>:dialog.mode==='delete'?<p>Delete the empty page “{dialog.title}”? This will not affect other pages.</p>:<label>Name<input autoFocus maxLength={120} value={dialog.title} onChange={event=>setDialog({...dialog,title:event.target.value,error:null})}/></label>}
         {dialog.mode==='create'&&<><label>Type<select value={dialog.type} onChange={event=>setDialog({...dialog,type:event.target.value})}>{Object.entries(PAGE_TYPES).map(([key,type])=><option key={key} value={key}>{type.label}</option>)}</select></label><p>{PAGE_TYPES[dialog.type].description}</p></>}
         {dialog.error&&<p role="alert">{dialog.error}</p>}
-        <div><button type="button" onClick={()=>setDialog(null)}>Cancel</button><button type="submit">{dialog.mode==='create'?'Create page':dialog.mode==='delete'?'Delete empty page':'Rename'}</button></div>
+        <div><button type="button" onClick={()=>setDialog(null)}>Cancel</button><button type="submit">{dialog.mode==='create'?'Create page':dialog.mode==='remove-content'?'Remove saved item':dialog.mode==='delete'?'Delete empty page':'Rename'}</button></div>
       </form>
     </div>}
   </div>;

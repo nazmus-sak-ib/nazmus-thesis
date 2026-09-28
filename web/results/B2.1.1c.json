@@ -3,7 +3,7 @@
   "metadata": {
     "model_id": "B2.1.1c",
     "model_name": "Model B2.1.1c",
-    "exported_at": "2026-09-24T14:19:37-0400",
+    "exported_at": "2026-09-27T13:01:01-0400",
     "lavaan_version": "0.7.2",
     "estimator": "DWLS",
     "estimator_requested": "WLSMV",

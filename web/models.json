@@ -30,6 +30,102 @@
       "title": "Model B2.2a",
       "image": "models/B2.2a.svg",
       "results": "results/B2.2a.json"
+    },
+    {
+      "id": "B1",
+      "title": "Model B1",
+      "image": "models/B1.svg",
+      "results": "results/B1.json"
+    },
+    {
+      "id": "B2.1.1a",
+      "title": "Model B2.1.1a",
+      "image": "models/B2.1.1a.svg",
+      "results": "results/B2.1.1a.json"
+    },
+    {
+      "id": "B2.1.1c",
+      "title": "Model B2.1.1c",
+      "image": "models/B2.1.1c.svg",
+      "results": "results/B2.1.1c.json"
+    },
+    {
+      "id": "B2.1.1d",
+      "title": "Model B2.1.1d",
+      "image": "models/B2.1.1d.svg",
+      "results": "results/B2.1.1d.json"
+    },
+    {
+      "id": "B2.1.1e",
+      "title": "Model B2.1.1e",
+      "image": "models/B2.1.1e.svg",
+      "results": "results/B2.1.1e.json"
+    },
+    {
+      "id": "B2.1.2",
+      "title": "Model B2.1.2",
+      "image": "models/B2.1.2.svg",
+      "results": "results/B2.1.2.json"
+    },
+    {
+      "id": "B2.2.1a",
+      "title": "Model B2.2.1a",
+      "image": "models/B2.2.1a.svg",
+      "results": "results/B2.2.1a.json"
+    },
+    {
+      "id": "B2.2.1b",
+      "title": "Model B2.2.1b",
+      "image": "models/B2.2.1b.svg",
+      "results": "results/B2.2.1b.json"
+    },
+    {
+      "id": "B2.2.1c",
+      "title": "Model B2.2.1c",
+      "image": "models/B2.2.1c.svg",
+      "results": "results/B2.2.1c.json"
+    },
+    {
+      "id": "B2.2.1c2",
+      "title": "Model B2.2.1c2",
+      "image": "models/B2.2.1c2.svg",
+      "results": "results/B2.2.1c2.json"
+    },
+    {
+      "id": "B2.2.1d",
+      "title": "Model B2.2.1d",
+      "image": "models/B2.2.1d.svg",
+      "results": "results/B2.2.1d.json"
+    },
+    {
+      "id": "B2.2.1c3",
+      "title": "Model B2.2.1c3",
+      "image": "models/B2.2.1c3.svg",
+      "results": "results/B2.2.1c3.json"
+    },
+    {
+      "id": "B2.2.2",
+      "title": "Model B2.2.2",
+      "image": "models/B2.2.2.svg",
+      "results": "results/B2.2.2.json"
+    },
+    {
+      "id": "B2.2.1c4",
+      "title": "Model B2.2.1c4",
+      "image": "models/B2.2.1c4.svg",
+      "results": "results/B2.2.1c4.json"
+    },
+    {
+      "id": "B2.2.3a",
+      "title": "Model B2.2.3a",
+      "image": "models/B2.2.3a.svg",
+      "results": "results/B2.2.3a.json"
+    },
+    {
+      "id": "B2.2.3b",
+      "title": "Model B2.2.3b",
+      "image": "models/B2.2.3b.svg",
+      "results": "results/B2.2.3b.json"
     }
   ]
 }

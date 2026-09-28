@@ -46,13 +46,42 @@ export function normalizeWorkspace(value) {
 function hasModelContent(layout) {
   return ['used_models','hidden_models','stacks'].some(key=>layout[key]?.length)||Object.keys(layout.model_notes??{}).length>0||Object.keys(layout.model_positions??{}).length>0;
 }
-export function pageHasContent(page) {
-  const layout=page.layout??{};
-  // Conservatively include hidden/unavailable models, saved annotations and positions.
-  // Catalog entries and their default size records alone do not make a page nonempty.
-  return ['notes','decorations','edges','stacks','used_models','hidden_models'].some(key=>Array.isArray(layout[key])&&layout[key].length>0)
-    || Object.keys(layout.model_notes??{}).length>0 || Object.keys(legacyPositions(layout)).length>0
-    || Boolean(layout.retained_content && Object.keys(layout.retained_content).length);
+// Positions and default sizes are reusable placement hints, not page content.
+export function pageContentItems(page) {
+  const l=page.layout??{}, items=[], stacks=l.stacks??[];
+  const members=new Set(stacks.flatMap(s=>s.members??[]));
+  const add=(kind,id,label)=>items.push({kind,id,key:kind+':'+id,label});
+  for(const n of l.notes??[])add('note',n.id,'Canvas note: '+(n.data?.title||n.id));
+  for(const n of l.decorations??[])add(n.type==='container'?'container':'shape',n.id,(n.type==='container'?'Container: ':'Shape: ')+(n.data?.title||n.id));
+  for(const s of stacks)add('stack',s.id,(s.hidden?'Hidden stack: ':'Stack: ')+(s.title||s.id));
+  for(const id of new Set([...legacyUsed(l),...(l.hidden_models??[])]))if(!members.has(id))add('model',id,(l.hidden_models?.includes(id)?'Hidden model: ':'Model: ')+id);
+  for(const id of Object.keys(l.model_notes??{}))if(l.model_notes[id])add('model-note',id,'Model note: '+id);
+  for(const e of l.edges??[])add('edge',e.id,'Arrow: '+e.source+' → '+e.target);
+  if(l.retained_content&&Object.keys(l.retained_content).length)add('retained','retained','Other retained page data');
+  return items;
+}
+export function pageContentSummary(page) {
+  const counts={};for(const item of pageContentItems(page))counts[item.kind]=(counts[item.kind]??0)+1;
+  const names={'note':'canvas note','model-note':'model note','edge':'arrow','retained':'retained data item'};
+  return Object.entries(counts).map(([kind,n])=>n+' '+(names[kind]??kind)+(n===1?'':'s')).join(', ')||'No saved content';
+}
+export function pageHasContent(page) { return pageContentItems(page).length>0; }
+// Explicit removal affects only this page, never the shared source files.
+export function removePageContent(layout,item) {
+  const l=structuredClone(layout), removed=new Set([item.id]);
+  if(item.kind==='retained'){delete l.retained_content;return l;}
+  if(item.kind==='model-note'){delete l.model_notes?.[item.id];return l;}
+  if(item.kind==='edge'){l.edges=(l.edges??[]).filter(e=>e.id!==item.id);return l;}
+  if(item.kind==='stack')for(const id of l.stacks?.find(s=>s.id===item.id)?.members??[])removed.add(id);
+  l.used_models=legacyUsed(l).filter(id=>!removed.has(id));
+  l.hidden_models=(l.hidden_models??[]).filter(id=>!removed.has(id));
+  for(const key of ['model_positions','positions','model_sizes','model_notes'])for(const id of removed)if(l[key])delete l[key][id];
+  for(const key of ['notes','decorations','stacks'])l[key]=(l[key]??[]).filter(n=>!removed.has(n.id));
+  l.stacks=l.stacks.map(s=>({...s,members:(s.members??[]).filter(id=>!removed.has(id))}));
+  l.decorations=l.decorations.map(n=>({...n,data:{...n.data,members:(n.data?.members??[]).filter(id=>!removed.has(id))}}));
+  l.edges=(l.edges??[]).filter(e=>!removed.has(e.source)&&!removed.has(e.target));
+  l.comparison_ids=(l.comparison_ids??[]).filter(id=>!removed.has(id));
+  return l;
 }
 export function canDeletePage(workspace,id) {
   const page=workspace.pages.find(item=>item.id===id);

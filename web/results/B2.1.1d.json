@@ -3,7 +3,7 @@
   "metadata": {
     "model_id": "B2.1.1d",
     "model_name": "Model B2.1.1d",
-    "exported_at": "2026-09-24T15:40:29-0400",
+    "exported_at": "2026-09-27T14:41:32-0400",
     "lavaan_version": "0.7.2",
     "estimator": "DWLS",
     "estimator_requested": "WLSMV",
@@ -44,7 +44,7 @@
       "n_patterns": 327
     }
   ],
-  "model_syntax": "\n  # =======================================\n  # Reflective Measurement Model\n  # =======================================\n  Attitude =~ att_appealing + att_desirable +\n              att_goodidea + att_pleasant\n\n  PBC =~ pbc_barrier + pbc_could +\n         pbc_resources\n\n  DescriptiveNorms =~ norms_d_many + norms_d_common +\n                      norms_d_few\n\n  InjunctiveNorms =~ norms_i_consider + norms_i_bad +\n                     norms_i_support\n\n\n  Symbolism =~ symb_envresp + symb_modern\n\n  AoC =~ aoc_transport + aoc_overstated + aoc_minor\n\n  BEnv =~ ben_env_reduce + ben_env_shift + ben_env_nodiff\n\n  Intention =~ nextv_bev + nextv_phev + nextv_icev\n\n\n  # =======================================\n  # Structural path\n  # ======================================= \n  Intention ~ d1*Attitude + PBC + d2*InjunctiveNorms + DescriptiveNorms\n  Attitude ~ c1*AoC + b1*BEnv + Symbolism\n  BEnv ~ a*AoC\n  InjunctiveNorms ~  Symbolism\n\n  \n  # Direct effect\n  dir_att := c1\n\n  # Indirect, direct, total: AoC -> Attitude / InjunctiveNorms\n  ind_att := a*b1\n  tot_att := c1 + a*b1\n\n  # Chains to Intention \n  ind_att_int := a*b1*d1\n\n  # =======================================\n  # Covariance path\n  # ======================================= \n  Attitude ~~ PBC\n  Attitude ~~ DescriptiveNorms\n  \n  Attitude ~~ InjunctiveNorms\n  \n  PBC ~~ InjunctiveNorms\n  InjunctiveNorms ~~ DescriptiveNorms\n  \n  # These two were regression paths in 2.1.1b\n  InjunctiveNorms ~~ AoC\n  InjunctiveNorms ~~ BEnv\n  \n  # these three endo ~ exo are add specifically to keep them constant for comparing against B2.1a\n  BEnv ~~ PBC\n  BEnv ~~ DescriptiveNorms\n  BEnv ~~ Symbolism\n  \n  # In addition, all exo ~~ exo allowed with auto.cov.lv.x = TRUE\n",
+  "model_syntax": "\n  # =======================================\n  # Reflective Measurement Model\n  # =======================================\n  Attitude =~ att_appealing + att_desirable +\n              att_goodidea + att_pleasant\n\n  PBC =~ pbc_barrier + pbc_could +\n         pbc_resources\n\n  DescriptiveNorms =~ norms_d_many + norms_d_common +\n                      norms_d_few\n\n  InjunctiveNorms =~ norms_i_consider + norms_i_bad +\n                     norms_i_support\n\n\n  Symbolism =~ symb_envresp + symb_modern\n\n  AoC =~ aoc_transport + aoc_overstated + aoc_minor\n\n  BEnv =~ ben_env_reduce + ben_env_shift + ben_env_nodiff\n\n  Intention =~ nextv_bev + nextv_phev + nextv_icev\n\n\n  # =======================================\n  # Structural path\n  # ======================================= \n  Intention ~ d1*Attitude + PBC + d2*InjunctiveNorms + DescriptiveNorms\n  Attitude ~ c1*AoC + b1*BEnv + Symbolism\n  BEnv ~ a*AoC\n  InjunctiveNorms ~  Symbolism\n\n  \n  # AoC on Attitude\n  dir_aoc_att := c1\n  ind_aoc_att := a*b1\n  tot_aoc_att := c1 + a*b1\n\n  # AoC on Intention\n  ind_tot_aoc_int := a*b1*d1 + c1*d1\n  \n\n  # =======================================\n  # Covariance path\n  # ======================================= \n  Attitude ~~ PBC\n  Attitude ~~ DescriptiveNorms\n  \n  Attitude ~~ InjunctiveNorms\n  \n  PBC ~~ InjunctiveNorms\n  InjunctiveNorms ~~ DescriptiveNorms\n  \n  # These two were regression paths in 2.1.1b\n  InjunctiveNorms ~~ AoC\n  InjunctiveNorms ~~ BEnv\n  \n  # these three endo ~ exo are add specifically to keep them constant for comparing against B2.1a\n  BEnv ~~ PBC\n  BEnv ~~ DescriptiveNorms\n  BEnv ~~ Symbolism\n  \n  # In addition, all exo ~~ exo allowed with auto.cov.lv.x = TRUE\n",
   "fit_measures": [
     {
       "measure": "npar",
@@ -3852,10 +3852,10 @@
       "section": "intercept"
     },
     {
-      "lhs": "dir_att",
+      "lhs": "dir_aoc_att",
       "op": ":=",
       "rhs": "c1",
-      "label": "dir_att",
+      "label": "dir_aoc_att",
       "est": 0.1336669581270168,
       "se": 0.06074732265963339,
       "z": 2.200376119881882,
@@ -3867,10 +3867,10 @@
       "section": "defined"
     },
     {
-      "lhs": "ind_att",
+      "lhs": "ind_aoc_att",
       "op": ":=",
       "rhs": "a*b1",
-      "label": "ind_att",
+      "label": "ind_aoc_att",
       "est": 0.4590716251881279,
       "se": 0.05711390018464499,
       "z": 8.03782658344087,
@@ -3882,10 +3882,10 @@
       "section": "defined"
     },
     {
-      "lhs": "tot_att",
+      "lhs": "tot_aoc_att",
       "op": ":=",
       "rhs": "c1+a*b1",
-      "label": "tot_att",
+      "label": "tot_aoc_att",
       "est": 0.5927385833151448,
       "se": 0.03442534975127702,
       "z": 17.218084568426409,
@@ -3897,18 +3897,18 @@
       "section": "defined"
     },
     {
-      "lhs": "ind_att_int",
+      "lhs": "ind_tot_aoc_int",
       "op": ":=",
-      "rhs": "a*b1*d1",
-      "label": "ind_att_int",
-      "est": 0.1841849830246289,
-      "se": 0.03134981908752573,
-      "z": 5.875152979683929,
-      "pvalue": 4.224530503194046e-09,
-      "ci.lower": 0.1227404666912322,
-      "ci.upper": 0.2456294993580257,
-      "std.lv": 0.1815247655165559,
-      "std.all": 0.1815247655165559,
+      "rhs": "a*b1*d1+c1*d1",
+      "label": "ind_tot_aoc_int",
+      "est": 0.2378137526169323,
+      "se": 0.03364363239622096,
+      "z": 7.068611076717296,
+      "pvalue": 1.564970375511621e-12,
+      "ci.lower": 0.1718734448112343,
+      "ci.upper": 0.3037540604226304,
+      "std.lv": 0.2343789649486699,
+      "std.all": 0.2343789649486699,
       "section": "defined"
     }
   ],
