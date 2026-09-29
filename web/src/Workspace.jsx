@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { loadPublishedWorkspace } from './loadPublishedWorkspace.js';
 import { WORKSPACE_KEY, LEGACY_KEY, PAGE_TYPES, newPage, normalizeWorkspace, workspaceFromLegacy, mergeLegacyLayouts, validateLayout, updatePageLayout, canDeletePage, deleteEmptyPage, pageContentItems, pageContentSummary, removePageContent } from './workspaceState.js';
 import { workspaceFingerprint, reorderPages } from './workspaceUi.js';
 const BASE=import.meta.env.BASE_URL;
@@ -51,7 +52,7 @@ export default function Workspace({ Canvas }) {
         try{saved=localStorage.getItem(WORKSPACE_KEY);legacy=localStorage.getItem(LEGACY_KEY);}catch{/* File load remains available. */}
         if(saved){const value=normalizeWorkspace(JSON.parse(saved));if(!cancelled&&ticket===bootstrap.current)commit(value);return;}
         let file={};
-        try{const response=await fetch(BASE+'layout.json',{cache:'no-store'});if(response.ok)file=await response.json();else if(response.status!==404)throw Error('Could not read layout.json ('+response.status+').');}
+        try{file=await loadPublishedWorkspace(BASE);}
         catch(loadError){if(!legacy)throw loadError;}
         const value=file.kind==='sem-workspace'?normalizeWorkspace(file):workspaceFromLegacy(mergeLegacyLayouts(validateLayout(file),legacy?validateLayout(JSON.parse(legacy)):{}));
         if(cancelled||ticket!==bootstrap.current)return;
