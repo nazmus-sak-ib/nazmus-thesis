@@ -126,6 +126,138 @@
       "title": "Model B2.2.3b",
       "image": "models/B2.2.3b.svg",
       "results": "results/B2.2.3b.json"
+    },
+    {
+      "id": "B2.2.3c",
+      "title": "Model B2.2.3c",
+      "image": "models/B2.2.3c.svg",
+      "results": "results/B2.2.3c.json"
+    },
+    {
+      "id": "B2.2.4",
+      "title": "Model B2.2.4",
+      "image": "models/B2.2.4.svg",
+      "results": "results/B2.2.4.json"
+    },
+    {
+      "id": "U1a",
+      "title": "Model U1a",
+      "image": "models/U1a.svg",
+      "results": "results/U1a.json"
+    },
+    {
+      "id": "B3.1a",
+      "title": "Model B3.1a",
+      "image": "models/B3.1a.svg",
+      "results": "results/B3.1a.json"
+    },
+    {
+      "id": "B3.1b",
+      "title": "Model B3.1b",
+      "image": "models/B3.1b.svg",
+      "results": "results/B3.1b.json"
+    },
+    {
+      "id": "B3.1b1",
+      "title": "Model B3.1b1",
+      "image": "models/B3.1b1.svg",
+      "results": "results/B3.1b1.json"
+    },
+    {
+      "id": "B3.1a_ml",
+      "title": "Model B3.1a_ml",
+      "image": "models/B3.1a_ml.svg",
+      "results": "results/B3.1a_ml.json"
+    },
+    {
+      "id": "B3.1b1_ml",
+      "title": "Model B3.1b1_ml",
+      "image": "models/B3.1b1_ml.svg",
+      "results": "results/B3.1b1_ml.json"
+    },
+    {
+      "id": "B3.1c",
+      "title": "Model B3.1c",
+      "image": "models/B3.1c.svg",
+      "results": "results/B3.1c.json"
+    },
+    {
+      "id": "B3.1c2",
+      "title": "Model B3.1c2",
+      "image": "models/B3.1c2.svg",
+      "results": "results/B3.1c2.json"
+    },
+    {
+      "id": "B3.1c2_ml",
+      "title": "Model B3.1c2_ml",
+      "image": "models/B3.1c2_ml.svg",
+      "results": "results/B3.1c2_ml.json"
+    },
+    {
+      "id": "B3.1c3_ml",
+      "title": "Model B3.1c3_ml",
+      "image": "models/B3.1c3_ml.svg",
+      "results": "results/B3.1c3_ml.json"
+    },
+    {
+      "id": "B3.1c_ml",
+      "title": "Model B3.1c_ml",
+      "image": "models/B3.1c_ml.svg",
+      "results": "results/B3.1c_ml.json"
+    },
+    {
+      "id": "B3.1c3",
+      "title": "Model B3.1c3",
+      "image": "models/B3.1c3.svg",
+      "results": "results/B3.1c3.json"
+    },
+    {
+      "id": "B3.1d",
+      "title": "Model B3.1d",
+      "image": "models/B3.1d.svg",
+      "results": "results/B3.1d.json"
+    },
+    {
+      "id": "B3.2d",
+      "title": "Model B3.2d",
+      "image": "models/B3.2d.svg",
+      "results": "results/B3.2d.json"
+    },
+    {
+      "id": "B4.2a",
+      "title": "Model B4.2a",
+      "image": "models/B4.2a.svg",
+      "results": "results/B4.2a.json"
+    },
+    {
+      "id": "B4.2a2",
+      "title": "Model B4.2a2",
+      "image": "models/B4.2a2.svg",
+      "results": "results/B4.2a2.json"
+    },
+    {
+      "id": "B4.2b",
+      "title": "Model B4.2b",
+      "image": "models/B4.2b.svg",
+      "results": "results/B4.2b.json"
+    },
+    {
+      "id": "B4.2a3",
+      "title": "Model B4.2a3",
+      "image": "models/B4.2a3.svg",
+      "results": "results/B4.2a3.json"
+    },
+    {
+      "id": "B4.2a2_ml",
+      "title": "Model B4.2a2_ml",
+      "image": "models/B4.2a2_ml.svg",
+      "results": "results/B4.2a2_ml.json"
+    },
+    {
+      "id": "B4.2b3",
+      "title": "Model B4.2b3",
+      "image": "models/B4.2b3.svg",
+      "results": "results/B4.2b3.json"
     }
   ]
 }

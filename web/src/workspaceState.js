@@ -1,3 +1,4 @@
+import { comparisonIdentity } from './cfaResults.js';
 export const WORKSPACE_KEY = 'sem-multipage-workspace';
 export const LEGACY_KEY = 'sem-model-layout';
 export const PAGE_TYPES = {
@@ -25,7 +26,7 @@ export function mergeLegacyLayouts(file={},browser={}) {
 export function validateLayout(value) {
   if(!value || typeof value!=='object' || Array.isArray(value))throw Error('A page layout must be a JSON object.');
   for(const key of ['used_models','hidden_models','stacks','notes','edges','decorations'])if(value[key]!==undefined&&!Array.isArray(value[key]))throw Error(key+' must be an array.');
-  for(const key of ['model_positions','positions','model_notes','model_sizes'])if(value[key]!==undefined&&(!value[key]||typeof value[key]!=='object'||Array.isArray(value[key])))throw Error(key+' must be an object.');
+  for(const key of ['model_positions','positions','model_notes','model_sizes','model_variants','matrix_settings'])if(value[key]!==undefined&&(!value[key]||typeof value[key]!=='object'||Array.isArray(value[key])))throw Error(key+' must be an object.');
   for(const key of ['notes','stacks','edges','decorations'])if(value[key]?.some(item=>!item||typeof item!=='object'||typeof item.id!=='string'))throw Error('Invalid '+key+' entry.');
   return value;
 }
@@ -80,7 +81,8 @@ export function removePageContent(layout,item) {
   l.stacks=l.stacks.map(s=>({...s,members:(s.members??[]).filter(id=>!removed.has(id))}));
   l.decorations=l.decorations.map(n=>({...n,data:{...n.data,members:(n.data?.members??[]).filter(id=>!removed.has(id))}}));
   l.edges=(l.edges??[]).filter(e=>!removed.has(e.source)&&!removed.has(e.target));
-  l.comparison_ids=(l.comparison_ids??[]).filter(id=>!removed.has(id));
+  for(const id of removed)if(l.model_variants)delete l.model_variants[id];
+  l.comparison_ids=(l.comparison_ids??[]).filter(id=>!removed.has(comparisonIdentity(id).modelId));
   return l;
 }
 export function canDeletePage(workspace,id) {

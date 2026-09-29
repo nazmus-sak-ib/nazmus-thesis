@@ -1,9 +1,14 @@
+import { MatrixSettingsContext } from './matrixContext.js';
+import { CFA_VIEWS, variantsOf, selectResult, comparisonKey, comparisonIdentity, normalizeCfaData, cfaViewAvailable, reliabilityRows } from './cfaResults.js';
+import CfaView from './CfaViews.jsx';
 import {
   useCallback,
   useEffect,
   useRef,
   useState
 } from 'react';
+import { useId } from 'react';
+import { createPortal } from 'react-dom';
 
 import {
   ReactFlow,
@@ -66,6 +71,7 @@ function resultRows(value) {
 }
 
 function normalizeResultData(value) {
+  value = normalizeCfaData(value);
   const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
   const data = { ...source, metadata: source.metadata && typeof source.metadata === 'object' && !Array.isArray(source.metadata) ? source.metadata : {} };
   for (const key of ['sample_size', 'missing_patterns', 'fit_measures', 'parameters', 'r_squared', 'modification_indices']) {
@@ -84,6 +90,7 @@ function settingText(value, fallback = 'Not exported') {
 }
 
 function parameterRows(data, section) {
+  if(section==='standardized')return resultRows(data?.standardized_solution).map(row=>({...row,est:row['est.std']}));
   const operators = { threshold: '|', loading: '=~', regression: '~' };
   return resultRows(data?.parameters).filter(row => row.section === section ||
     (!row.section && operators[section] && row.op === operators[section]) ||
@@ -108,7 +115,7 @@ function getMethodSummary(data) {
       : orderedCount === 0 ? 'continuous' : 'unknown';
   const labels = { ordinal: 'Ordinal', mixed: 'Mixed', continuous: 'Continuous', ordered: 'Ordinal / mixed', unknown: 'Type unknown' };
   return {
-    metadata, ordered, orderedCount, treatment, treatmentLabel: labels[treatment], hasThresholds,
+    variantLabel: data?.label, resultData: data, metadata, ordered, orderedCount, treatment, treatmentLabel: labels[treatment], hasThresholds,
     hasPaths,
     hasDefined: parameterRows(data, 'defined').length > 0,
     supportsThresholds: hasThresholds || ['ordinal', 'mixed', 'ordered'].includes(treatment),
@@ -124,7 +131,7 @@ function sampleSizeTotal(data) {
 }
 
 function resultViewsFor(summary) {
-  return RESULT_VIEWS.filter(([key]) => (key !== 'thresholds' || summary?.supportsThresholds) && (key !== 'defined' || summary?.hasDefined) && (key !== 'paths' || summary?.hasPaths));
+  return RESULT_VIEWS.filter(([key]) => cfaViewAvailable(summary?.resultData,key) && (key !== 'thresholds' || summary?.supportsThresholds) && (key !== 'defined' || summary?.hasDefined) && (key !== 'paths' || summary?.hasPaths));
 }
 
 function keyModelSettings(data) {
@@ -152,7 +159,7 @@ function keyModelSettings(data) {
 
 function ModelFooter({ title, summary }) {
   const method = summary ?? getMethodSummary(null);
-  const cue = [method.estimator || 'Estimator unknown', method.treatmentLabel, method.missing].filter(Boolean).join(' · ');
+  const cue = [method.variantLabel || method.estimator || 'Estimator unknown', method.treatmentLabel, method.missing].filter(Boolean).join(' · ');
   return <div className="model-footer">
     <div className="model-title">{title}</div>
     <div className="model-method-cue" title={cue}>{cue}</div>
@@ -250,15 +257,35 @@ function cleanNoteHtml(html) {
   return template.innerHTML;
 }
 
+function NotePreviewButton({ html, children, onClick, ...props }) {
+  const [position,setPosition]=useState(null),id=useId();
+  const show=event=>{
+    const rect=event.currentTarget.getBoundingClientRect(),width=Math.min(360,window.innerWidth-24),height=Math.min(260,window.innerHeight-24);
+    setPosition({left:Math.max(12,Math.min(rect.left,window.innerWidth-width-12)),top:rect.bottom+height+12<window.innerHeight?rect.bottom+8:Math.max(12,rect.top-height-8),width,maxHeight:height});
+  };
+  useEffect(()=>{
+    if(!position)return;
+    const hide=()=>setPosition(null),key=event=>{if(event.key==='Escape')hide();};
+    window.addEventListener('resize',hide);window.addEventListener('scroll',hide,true);window.addEventListener('blur',hide);document.addEventListener('keydown',key);
+    return()=>{window.removeEventListener('resize',hide);window.removeEventListener('scroll',hide,true);window.removeEventListener('blur',hide);document.removeEventListener('keydown',key);};
+  },[position]);
+  return <><button {...props} aria-describedby={position?id:undefined} onPointerEnter={show} onPointerLeave={()=>setPosition(null)} onFocus={show} onBlur={()=>setPosition(null)}
+    onClick={event=>{setPosition(null);onClick?.(event);}}>{children}</button>
+    {position&&createPortal(<div id={id} role="tooltip" className="note-hover-preview" style={position}>
+      <div className="note-hover-content" dangerouslySetInnerHTML={{__html:cleanNoteHtml(html)}} />
+      <small>Click the note icon to open and edit.</small>
+    </div>,document.body)}</>;
+}
+
 function ModelNoteButton({ data }) {
   if (!data.noteHtml) return null;
-  return <button type="button" className="model-note-icon nodrag nopan"
-    title="Open this model's notes" aria-label={'Open notes for ' + (data.activeTitle ?? data.title)}
+  return <NotePreviewButton html={data.noteHtml} type="button" className="model-note-icon nodrag nopan"
+    aria-label={'Open notes for ' + (data.activeTitle ?? data.title)}
     onClick={event => { event.stopPropagation(); data.onOpenNotes?.(); }}>
     <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
       <path d="M5 3h10l4 4v14H5z M14 3v5h5 M8 12h8 M8 16h6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
     </svg>
-  </button>;
+  </NotePreviewButton>;
 }
 
 function RichModelNotes({ value, onChange, label = 'Model notes', placeholder = 'Write notes for this model…' }) {
@@ -435,7 +462,7 @@ async function modelFileExists(filePath, kind) {
     try {
       const data = await response.json();
       if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Invalid result');
-      return getMethodSummary(data);
+      return {...getMethodSummary(selectResult(data)), variants:variantsOf(data).map(v=>({id:v.id,label:v.label,summary:getMethodSummary(v)})), defaultVariant:data.default_variant};
     } catch {
       throw new Error('Could not read ' + filePath + ' as result JSON. Library unchanged; retry after the file finishes writing.');
     }
@@ -837,10 +864,10 @@ function AnnotatedEdge(props) {
         onKeyDown={event => { event.stopPropagation(); const delta = { ArrowLeft: [-10,0], ArrowRight: [10,0], ArrowUp: [0,-10], ArrowDown: [0,10] }[event.key];
           if (delta) { event.preventDefault(); move({ x: x + delta[0], y: y + delta[1] }); } }}
         onContextMenu={event => props.data.onMenu(event)}>◆</button>}
-      {props.data?.noteHtml && <button className="arrow-note-icon nodrag nopan" aria-label="Open arrow note" title="Open arrow note"
+      {props.data?.noteHtml && <NotePreviewButton html={props.data.noteHtml} className="arrow-note-icon nodrag nopan" aria-label="Open arrow note"
         style={{ transform: 'translate(-50%, -50%) translate(' + x + 'px, ' + (y - (props.selected ? 30 : 0)) + 'px)' }}
         onClick={event => { event.stopPropagation(); props.data.onOpenNote(); }}
-        onContextMenu={event => props.data.onMenu(event)}>▤</button>}
+        onContextMenu={event => props.data.onMenu(event)}>▤</NotePreviewButton>}
     </EdgeLabelRenderer>
   </>;
 }
@@ -944,6 +971,7 @@ const RESULT_VIEWS = [
   ['thresholds', 'Thresholds'],
   ['r2', 'R²'],
   ['mi', 'Modification indices'],
+  ...CFA_VIEWS,
   ['notes', 'Notes']
 ];
 
@@ -968,6 +996,7 @@ function ResultContent({ data, view }) {
   }
 
   data = normalizeResultData(data);
+  if(CFA_VIEWS.some(([key])=>key===view))return <CfaView data={data} view={view} Table={DataTable}/>;
   const metadata = data.metadata;
 
   function fit(name) {
@@ -982,6 +1011,9 @@ function ResultContent({ data, view }) {
     const rows = [
       { item: 'Model ID', value: metadata.model_id },
       { item: 'Model name', value: metadata.model_name },
+      { item: 'Variant', value: data.label },
+      { item: 'Post-estimation check', value: metadata.post_check },
+      { item: 'Sampling-weight variable', value: metadata.sampling_weight_variable },
       { item: 'Estimator', value: getMethodSummary(data).estimator || undefined },
       { item: 'Data treatment', value: getMethodSummary(data).treatmentLabel },
       { item: 'N', value: totalN },
@@ -1003,6 +1035,7 @@ function ResultContent({ data, view }) {
           rows={rows}
           preferredColumns={['item', 'value']}
         />
+        {data.isCfaVariant&&<details><summary>Extraction diagnostics</summary><DataTable rows={Object.entries(data.diagnostics??{}).filter(([,d])=>d.status!=='ok'||d.warnings?.length).map(([section,d])=>({section,status:d.status,message:d.error||settingText(d.warnings,'')}))}/></details>}
         <KeyModelSettings data={data} />
         <ModelSpecification syntax={data.model_syntax} />
       </>
@@ -1103,6 +1136,7 @@ function ResultWindow({
   windowData,
   onClose,
   onChangeView,
+  onChangeVariant,
   noteHtml,
   onNotesChange
 }) {
@@ -1183,6 +1217,7 @@ function ResultWindow({
         </button>
       </div>
 
+      {windowData.variants?.length>1&&<label className="cfa-variant-selector">Estimation variant <select value={windowData.variantId} onChange={e=>onChangeVariant(e.target.value)}>{windowData.variants.map(v=><option key={v.id} value={v.id}>{v.label||v.id}</option>)}</select></label>}
       <div className="result-tabs">
         {resultViewsFor(getMethodSummary(windowData.data)).map(([key, label]) => (
           <button
@@ -1229,7 +1264,8 @@ const COMPARISON_VIEWS = [
   ['covariances', 'Covariances'],
   ['thresholds', 'Thresholds'],
   ['r2', 'R²'],
-  ['mi', 'Modification indices']
+  ['mi', 'Modification indices'],
+  ...CFA_VIEWS
 ];
 
 const PARAMETER_FIELDS = [
@@ -1252,6 +1288,7 @@ const MI_FIELDS = [
 ];
 
 function modelLabel(model) {
+  if(model.data?.isCfaVariant)return model.title;
   return (
     model.data?.metadata?.model_name ??
     model.title ??
@@ -1704,6 +1741,13 @@ function ComparisonContent({
   }
 
   models = models.map(model => ({ ...model, data: normalizeResultData(model.data) }));
+  if(view==='reliability') {
+    const rows=[...new Set(models.flatMap(m=>reliabilityRows(m.data).map(r=>r.factor)))];
+    return <>{['omega','AVE'].map(field=><section key={field}><h3>{field}</h3><SimpleComparisonTable models={models} rowLabels={rows} firstColumnLabel="Factor" valueGetter={(m,f)=>reliabilityRows(m.data).find(r=>r.factor===f)?.[field]}/></section>)}</>;
+  }
+  if(view==='standardized')return <><p>Estimates and uncertainty are on the fully standardized (std.all) scale.</p><div className="compare-controls"><CheckboxFields options={PARAMETER_FIELDS.filter(([key])=>!key.startsWith('std.'))} selected={parameterFields} onChange={onParameterFieldsChange}/><GroupingToggle value={grouping} onChange={onGroupingChange}/></div><ParameterComparisonTable models={models} section="standardized" selectedFields={parameterFields.filter(key=>!key.startsWith('std.'))} grouping={grouping}/></>;
+  if(CFA_VIEWS.some(([key])=>key===view))return <>{models.map(m=><section className="cfa-comparison-section" key={m.id}><h3>{m.title}</h3><CfaView data={m.data} view={view} Table={DataTable}/></section>)}</>;
+
 
   if (view === 'overview') {
     const overviewMaps = models.map(getOverviewItems);
@@ -1968,7 +2012,7 @@ function ComparisonWindow({
       </div>
 
       <div className="result-tabs comparison-tabs">
-        {COMPARISON_VIEWS.filter(([key]) => (key !== 'paths' || windowData.models?.some(model=>parameterRows(model.data,'regression').length>0)) && (key !== 'thresholds' || windowData.models?.some(model => getMethodSummary(model.data).supportsThresholds)) && (key !== 'defined' || windowData.models?.some(model => parameterRows(model.data, 'defined').length > 0))).map(([key, label]) => (
+        {COMPARISON_VIEWS.filter(([key]) => windowData.models?.some(m=>cfaViewAvailable(m.data,key)) && (key !== 'paths' || windowData.models?.some(model=>parameterRows(model.data,'regression').length>0)) && (key !== 'thresholds' || windowData.models?.some(model => getMethodSummary(model.data).supportsThresholds)) && (key !== 'defined' || windowData.models?.some(model => parameterRows(model.data, 'defined').length > 0))).map(([key, label]) => (
           <button
             key={key}
             className={(windowData.view === key ? 'active ' : '') + (key === 'defined' ? 'defined-tab' : '')}
@@ -2069,10 +2113,17 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
   }
 
   const [stackDialog, setStackDialog] = useState(null);
+  const resultRequest=useRef(0);
   const [resultWindow, setResultWindow] = useState(null);
 
+  const [matrixSettings,setMatrixSettings]=useState(initialLayout.matrix_settings??{});
+  function updateMatrixSettings(key,value){setMatrixSettings(current=>{const next={...current};if(value===null)delete next[key];else next[key]=value;return next;});}
+  const [variantSelections,setVariantSelections]=useState(initialLayout.model_variants??{});
   const [comparisonIds, setComparisonIds] = useState(() => Array.isArray(initialLayout.comparison_ids) ? initialLayout.comparison_ids : []);
   const [comparisonWindow, setComparisonWindow] = useState(null);
+  const [queueOpen,setQueueOpen]=useState(false),[queueQuery,setQueueQuery]=useState('');
+  const [queuePosition,setQueuePosition]=useState({});
+  const comparisonRequest=useRef(0);
 
   const canvasRef = useRef(null);
   const [decorationMenu,setDecorationMenu]=useState(null);
@@ -2082,6 +2133,18 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
   const drawStart=useRef(null), resizeBefore=useRef(new Map());
   const [canvasNotice,setCanvasNotice]=useState('');
   const [libraryPrefs,setLibraryPrefs]=useState(()=>{try{return JSON.parse(localStorage.getItem('sem-library-sections:'+pageId)||'{}')||{};}catch{return {};}});
+  function dismissContextMenus(){setContextMenu(null);setArrowMenu(null);setDecorationMenu(null);}
+  useEffect(()=>{
+    const outside=event=>{
+      if(!event.target.closest?.('.context-menu')){setContextMenu(null);setArrowMenu(null);setDecorationMenu(null);}
+      if(!event.target.closest?.('.comparison-queue'))setQueueOpen(false);
+    };
+    const escape=event=>{if(event.key==='Escape'){setContextMenu(null);setArrowMenu(null);setDecorationMenu(null);setQueueOpen(false);}};
+    const resize=()=>setQueueOpen(false);
+    document.addEventListener('pointerdown',outside,true);document.addEventListener('keydown',escape,true);
+    window.addEventListener('resize',resize);
+    return()=>{document.removeEventListener('pointerdown',outside,true);document.removeEventListener('keydown',escape,true);window.removeEventListener('resize',resize);};
+  },[]);
   function updateLibraryPrefs(change) {
     setLibraryPrefs(current=>{const next={...current,...change};try{localStorage.setItem('sem-library-sections:'+pageId,JSON.stringify(next));}catch{/* unavailable */}return next;});
   }
@@ -2317,6 +2380,8 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
     return {
       viewport: validViewport(flowInstance?.getViewport()) ?? viewport,
       comparison_ids: comparisonIds,
+      model_variants: variantSelections,
+      matrix_settings: matrixSettings,
       schema_version: '9.0',
       ...(retainedLayout.current.retained_content?{retained_content:retainedLayout.current.retained_content}:{}),
       decorations,
@@ -2495,11 +2560,11 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
       return kept.length === current.length ? current : kept;
     });
     setComparisonIds(current => {
-      const kept = current.filter(id => modelIds.has(id));
+      const kept = current.filter(id => modelIds.has(comparisonIdentity(id).modelId));
       return kept.length === current.length ? current : kept;
     });
     setResultWindow(current => current && !modelIds.has(current.nodeId) ? null : current);
-    setComparisonWindow(current => current?.models?.some(model => !modelIds.has(model.id)) ? null : current);
+    setComparisonWindow(current => current?.models?.some(model => !modelIds.has(comparisonIdentity(model.id).modelId)) ? null : current);
   }, [nodes, modelsLoaded, setEdges]);
 
   function selectVersion(stackId, modelId) {
@@ -2643,7 +2708,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
           }
         : node
     ));
-    setComparisonIds(current => current.filter(id => id !== nodeId));
+    setComparisonIds(current => current.filter(id => comparisonIdentity(id).modelId !== nodeId));
     setContextMenu(null);
   }
 
@@ -2670,6 +2735,9 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
   // A keyed PageCanvas unmounts when switching pages, isolating async requests.
   function restoreHistory(document) {
     retainedLayout.current = document;
+    setVariantSelections(document.model_variants??{});
+    setMatrixSettings(document.matrix_settings??{});
+    setResultWindow(null);
     const models = nodes.filter(node=>node.type==='model').map(node=>({
       ...node, ...modelDimensions(document.model_sizes?.[node.id]),
       selected:false, dragging:false,
@@ -2823,7 +2891,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
     );
 
     setComparisonIds(current =>
-      current.filter(id => id !== nodeId)
+      current.filter(id => comparisonIdentity(id).modelId !== nodeId)
     );
 
     setContextMenu(null);
@@ -2847,36 +2915,36 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
   // Comparison selection
   // ====================================================
 
+  function variantsFor(id){return nodes.find(n=>n.id===id)?.data.methodSummary?.variants??[];}
+  function activeVariant(id){const vs=variantsFor(id);return vs.find(v=>v.id===variantSelections[id])?.id??vs.find(v=>v.id===nodes.find(n=>n.id===id)?.data.methodSummary?.defaultVariant)?.id??vs[0]?.id;}
+  function selectedSummary(id){const node=nodes.find(n=>n.id===id);return variantsFor(id).find(v=>v.id===activeVariant(id))?.summary??node?.data.methodSummary;}
+  function activeComparisonKey(id){return comparisonKey(id,activeVariant(id));}
+  function selectFitVariant(id,variantId){setVariantSelections(current=>({...current,[id]:variantId}));if(resultWindow?.nodeId===id)openResults(id,resultWindow.view,variantId);}
   function toggleComparisonModel(nodeId) {
-    setComparisonIds(current => {
-      if (current.includes(nodeId)) {
-        return current.filter(id => id !== nodeId);
-      }
-
-      if (current.length >= 5) {
-        alert('You can compare up to five models at a time.');
-        return current;
-      }
-
-      return [...current, nodeId];
-    });
-
-    setContextMenu(null);
+    if(!nodeId.startsWith('cfa:')&&!comparisonIds.includes(nodeId))nodeId=activeComparisonKey(nodeId);
+    if(!comparisonIds.includes(nodeId)&&comparisonIds.length>=5){setCanvasNotice('You can compare up to five models at a time.');return;}
+    const next=comparisonIds.includes(nodeId)?comparisonIds.filter(id=>id!==nodeId):[...comparisonIds,nodeId];
+    setComparisonIds(next);dismissContextMenus();
+    if(comparisonWindow&&next.length>=2)openComparison(comparisonWindow.view,next);
+    else {comparisonRequest.current++;setComparisonWindow(null);}
   }
 
   function clearComparison() {
+    comparisonRequest.current++;
     setComparisonIds([]);
     setComparisonWindow(null);
   }
 
-  async function openComparison(view = 'overview') {
-    if (comparisonIds.length < 2) {
+  async function openComparison(view = 'overview', ids = comparisonIds) {
+    dismissContextMenus();
+    const request=++comparisonRequest.current;
+    if (ids.length < 2) {
       alert('Select at least two models to compare.');
       return;
     }
 
-    const selectedNodes = comparisonIds
-      .map(id => nodes.find(node => node.id === id))
+    const selectedNodes = ids
+      .map(id => {const identity=comparisonIdentity(id);const node=nodes.find(node=>node.id===identity.modelId);return node?{...node,comparisonId:id,variantId:identity.variantId}:null;})
       .filter(node => node?.type === 'model');
 
     setComparisonWindow({
@@ -2884,7 +2952,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
       loading: true,
       error: null,
       models: selectedNodes.map(node => ({
-        id: node.id,
+        id: node.comparisonId,
         title: node.data.title,
         data: null
       }))
@@ -2904,23 +2972,19 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
             );
           }
 
-          return {
-            id: node.id,
-            title: node.data.title,
-            data: normalizeResultData(await response.json())
-          };
+          const selected=selectResult(await response.json(),node.variantId);
+          return {id:node.comparisonId,title:node.data.title+(selected.isCfaVariant?' — '+(selected.label||selected.id):''),data:normalizeResultData(selected)};
         })
       );
 
-      const latestSummaries = new Map(loadedModels.map(model => [model.id, getMethodSummary(model.data)]));
-      setNodes(current => current.map(node => latestSummaries.has(node.id)
-        ? { ...node, data: { ...node.data, methodSummary: latestSummaries.get(node.id) } } : node));
+      if(request!==comparisonRequest.current)return;
       setComparisonWindow(current => ({
         ...current,
         models: loadedModels,
         loading: false
       }));
     } catch (error) {
+      if(request!==comparisonRequest.current)return;
       setComparisonWindow(current => ({
         ...current,
         loading: false,
@@ -2965,7 +3029,8 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
   // Open single-model results
   // ====================================================
 
-  async function openResults(nodeId, view) {
+  async function openResults(nodeId, view, requestedVariant = activeVariant(nodeId)) {
+    const request=++resultRequest.current;
     const node = nodes.find(item => item.id === nodeId);
 
     if (!node || node.type !== 'model') {
@@ -2995,16 +3060,23 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
         );
       }
 
-      const data = normalizeResultData(await response.json());
+      const raw=await response.json();
+      if(request!==resultRequest.current)return;
+      const selected=selectResult(raw,requestedVariant);
+      const data=normalizeResultData(selected);
+      const variants=variantsOf(raw).map(v=>({id:v.id,label:v.label,summary:getMethodSummary(v)}));
+      const summary={...getMethodSummary(data),variants,defaultVariant:raw.default_variant};
+      const safeView=resultViewsFor(summary).some(([key])=>key===view)?view:'overview';
 
       setNodes(current => current.map(item => item.id === nodeId
-        ? { ...item, data: { ...item.data, methodSummary: getMethodSummary(data) } } : item));
+        ? { ...item, data: { ...item.data, methodSummary: summary } } : item));
       setResultWindow(current => current?.nodeId === nodeId ? ({
         ...current,
-        data,
+        data, variants, variantId:selected.isCfaVariant?selected.id:null, view:safeView,
         loading: false
       }) : current);
     } catch (error) {
+      if(request!==resultRequest.current)return;
       setResultWindow(current => current?.nodeId === nodeId ? ({
         ...current,
         loading: false,
@@ -3032,7 +3104,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
     if (node.type === 'note' || isDecoration(node)) return node;
     const modelId = node.type === 'stack' ? node.data.activeId : node.id;
     const model = nodes.find(item => item.id === modelId);
-    return { ...node, data: { ...node.data, noteHtml: model?.data.noteHtml ?? '',
+    return { ...node, data: { ...node.data, methodSummary:selectedSummary(modelId), noteHtml: model?.data.noteHtml ?? '',
       onOpenNotes: () => openResults(modelId, 'notes') } };
   });
   const canvasNotes = nodes.filter(node => node.type === 'note');
@@ -3087,6 +3159,10 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
   const notedArrow = edges.find(edge => edge.id === arrowNoteId);
   const menuNode = nodes.find(node => node.id === contextMenu?.nodeId);
   const menuModelId = menuNode?.type === 'stack' ? menuNode.data.activeId : menuNode?.id;
+  const comparisonCandidates=nodes.filter(n=>n.type==='model').flatMap(node=>{
+    const variants=variantsFor(node.id);
+    return variants.length?variants.map(v=>({...node,id:comparisonKey(node.id,v.id),data:{...node.data,title:node.data.title+' — '+(v.label||v.id)}})):[node];
+  }).filter(node=>!comparisonIds.includes(node.id)&&(node.id+' '+node.data.title).toLowerCase().includes(queueQuery.trim().toLowerCase()));
 
   return (
     <div className="app">
@@ -3101,7 +3177,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
           }
         }}
       >
-        <div className="layout-toolbar">
+        <div className="layout-toolbar" onClickCapture={dismissContextMenus}>
           <button aria-label={toolsOpen ? 'Hide tools' : 'Show tools'} title={toolsOpen ? 'Hide tools' : 'Show tools'}
             aria-expanded={toolsOpen} aria-controls="canvas-tools" onClick={toggleTools}>☰</button>
           {toolsOpen && <div id="canvas-tools" className="toolbar-items">
@@ -3123,17 +3199,25 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
           {supportsModels && <><button
             className={comparisonIds.length >= 2 ? 'compare-ready' : ''}
             onClick={() => openComparison('overview')}
-            disabled={comparisonIds.length < 2}
+            disabled={!modelsLoaded || comparisonIds.length < 2}
             title="Right-click models to add them to the comparison"
           >
             Compare ({comparisonIds.length})
           </button>
 
-          {comparisonIds.length > 0 && (
-            <button onClick={clearComparison}>
-              Clear comparison
-            </button>
-          )}
+          <div className="comparison-queue">
+            <button aria-expanded={queueOpen} aria-controls="comparison-queue-panel" onClick={event=>{const rect=event.currentTarget.getBoundingClientRect();setQueuePosition({left:Math.max(12,Math.min(rect.left,window.innerWidth-362)),top:rect.bottom+8,maxHeight:Math.max(160,window.innerHeight-rect.bottom-24)});setQueueOpen(value=>!value);}}>Comparison queue ({comparisonIds.length}) ▾</button>
+            {queueOpen&&<div id="comparison-queue-panel" className="comparison-queue-panel" style={queuePosition} role="dialog" aria-label="Comparison queue" onKeyDown={event=>event.stopPropagation()}>
+              <div className="queue-heading"><strong>Models to compare</strong><button disabled={!comparisonIds.length} onClick={clearComparison}>Clear all</button></div>
+              <div className="queue-items">{comparisonIds.map(id=>{
+                const identity=comparisonIdentity(id);const model=nodes.find(node=>node.id===identity.modelId);const variant=variantsFor(identity.modelId).find(v=>v.id===identity.variantId);
+                return <div className="queue-item" key={id}><span>{model?.data.title??id}{variant?" — "+(variant.label||variant.id):""}<small>{identity.variantId??identity.modelId}</small></span><button aria-label={'Remove '+id+' from comparison'} onClick={()=>toggleComparisonModel(id)}>×</button></div>;
+              })}{!comparisonIds.length&&<p>No models queued.</p>}</div>
+              <label className="queue-search">Add a model<input type="search" aria-label="Search models to compare" placeholder="Model name or ID…" value={queueQuery} onChange={event=>setQueueQuery(event.target.value)} /></label>
+              <div className="queue-search-results">{comparisonCandidates.map(node=><div className="queue-item" key={node.id}><span>{node.data.title}<small>{comparisonIdentity(node.id).variantId??node.id}{node.data.stackId?' · Stack version':''}</small></span><button disabled={comparisonIds.length>=5} aria-label={'Add '+node.id+' to comparison'} onClick={()=>toggleComparisonModel(node.id)}>Add</button></div>)}{!comparisonCandidates.length&&<p>No matching models available to add.</p>}</div>
+              <small className="queue-help">Up to five models. Includes available, hidden, and stacked versions.</small>
+            </div>}
+          </div>
 
           <button
             onClick={() => setLibraryOpen(current => !current)}
@@ -3291,7 +3375,8 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
           className="context-menu"
           style={{
             left: contextMenu.x,
-            top: contextMenu.y
+            top: contextMenu.y,
+            maxHeight: Math.max(160, window.innerHeight-contextMenu.y-12)
           }}
         >
           <div className="context-menu-title">
@@ -3313,7 +3398,8 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
                   ))}
                 </div>
               )}
-              {resultViewsFor(nodes.find(node => node.id === menuModelId)?.data.methodSummary).filter(([key]) => key !== 'notes').map(([key, label]) => (
+              {variantsFor(menuModelId).length>1&&<label className="cfa-variant-selector">Estimation variant<select value={activeVariant(menuModelId)} onChange={e=>selectFitVariant(menuModelId,e.target.value)}>{variantsFor(menuModelId).map(v=><option key={v.id} value={v.id}>{v.label||v.id}</option>)}</select></label>}
+              {resultViewsFor(selectedSummary(menuModelId)).filter(([key]) => key !== 'notes').map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() =>
@@ -3333,7 +3419,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
               <div className="context-divider" />
               <button
                 className={
-                  comparisonIds.includes(menuModelId)
+                  comparisonIds.includes(activeComparisonKey(menuModelId))
                     ? 'comparison-selected'
                     : ''
                 }
@@ -3341,7 +3427,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
                   toggleComparisonModel(menuModelId)
                 }
               >
-                {comparisonIds.includes(menuModelId)
+                {comparisonIds.includes(activeComparisonKey(menuModelId))
                   ? 'Remove from comparison'
                   : 'Add to comparison'}
               </button>
@@ -3431,8 +3517,10 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
           </form>
         </div>
       )}
+      <MatrixSettingsContext.Provider value={{settings:matrixSettings,update:updateMatrixSettings}}>
       {/* Single-model results */}
       <ResultWindow
+        onChangeVariant={id=>selectFitVariant(resultWindow.nodeId,id)}
         windowData={resultWindow}
         noteHtml={nodes.find(node => node.id === resultWindow?.nodeId)?.data.noteHtml ?? ''}
         onNotesChange={html => {
@@ -3440,7 +3528,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
           setNodes(current => current.map(node => node.id === modelId && node.type === 'model'
             ? { ...node, data: { ...node.data, noteHtml: html } } : node));
         }}
-        onClose={() => setResultWindow(null)}
+        onClose={() => {resultRequest.current++;setResultWindow(null);}}
         onChangeView={view =>
           setResultWindow(current => ({
             ...current,
@@ -3452,7 +3540,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
       {/* Multi-model comparison */}
       <ComparisonWindow
         windowData={comparisonWindow}
-        onClose={() => setComparisonWindow(null)}
+        onClose={() => {comparisonRequest.current++;setComparisonWindow(null);}}
         onChangeView={view =>
           setComparisonWindow(current => ({
             ...current,
@@ -3460,6 +3548,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
           }))
         }
       />
+      </MatrixSettingsContext.Provider>
     </div>
   );
 }

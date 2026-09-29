@@ -829,3 +829,52 @@
 .arrow-endpoint-drag:active { cursor: grabbing; }
 .arrow-snap-point { fill: #fff; stroke: #2878bb; stroke-width: 2; pointer-events: none; vector-effect: non-scaling-stroke; }
 .arrow-snap-point.active { fill: #2878bb; stroke: #fff; stroke-width: 3; }
+.note-hover-preview {position:fixed;z-index:5000;pointer-events:none;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;padding:12px 14px;border:1px solid #c9b778;border-radius:8px;background:#fffdf1;color:#263341;box-shadow:0 6px 24px #16233830;font-size:14px;overflow:hidden;}
+.note-hover-content {overflow:hidden;min-height:0;overflow-wrap:anywhere;line-height:1.45;}
+.note-hover-content p:first-child {margin-top:0;}
+.note-hover-preview small {flex-shrink:0;color:#71694b;border-top:1px solid #e6dfc7;padding-top:7px;font-size:11px;}
+.page-switch {cursor:grab;touch-action:none;user-select:none;}
+.page-entry.drop-before {border-top:3px solid #2678be;}
+.page-entry.drop-after {border-bottom:3px solid #2678be;}
+.unsaved-marker {color:#925409;font-size:12px;font-weight:600;}
+.comparison-queue {position:relative;pointer-events:auto;}
+.layout-toolbar {z-index:1200;}
+.context-menu {z-index:2000;}
+.comparison-queue-panel {position:fixed;width:350px;max-width:calc(100vw - 24px);box-sizing:border-box;overflow:auto;padding:12px;background:white;color:#263341;border:1px solid #aab8c8;border-radius:8px;box-shadow:0 8px 25px #17263830;pointer-events:auto;font-size:13px;}
+.queue-heading,.queue-item {display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.queue-heading {margin-bottom:8px;}
+.queue-items {max-height:180px;overflow:auto;}
+.queue-item {padding:6px 0;border-bottom:1px solid #e5eaf0;}
+.queue-item span {min-width:0;overflow-wrap:anywhere;}
+.queue-item small {display:block;color:#64748b;font-size:11px;}
+.queue-item button {flex-shrink:0;}
+.queue-search {display:block;margin-top:12px;font-weight:600;}
+.queue-search input {display:block;box-sizing:border-box;width:100%;margin:5px 0;padding:7px;border:1px solid #abb8c8;border-radius:4px;}
+.queue-search-results {max-height:220px;overflow:auto;}
+.queue-help {display:block;margin-top:8px;color:#64748b;}
+.cfa-variant-selector { display:flex; gap:10px; align-items:center; padding:8px 12px; font-size:13px; background:#eef4fb; }
+.cfa-variant-selector select { min-width:0; max-width:100%; padding:5px; }
+.context-menu .cfa-variant-selector { flex-direction:column; align-items:stretch; }
+.cfa-matrix-scroll { overflow:auto; max-height:480px; margin:10px 0; }
+.cfa-matrix { border-collapse:collapse; font-size:12px; }
+.cfa-matrix td,.cfa-matrix th { padding:7px 10px; border:1px solid #dce1e7; white-space:nowrap; }
+.cfa-matrix th { background:#f1f4f8; position:sticky; top:0; }
+.cfa-matrix th:first-child { left:0; z-index:1; }
+.cfa-pass { background:#e8f4ed; color:#19603a; }
+.cfa-fail { background:#fbe9e9; color:#8c2525; }
+.cfa-comparison-section { border-bottom:2px solid #dce1e7; padding:14px 0; }
+.result-window-body details { margin:10px 0; }
+.matrix-panel { margin:12px 0 24px; }
+.matrix-legend { display:flex; gap:10px 18px; flex-wrap:wrap; align-items:center; padding:8px 0; font-size:12px; }
+.matrix-legend span { display:inline-flex; gap:6px; align-items:center; }
+.matrix-legend i { display:inline-block; width:16px; height:16px; border:1px solid #89919a; }
+.matrix-legend small { color:#555; }
+.matrix-controls { border:1px solid #dce1e7; padding:10px; border-radius:5px; background:#f8fafc; font-size:13px; }
+.matrix-controls summary { cursor:pointer; font-weight:600; }
+.matrix-controls label { display:inline-flex; gap:6px; align-items:center; }
+.matrix-controls button { margin:6px; padding:5px 9px; }
+.matrix-controls p { color:#555; font-size:12px; }
+.matrix-rule { display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:8px 0; }
+.matrix-rule input[type=number] { width:90px; padding:5px; }
+.matrix-rule input[type=color] { width:42px; height:30px; padding:2px; cursor:pointer; }
+@media print { .matrix-controls { display:none; } .matrix-legend,.cfa-matrix { print-color-adjust:exact; } }

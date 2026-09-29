@@ -4,30 +4,426 @@
   "active_page": "page-cd862d65-6a23-45ba-bc82-8391f14002e3",
   "pages": [
     {
+      "id": "page-3f6b1a3c-3d1e-47e5-88c3-d744b519d569",
+      "title": "CFA of Utility Account",
+      "type": "model",
+      "layout": {
+        "viewport": {
+          "x": -95.59396477342284,
+          "y": 64.45058928787307,
+          "zoom": 0.5
+        },
+        "comparison_ids": [
+          "cfa:[\"U2a\",\"U2a\"]",
+          "cfa:[\"U2b\",\"U2b\"]"
+        ],
+        "model_variants": {
+          "U1a": "U1a"
+        },
+        "matrix_settings": {
+          "[\"U1a\",\"latent\"]": {
+            "triangle": "lower",
+            "ranges": [
+              {
+                "min": 0,
+                "max": 0.2,
+                "color": "#edf8e9"
+              },
+              {
+                "min": 0.2,
+                "max": 0.4,
+                "color": "#bae4b3"
+              },
+              {
+                "min": 0.4,
+                "max": 0.6,
+                "color": "#fee8a6"
+              },
+              {
+                "min": 0.6,
+                "max": 0.8,
+                "color": "#fdbb84"
+              },
+              {
+                "min": 0.8,
+                "max": 1,
+                "color": "#e88484"
+              }
+            ],
+            "passColor": "#e8f4ed",
+            "failColor": "#fbe9e9",
+            "colorsEnabled": true
+          }
+        },
+        "schema_version": "9.0",
+        "decorations": [],
+        "model_sizes": {
+          "B1": {
+            "width": 320,
+            "height": 260
+          },
+          "B1.2": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.1.1": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.1.1a": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.1.1b": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.1.1c": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.1.1d": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.1.1e": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.1.2": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.1a": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.1b_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.1b2": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.1b2_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.1b3": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.1b5": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.2": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.2.1a": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.2.1b": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.2.1c": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.2.1c2": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.2.1c3": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.2.1d": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.2.2": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.2.3a": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.2.3b": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.2.3c": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.2.4": {
+            "width": 320,
+            "height": 260
+          },
+          "B2.2a": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1a": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1a_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1b1": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1b1_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1c": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1c_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1c2": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1c2_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1c3_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1d": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.2d": {
+            "width": 320,
+            "height": 260
+          },
+          "B4.2a": {
+            "width": 320,
+            "height": 260
+          },
+          "B4.2a2": {
+            "width": 320,
+            "height": 260
+          },
+          "B4.2a2_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B4.2a3": {
+            "width": 320,
+            "height": 260
+          },
+          "B4.2b": {
+            "width": 320,
+            "height": 260
+          },
+          "I1.0": {
+            "width": 320,
+            "height": 260
+          },
+          "U1a": {
+            "width": 596,
+            "height": 350
+          },
+          "U1b": {
+            "width": 606,
+            "height": 353
+          },
+          "U1b2": {
+            "width": 574,
+            "height": 292
+          },
+          "U2a": {
+            "width": 534,
+            "height": 356
+          },
+          "U2a2": {
+            "width": 556,
+            "height": 288
+          },
+          "U2b": {
+            "width": 644,
+            "height": 366
+          },
+          "U2b2": {
+            "width": 582,
+            "height": 292
+          }
+        },
+        "model_notes": {
+          "U1a": "Range and comparable data show high latent correlations and the HTMT2 value is also near the guideline value where the problems start<div><br></div><div>This is the first time I've applied Ronkko's (2022) workflow -- they kind of criticized all the things I've done before to assess discriminant validity. And I've felt the problems along the way, too. </div><div><br></div><div>The numbers are not too legible here but these are the cases that would get flagged by his workflow of looking at the upper CI and comparing a chi^2 against a less restrictive model.</div><div><br></div><div><span style=\"background-color: rgb(242, 228, 145);\">Although compatibility and range concerns may seem very similar, they are perhaps not similar enough to warrant a forced merge. From a theoretical standpoint, I still am going to merge them. </span></div><div>\n lhs              rhs    est    se ci.lower ci.upper    UL                 class_CI class_chi2\n190         Attitude        Intention  0.855 0.012    0.833    0.878 0.878                 Marginal   Marginal\n209    Compatibility        RangeConc -0.848 0.012   -0.871   -0.825 0.871                 Marginal   Marginal\n186         Attitude    Compatibility  0.844 0.010    0.826    0.863 0.863                 Marginal   Marginal\n185         Attitude  InjunctiveNorms  0.823 0.013    0.799    0.848 0.848                 Marginal   Marginal\n198 DescriptiveNorms  InjunctiveNorms  0.816 0.015    0.786    0.845 0.845                 Marginal   Marginal\n208  InjunctiveNorms        Intention  0.799 0.018    0.764    0.834 0.834                 Marginal   Marginal\n212    Compatibility        Intention  0.775 0.016    0.742    0.807 0.807                 Marginal   Marginal\n\n</div>",
+          "U1b": "Savalei's RMSEA-D 0.056 ---&gt; This added restriction doesn't add a lot of misfit. Although these might not be the best stat.<div><br></div><div><br></div>"
+        },
+        "stacks": [],
+        "used_models": [
+          "U1a",
+          "U1b",
+          "U1b2",
+          "U2a",
+          "U2a2",
+          "U2b",
+          "U2b2"
+        ],
+        "model_positions": {
+          "U1a": {
+            "x": -782.62,
+            "y": 37
+          },
+          "U1b": {
+            "x": -30.84,
+            "y": 26.62
+          },
+          "U1b2": {
+            "x": -3.73,
+            "y": 582.33
+          },
+          "U2a": {
+            "x": 818.07,
+            "y": 21.99
+          },
+          "U2a2": {
+            "x": 792.27,
+            "y": 578.33
+          },
+          "U2b": {
+            "x": 1580.27,
+            "y": 37.03
+          },
+          "U2b2": {
+            "x": 1558.27,
+            "y": 580.33
+          }
+        },
+        "hidden_models": [],
+        "notes": [
+          {
+            "id": "note-1790649829221",
+            "type": "note",
+            "position": {
+              "x": -27.98,
+              "y": 970.61
+            },
+            "width": 692,
+            "height": 166,
+            "data": {
+              "title": "Note",
+              "text": "The bottom row varies from the top row in the dataset. I merged the DKs to the middle category for Cost and Performance items. The effect is yet to be explored in depth. Just putting the results here. ",
+              "collapsed": false,
+              "expandedSize": {
+                "width": 692,
+                "height": 166
+              }
+            }
+          }
+        ],
+        "edges": [
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": null,
+              "noteHtml": "Why?<div> Combining range anxiety and compatibility constructs into one because of their high latent correlation.</div><div><br></div><div>More discussion in Model U1a notes. </div>"
+            },
+            "id": "xy-edge__U1asource-right-U1bsource-left",
+            "source": "U1a",
+            "target": "U1b",
+            "sourceHandle": "source-right",
+            "targetHandle": "source-left"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": null,
+              "noteHtml": "What? Added performance and cost perceptions. "
+            },
+            "id": "xy-edge__U1bsource-right-U2atarget-left",
+            "source": "U1b",
+            "target": "U2a",
+            "sourceHandle": "source-right",
+            "targetHandle": "target-left"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": null,
+              "noteHtml": "What? Broke down performance into power and non-power. Based on the exploratory factor structure it was not a clean separation but there was some pattern of two-ish factors. <div>B actually fits the data better. </div><div><br></div><div>\n\n<span style=\"color: blue;\">&gt; </span><span style=\"color: blue;\">RMSEA_D\n</span>[1] 0.1268304\n</div><div><span style=\"color: blue;\">&gt; </span><span style=\"color: blue;\">lrt &lt;- lavTestLRT(fit_cfa_U2a, fit_cfa_U2b)\n</span><span style=\"color: blue;\">&gt; </span><span style=\"color: blue;\">lrt\n</span>\nScaled and Shifted Chi-Squared Difference Test (method = “satorra.2000”)\n\nlavaan-&gt;lavTestLRT():  \n   lavaan NOTE: The “Chisq” column contains standard test statistics, not the robust test that should be reported per model. A robust \n   difference test is a function of two standard (not robust) statistics.\n\n             Df AIC BIC  Chisq Chisq diff Df diff Pr(&gt;Chisq)    \nfit_cfa_U2b 685         3426.3                                  \nfit_cfa_U2a 695         3790.9     254.67      10  &lt; 2.2e-16 ***\n---\nSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n\n</div>"
+            },
+            "id": "xy-edge__U2asource-right-U2bsource-left",
+            "source": "U2a",
+            "target": "U2b",
+            "sourceHandle": "source-right",
+            "targetHandle": "source-left"
+          }
+        ]
+      }
+    },
+    {
       "id": "page-cd862d65-6a23-45ba-bc82-8391f14002e3",
       "title": "SEM",
       "type": "model",
       "layout": {
         "viewport": {
-          "x": -1498.4375046618193,
-          "y": 1423.880134664908,
-          "zoom": 0.7578582992863067
+          "x": 2720.3207606964147,
+          "y": 671.0730047241119,
+          "zoom": 0.5
         },
         "comparison_ids": [
-          "B2.2.3a",
-          "B2.2.1c3"
+          "B2.2.4",
+          "B4.2a2",
+          "B4.2a",
+          "B4.2a3",
+          "B1.2"
         ],
+        "model_variants": {},
+        "matrix_settings": {},
         "schema_version": "9.0",
         "decorations": [
           {
             "id": "shape-5898caf5-80b3-40f5-89d1-5153b2c04e90",
             "type": "shape",
             "position": {
-              "x": -1653.7629777347138,
-              "y": -657.456735594481
+              "x": -1465.7629777347138,
+              "y": -679.456735594481
             },
-            "width": 4476,
-            "height": 350,
+            "width": 4954,
+            "height": 60,
             "dragHandle": ".decoration-drag",
             "data": {
               "fill": "#fff2b3",
@@ -43,11 +439,11 @@
             "id": "shape-d3730f13-b48c-4d3d-bc7a-7406cb9dd845",
             "type": "shape",
             "position": {
-              "x": -1405.7629777347138,
-              "y": -1551.456735594481
+              "x": -1465.7629777347138,
+              "y": -1567.456735594481
             },
-            "width": 454,
-            "height": 1246,
+            "width": 60,
+            "height": 1324,
             "dragHandle": ".decoration-drag",
             "data": {
               "fill": "#e8ffd1",
@@ -55,7 +451,47 @@
               "thickness": 2,
               "line": "solid",
               "kind": "rectangle",
+              "order": 0,
+              "members": []
+            }
+          },
+          {
+            "id": "shape-0c3a3143-49bc-43f5-8b48-d1ba136d1e65",
+            "type": "shape",
+            "position": {
+              "x": -1008.4965122843578,
+              "y": -1568.3155951131832
+            },
+            "width": 60,
+            "height": 1302,
+            "dragHandle": ".decoration-drag",
+            "data": {
+              "fill": "#ffebf4",
+              "border": "#a68b32",
+              "thickness": 2,
+              "line": "solid",
+              "kind": "rectangle",
               "order": 2,
+              "members": []
+            }
+          },
+          {
+            "id": "shape-96f2acbd-c970-4062-abeb-f46779ac3a7d",
+            "type": "shape",
+            "position": {
+              "x": -3141.9495845006877,
+              "y": -1683.6306193188373
+            },
+            "width": 60,
+            "height": 1506,
+            "dragHandle": ".decoration-drag",
+            "data": {
+              "fill": "#fff2b3",
+              "border": "#a68b32",
+              "thickness": 2,
+              "line": "solid",
+              "kind": "rectangle",
+              "order": 3,
               "members": []
             }
           }
@@ -133,14 +569,6 @@
             "width": 477,
             "height": 271
           },
-          "B2.2a": {
-            "width": 320,
-            "height": 260
-          },
-          "I1.0": {
-            "width": 320,
-            "height": 260
-          },
           "B2.2.1c": {
             "width": 474,
             "height": 289
@@ -149,13 +577,13 @@
             "width": 382,
             "height": 279
           },
-          "B2.2.1d": {
-            "width": 456,
-            "height": 314
-          },
           "B2.2.1c3": {
             "width": 370,
             "height": 273
+          },
+          "B2.2.1d": {
+            "width": 456,
+            "height": 314
           },
           "B2.2.2": {
             "width": 377,
@@ -168,6 +596,114 @@
           "B2.2.3b": {
             "width": 369,
             "height": 256
+          },
+          "B2.2.3c": {
+            "width": 391,
+            "height": 260
+          },
+          "B2.2.4": {
+            "width": 422,
+            "height": 246
+          },
+          "B2.2a": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1a": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1a_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1b1": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1b1_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1c": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1c_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1c2": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1c2_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1c3_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1d": {
+            "width": 346,
+            "height": 271
+          },
+          "B3.2d": {
+            "width": 343,
+            "height": 263
+          },
+          "B4.2a": {
+            "width": 529,
+            "height": 336
+          },
+          "B4.2a2": {
+            "width": 564,
+            "height": 330
+          },
+          "B4.2a2_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B4.2a3": {
+            "width": 458,
+            "height": 318
+          },
+          "B4.2b": {
+            "width": 320,
+            "height": 260
+          },
+          "I1.0": {
+            "width": 320,
+            "height": 260
+          },
+          "U1a": {
+            "width": 320,
+            "height": 260
+          },
+          "U1b": {
+            "width": 320,
+            "height": 260
+          },
+          "U1b2": {
+            "width": 320,
+            "height": 260
+          },
+          "U2a": {
+            "width": 320,
+            "height": 260
+          },
+          "U2a2": {
+            "width": 320,
+            "height": 260
+          },
+          "U2b": {
+            "width": 320,
+            "height": 260
+          },
+          "U2b2": {
+            "width": 320,
+            "height": 260
           },
           "B2.2.1c4": {
             "width": 360,
@@ -201,7 +737,16 @@
           "B2.1b5": "Model discussion:<div> no exogenous variable has been allowed to covary with any endogenous variable, which has actually been the case for all models so far with <span style=\"font-weight: bold; font-style: italic;\">auto.cov.y = F</span>. In other models, I explicitly had to allow the exogenous variables to covary with some endogenous variables. Here I haven't done so. </div><div><br></div><div>Here you see the negative variance problem again. </div><div><br></div><div>The lesson is that when you claim that you are fully explaining your endogenous variable with some predictors, it clearly covaries strongly independently -- it might lead to incorrect specification and counterintuitive results. </div><div><br></div><div>In this model symbolism and environmental benefits both have significant loadings on injunctive norms but one of them is negative and the other one is positive. </div>",
           "B2.2.1a": "<div><div><div><p style=\"font-size: 11pt;\">Global fit statistics are better in this expanded model with the dispositional account (B2.2.1A) compared to B2.1.1D. </p><p style=\"font-size: 11pt;\"><span style=\"background-color: rgb(251, 237, 157); font-size: 11pt; font-weight: bold;\">Results</span></p><p style=\"font-size: 11pt;\"></p><ul><li><span style=\"font-weight: bold; text-decoration: underline;\">Direct effect of dispositions on intention</span>. These were significant at 3.9% and 1.7% with intuitive signs. <span style=\"font-weight: bold; text-decoration: underline;\">Total effects on intention</span> are significant as well.</li><li><span style=\"font-size: 11pt; font-weight: bold; text-decoration: underline;\">Direct effects on attitude</span><span style=\"font-size: 11pt;\">. </span><span style=\"font-size: 11pt;\">The effect of </span><span style=\"font-size: 11pt; text-decoration: underline;\">anti-intellectualism on </span><span style=\"font-size: 11pt; text-decoration: underline;\">attitude</span><span style=\"font-size: 11pt;\"> was insignificant at 6.4%. </span><span style=\"font-size: 11pt; text-decoration: underline;\">Reactance </span><span style=\"font-size: 11pt; text-decoration: underline;\">on attitude</span><span style=\"font-size: 11pt;\"> was significant. Both had intuitive signs.</span></li><li><span style=\"font-size: 11pt;\">Direct effects of </span><span style=\"font-size: 11pt; font-weight: bold; text-decoration: underline;\">both norms on intention </span><span style=\"font-size: 11pt;\">became insignificant compared to 2.1.1D. Also, injunctive norm flips in its </span><span style=\"font-size: 11pt;\">sign. Note that we allowed both norms to freely covary with these new </span><span style=\"font-size: 11pt;\">variables.</span></li><li><span style=\"font-size: 11pt;\">Direct effects of </span><span style=\"font-size: 11pt; font-weight: bold; text-decoration: underline;\">AoC on attitude </span><span style=\"font-size: 11pt;\">become insignificant and flip in sign compared to 2.1.1D. <span style=\"font-weight: 700;\">The total effect of AoC on attitude</span> decreases in magnitude but remains</span><span style=\"font-size: 11pt;\"> significant. </span></li></ul><p></p>\n\n<p style=\"font-size: 11pt;\">&nbsp;</p>\n\n<p style=\"font-size: 11pt;\">&nbsp;</p>\n\n</div>\n\n</div>\n\n</div>\n\n\n\n\n\n",
           "B2.2.1d": "Will not make it a part of the workflow because it would not be theoretically strong to have anti-intellectualism point towards policy reactance. ",
-          "B2.2.2": "The global fit stats indeed are worse than those for Model 2.2.1c3. <div><br></div><div>R-squares of attitude and intention increased slightly.</div>"
+          "B2.2.2": "The global fit stats indeed are worse than those for Model 2.2.1c3. <div><br></div><div>R-squares of attitude and intention increased slightly.</div>",
+          "B2.2.3b": "<ul><li>The effect of both norms on intention becomes significant. This might signal that institutional trust and the norms were competing for the same information -- further supported by the observation that the effect of the injunctive norm on intention roughly doubles. However, descriptive norms --&gt; Intention remain counterintuitively negative (even as they increase in absolute value). </li></ul><ul><li>R-square of intention increases by 0.013. </li><li><span style=\"background-color: rgb(255, 250, 224);\">The direct effect of AoC on attitude is negative and non-significant. That inflates the indirect effect of AoC on attitude -- this is the reason I'm going to remove the path and see what happens in Model 2.2.3C.</span></li><li>\n\n\n\n\n\n\n\n\n\n\n<p style=\"font-size: 11pt;\">The direct effect of\nAoC on attitude is negative and non-significant. That inflates the indirect\neffect of AoC on attitude.</p>\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n<p style=\"font-size: 11pt;\">The direct effect of\nAoC on attitude is negative and non-significant. That inflates the indirect\neffect of AoC on attitude.</p>\n\n\n\n\n\n</li></ul><div><br></div>",
+          "B2.2.3c": "<ul><li>Nothing downstream became unstable when I moved to model 2.2.3C from 2.2.3B. </li><li>In particular, the total effect of ALC on attitude and intention remains more or less stable, and the insignificant and negative direct effect on attitude, by design, is now zero. </li></ul>",
+          "B3.1a": "In this first utility-addition step, I am adding only the clean, reflective variables. <div><br></div><div><ul><li>Attitude ~ Observability regression coefficient is negative (counterintuitive) and significant. </li><li>Their original latent correlation was 0.42713  (see CFA of utility account, any model, U2B)</li></ul><ul><li>Descriptive norms had a knack for often breaking in the past in the sense that it shows a negative sign and insignificance. Same thing happening here.</li></ul><ul><li>The rest of the results have intuitive signs and all are significant. </li></ul></div><div><br><div><br></div></div>",
+          "B3.1b1": "<span style=\"font-weight: bold;\">Issues I faced</span><div><ul><li>Empirically, I don't have the robust CFI and TLI to keep comparing. </li><li>Next, I tried fitting these variables as formative latent variables with their own disturbance terms, but in an ordinal setting, it was impossible with different settings. Among other things, I tried scaling the causal indicators, emitting two or more paths from the reflective variable, and scaling one of those paths (for example, the performance perception-to-attitude path) to 1. All attempts failed. The model never converged or was never identifiable. </li><li>The ML approach succeeded.\n</li></ul><div>\n<span style=\"font-weight: bold;\">Results</span></div></div><div><ul><li>Comparing with model 3.1, injunctive norm --&gt; intention becomes negative (counterintuitive) but remains significant, while descriptive norm --&gt; intention becomes significant and becomes positive (intuitive). </li><li>Observability --&gt; attitude becomes insignificant. Perhaps due to the addition of other variables that are correlated with observability. Some sort of suppression effect</li><li>Other comparable things retain the same sign and significance. </li></ul></div><div><br></div><div></div>",
+          "B3.1c": "<ul><li>SRMR and robust RMSEA become better. Robust CFI and robust TLI get slightly worse.</li></ul><div><ul><li>Descriptive norms on intention become more strongly negative but become significant. </li><li>Other stuff retains significance and the direction of their signs. </li></ul></div><div><ul><li>So overall nothing crazy. </li></ul></div><div><br></div>",
+          "B3.1c2": "<span style=\"color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0.08); font-size: 13.3333px;\">2: lavaan-&gt;lav_object_post_check():  \n   covariance matrix of latent variables is not positive definite ; use lavInspect(fit, \"cov.lv\") to investigate. </span><div><br></div><div><br></div><div><span style=\"font-weight: bold;\">Comparing this (B3.1c2) versus B3.1c</span></div><div><ul><li>All global stats get a tiny tad better to the third decimal point. TLI gets 0.001 worse. </li><li>All comparable variables retain their signs and significance. </li><li>No crazy changes overall. </li></ul></div><div>------------------------------------------</div><div><span style=\"font-weight: bold;\">This (B3.1c2) alone</span></div><div><ul><li>However, the newly introduced power perception and non-power perception might be fighting for the same information due to their latent high intercorrelation. </li><li>Non-power perception has a positive regression effect on attitude while power perception has a negative one. </li><li>The opposite is true of their impacts on PBC. \n\n</li></ul></div><div></div>",
+          "B3.1c2_ml": "<div><span style=\"font-weight: bold;\">This (B3.1c2_ml) versus its ordinal version (B3.1c2)</span></div><div><ul><li>The impact of observability on attitude becomes positive but insignificant. </li><li>The effect of non-power perceptions on PBC becomes insignificant at 7.1%. Previously, it was hovering dangerously at 4.3%.</li><li>The rest retain their sign and significance. </li><li>That means that the fight between power and non-power remains the same as the ordinal version. </li></ul></div><div><br></div><div><br></div><div><br></div><div><br></div>",
+          "B3.1d": "<span style=\"color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0.08); font-size: 13.3333px;\">4: lavaan-&gt;lav_object_post_check():  \n   covariance matrix of latent variables is not positive definite ; use lavInspect(fit, \"cov.lv\") to investigate. </span><div><br></div><div>Interesting. The only way this model differed from Model B3.1C2 is that I didn't allow any path from non-power perceptions to PBC. This reduces the impact of power perception on PBC, and that path also becomes insignificant. </div><div><br></div><div>Most importantly, this model, like the previous one, exhibits a non-positive-definite structure. The lowest eigenvalue is slightly negative, as I found after some digging with ChatGPT. Further digging showed a linear combination in the problematic eigenvalue direction and the problem might be associated with descriptive and injunctive norm so I'm going to merge them. And see what happens. Hopefully the positive definite problem will go away. \n\n</div>",
+          "B4.2a": "<span style=\"font-weight: bold;\">Compared to the final environmental dispositional model, here....</span><div><ul><li>the effect of symbolism on attitude vanishes, becomes negative at 0.01, and is insignificant at 92%. </li><li>The effect of institutional trust on attitude remains significant but halves in magnitude. </li><li>The effect of awareness of consequences on institutional trust flips in sign but remains the same in magnitude, which is the craziest jump. </li></ul></div><div><span style=\"font-weight: bold;\">Compared to the final-ish utility model, here....</span></div><div><ul><li>The effect of observability on attitude becomes insignificant and moves from -0.605 to -0.03. It was the counterintuitive sign all along. </li><li>The effect of finding public chargers halves in magnitude. </li><li>Perception of power on attitude becomes insignificant. </li><li>Perception of non-power on attitude halves in magnitude and remains significant. </li><li>Perception of power on PBC becomes insignificant. </li></ul></div><div><br></div>"
         },
         "stacks": [
           {
@@ -245,6 +790,78 @@
             "in_use": true,
             "hidden": false,
             "has_position": true
+          },
+          {
+            "id": "stack-d812c120-e0e6-4dc8-b791-a06d00866278",
+            "title": "3.1 family",
+            "members": [
+              "B3.1a_ml",
+              "B3.1a"
+            ],
+            "active_model": "B3.1a",
+            "position": {
+              "x": -1863.43,
+              "y": -1090.27
+            },
+            "width": 320,
+            "height": 260,
+            "in_use": true,
+            "hidden": false,
+            "has_position": true
+          },
+          {
+            "id": "stack-715f5c78-0165-4f0a-9437-6e07d224531f",
+            "title": "3.1b1 family",
+            "members": [
+              "B3.1b1_ml",
+              "B3.1b1"
+            ],
+            "active_model": "B3.1b1",
+            "position": {
+              "x": -1872.52,
+              "y": -1452.67
+            },
+            "width": 320,
+            "height": 260,
+            "in_use": true,
+            "hidden": false,
+            "has_position": true
+          },
+          {
+            "id": "stack-c332e0e0-bf95-4fe6-954f-d3a1b0da8d31",
+            "title": "B3.1c2 family",
+            "members": [
+              "B3.1c2_ml",
+              "B3.1c2"
+            ],
+            "active_model": "B3.1c2",
+            "position": {
+              "x": -2642.57,
+              "y": -1089.45
+            },
+            "width": 320,
+            "height": 260,
+            "in_use": true,
+            "hidden": false,
+            "has_position": true
+          },
+          {
+            "id": "stack-67fa526d-780d-4230-9f8e-c5aa0a18d950",
+            "title": "Model 3.1c family",
+            "members": [
+              "B3.1c_ml",
+              "B3.1c"
+            ],
+            "active_model": "B3.1c",
+            "position": {
+              "x": -2271.86,
+              "y": -1093.35
+            },
+            "width": 320,
+            "height": 260,
+            "in_use": true,
+            "hidden": false,
+            "has_position": true
           }
         ],
         "used_models": [
@@ -257,11 +874,19 @@
           "B2.2.1b",
           "B2.2.1c",
           "B2.2.1c2",
-          "B2.2.1d",
           "B2.2.1c3",
+          "B2.2.1d",
           "B2.2.2",
           "B2.2.3a",
-          "B2.2.3b"
+          "B2.2.3b",
+          "B2.2.3c",
+          "B2.2.4",
+          "B3.1c3_ml",
+          "B3.1d",
+          "B3.2d",
+          "B4.2a",
+          "B4.2a2",
+          "B4.2a3"
         ],
         "model_positions": {
           "B1": {
@@ -269,8 +894,8 @@
             "y": -1076.15
           },
           "B1.2": {
-            "x": -1389.09,
-            "y": -634.19
+            "x": -1361.09,
+            "y": -596.19
           },
           "B2.1.1": {
             "x": -737.65,
@@ -297,8 +922,8 @@
             "y": -1243.81
           },
           "B2.1.2": {
-            "x": -317.84,
-            "y": -635.82
+            "x": -313.84,
+            "y": -605.82
           },
           "B2.1a": {
             "x": -543.03,
@@ -333,32 +958,96 @@
             "y": -1494.22
           },
           "B2.2.1c": {
-            "x": 1281.65,
-            "y": -1111.89
+            "x": 1251.65,
+            "y": -1103.89
           },
           "B2.2.1c2": {
-            "x": 1810.41,
-            "y": -1101.62
+            "x": 1794.41,
+            "y": -1097.62
+          },
+          "B2.2.1c3": {
+            "x": 2230.47,
+            "y": -1092.69
           },
           "B2.2.1d": {
             "x": 1221.89,
             "y": -1512.48
           },
-          "B2.2.1c3": {
-            "x": 2306.47,
-            "y": -1098.69
-          },
           "B2.2.2": {
-            "x": 2304.47,
-            "y": -620.63
+            "x": 2230.47,
+            "y": -586.63
           },
           "B2.2.3a": {
-            "x": 2288.4,
-            "y": -1489.54
+            "x": 2210.4,
+            "y": -1487.54
           },
           "B2.2.3b": {
-            "x": 2843.22,
-            "y": -1484.88
+            "x": 2685.22,
+            "y": -1486.88
+          },
+          "B2.2.3c": {
+            "x": 3147.74,
+            "y": -1484.72
+          },
+          "B2.2.4": {
+            "x": 3159.5,
+            "y": -595.32
+          },
+          "B3.1a": {
+            "x": -1863.43,
+            "y": -1090.27
+          },
+          "B3.1a_ml": {
+            "x": -1861.44,
+            "y": -813.72
+          },
+          "B3.1b1": {
+            "x": -2358.8,
+            "y": -1092.3
+          },
+          "B3.1b1_ml": {
+            "x": -2165.16,
+            "y": -847.23
+          },
+          "B3.1c": {
+            "x": -2271.86,
+            "y": -1093.35
+          },
+          "B3.1c_ml": {
+            "x": -2264.05,
+            "y": -1495.94
+          },
+          "B3.1c2": {
+            "x": -2642.57,
+            "y": -1089.45
+          },
+          "B3.1c2_ml": {
+            "x": -2403.03,
+            "y": -938.76
+          },
+          "B3.1c3_ml": {
+            "x": -2645.28,
+            "y": -1447.36
+          },
+          "B3.1d": {
+            "x": -3055.26,
+            "y": -1100.11
+          },
+          "B3.2d": {
+            "x": -3055.27,
+            "y": -633.14
+          },
+          "B4.2a": {
+            "x": -3863.56,
+            "y": -660.03
+          },
+          "B4.2a2": {
+            "x": -4569.07,
+            "y": -657.82
+          },
+          "B4.2a3": {
+            "x": -5150.21,
+            "y": -651.64
           },
           "B2.2.1c4": {
             "x": 2767.42,
@@ -386,12 +1075,12 @@
               "x": -1240.72,
               "y": -2303.87
             },
-            "width": 800,
-            "height": 208,
+            "width": 240,
+            "height": 64,
             "data": {
               "title": "as",
               "text": "",
-              "collapsed": false,
+              "collapsed": true,
               "expandedSize": {
                 "width": 800,
                 "height": 208
@@ -414,6 +1103,25 @@
               "expandedSize": {
                 "width": 612,
                 "height": 332
+              }
+            }
+          },
+          {
+            "id": "note-1790657988599",
+            "type": "note",
+            "position": {
+              "x": -4530.12,
+              "y": -313.63
+            },
+            "width": 460,
+            "height": 148,
+            "data": {
+              "title": "Problems",
+              "text": "If I add the composites, negative latent variances appear\nSome parts of the model becomes thin when other sides are developed.\nSo there perhaps needs a balance in the # of latents",
+              "collapsed": false,
+              "expandedSize": {
+                "width": 460,
+                "height": 148
               }
             }
           }
@@ -714,7 +1422,7 @@
                 "size": 36
               },
               "bend": null,
-              "noteHtml": "What?<div>Merging the dispositional variables </div>"
+              "noteHtml": "What?<div>Merging the dispositional variables </div><div><br></div><div>Since I am changing the structure, no way to compare it in a chi-square way, but the robust <span style=\"background-color: rgb(183, 255, 168);\">CFI drops by .008 -- might be a reason to actually not go with Model 2.2.3A  </span></div>"
             },
             "id": "xy-edge__B2.2.1c3source-top-B2.2.3asource-bottom",
             "source": "B2.2.1c3",
@@ -733,13 +1441,250 @@
                 "size": 36
               },
               "bend": null,
-              "noteHtml": "What?<div> Setting the direct path to zero from institutional trust to intentions </div>"
+              "noteHtml": "What?<div> Setting the direct path to zero from institutional trust to intentions </div><div><br></div><div><span style=\"background-color: rgb(255, 243, 173);\">The chi-square difference test suggests that the restriction imposed on B is non-trivial for Model A. </span></div><div><span style=\"background-color: rgb(176, 227, 177);\">However, this is the first time I'm going to use Savalei's diff(RMSEA). The value is  ---&gt; </span><span style=\"background-color: rgb(176, 227, 177);\">0.071 -- fairly small added misfit by this restriction, suggesting that the restricted model 2.2.3b does not fit much worse.</span></div><div><span style=\"background-color: rgb(176, 227, 177);\"><br></span></div><div><span style=\"background-color: rgb(176, 227, 177);\">This is a case where the difference in DF is just 1, which would be an unstable case. </span></div><div><span style=\"background-color: rgb(176, 227, 177);\"><br></span></div><div><span style=\"background-color: rgb(176, 227, 177);\"><br></span></div><div><span style=\"background-color: rgb(230, 152, 160);\">TLDR, I'll go with model 2.2.3B. </span></div><div>\n<span style=\"color: blue;\">&gt; </span><span style=\"color: blue;\">lavTestLRT(fit_semB223a, fit_semB223b)\n</span>\nScaled and Shifted Chi-Squared Difference Test (method = “satorra.2000”)\n\nlavaan-&gt;lavTestLRT():  \n   lavaan NOTE: The “Chisq” column contains standard test statistics, not the robust test that should be reported per model. A robust \n   difference test is a function of two standard (not robust) statistics.\n\n              Df AIC BIC  Chisq Chisq diff Df diff Pr(&gt;Chisq)   \nfit_semB223a 402         1772.4                                 \nfit_semB223b 403         1780.3     8.7571       1   0.003084 **\n---\nSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n\n</div>"
             },
             "id": "xy-edge__B2.2.3asource-right-B2.2.3bsource-left",
             "source": "B2.2.3a",
             "target": "B2.2.3b",
             "sourceHandle": "source-right",
             "targetHandle": "source-left"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": null,
+              "noteHtml": "What?<div> Removing the direct path from AoC to attitude </div><div><br></div><div><ul><li>Savalei's RMSEA_D b/w <span style=\"font-weight: bold;\">2.2.1b&lt;-&gt;2.2.1c is 0.04</span>  and <span style=\"font-weight: bold;\">2.2.1a&lt;-&gt;2.2.1c is 0.053</span> ::: suggesting the added misfit is not bad. </li><li>Although a chi-square test of difference suggests that this is a significantly worse fit than 2.2.1b.</li><li>The global fit stats remain unchanged to the third decimal point. </li></ul><div>I will go with this parsimonious 2.2.3C. </div></div><div><br></div>"
+            },
+            "id": "xy-edge__B2.2.3bsource-right-B2.2.3csource-left",
+            "source": "B2.2.3b",
+            "target": "B2.2.3c",
+            "sourceHandle": "source-right",
+            "targetHandle": "source-left"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": {
+                "x": 2.0083276083300916,
+                "y": -20.305799929416935
+              },
+              "noteHtml": "<span style=\"font-weight: bold;\">What?</span> Merging the norms <div><br></div><div>As usual the model fit worsens and technically they are merged models and we could get some statistics. </div><div>Chi-square difference says these merging restrictions are too bad (i.e. significant result), and Savalei's RMSEA-D is 0.21 (restrictions add poor misfit)</div>"
+            },
+            "id": "xy-edge__B2.2.3csource-bottom-B2.2.4target-top",
+            "source": "B2.2.3c",
+            "target": "B2.2.4",
+            "sourceHandle": "source-bottom",
+            "targetHandle": "target-top"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": {
+                "x": 3.7642776630898425,
+                "y": -0.8637095515841793
+              },
+              "noteHtml": "What?<div> Add the utility account to the bare TPB for the first time. </div><div><br></div><div>The right-hand side of Model B1 keeps adding environmental and dispositional stuff to the TPB and this left-hand side adds the utility stuff. </div>"
+            },
+            "id": "xy-edge__B1source-left-B3.1asource-right",
+            "source": "B1",
+            "target": "stack-d812c120-e0e6-4dc8-b791-a06d00866278",
+            "sourceHandle": "source-left",
+            "targetHandle": "source-right"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": {
+                "x": 3.5597616645663948,
+                "y": -1.2339622790218527
+              },
+              "noteHtml": "What?<div> Adding the much dreaded formative-like variables. Read about their problems for years. Now facing them finally.</div><div><br></div><div>Their ML versions might be compared because the ordinal version loses the robust statistics for the inclusion of the composites in 3.1B, <span style=\"background-color: rgb(255, 240, 158);\">visualized by hexagons</span>. </div><div><br></div><div><br></div>"
+            },
+            "id": "xy-edge__B3.1asource-left-B3.1b1source-right",
+            "source": "stack-d812c120-e0e6-4dc8-b791-a06d00866278",
+            "target": "stack-715f5c78-0165-4f0a-9437-6e07d224531f",
+            "sourceHandle": "source-top",
+            "targetHandle": "source-bottom"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": null,
+              "noteHtml": "<span style=\"font-weight: bold;\">What? </span>Adding <span>performance perceptions</span> as a reflective latent variable instead, as opposed to the 3.1B1 version, which was a composite. <div><br></div><div>This time around, there are no problems with global fit stats. Can be directly compared against Model B3.1A. </div>"
+            },
+            "id": "xy-edge__stack-d812c120-e0e6-4dc8-b791-a06d00866278source-left-B3.1csource-right",
+            "source": "stack-d812c120-e0e6-4dc8-b791-a06d00866278",
+            "target": "stack-67fa526d-780d-4230-9f8e-c5aa0a18d950",
+            "sourceHandle": "source-left",
+            "targetHandle": "source-right"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": null,
+              "noteHtml": "<span style=\"font-weight: bold;\">What? </span>Breaking up the performance perceptions into two and seeing if there's an improvement in fit <div>The chi-square likelihood ratio test says that the restrictions fit in B3.1C significantly worsen the model. </div><div><span style=\"background-color: rgb(255, 240, 158);\">In other words, c2 is preferable. </span></div><div><br></div><div>Savalei's RMSEA-D agrees (0.1475565)</div><div><br></div><div><span style=\"color: blue;\">&gt; </span><span style=\"color: blue;\">lrt</span>\nScaled and Shifted Chi-Squared Difference Test (method = “satorra.2000”)\n\nlavaan-&gt;lavTestLRT():  \n   lavaan NOTE: The “Chisq” column contains standard test statistics, not the robust test that should be reported per model. A robust \n   difference test is a function of two standard (not robust) statistics.\n\n              Df AIC BIC  Chisq Chisq diff Df diff Pr(&gt;Chisq)    \nfit_semB31c2 590         3126.9                                  \nfit_semB31c  598         3563.4     272.93       8  &lt; 2.2e-16 ***\n---\nSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n\n</div>"
+            },
+            "id": "xy-edge__B3.1csource-top-B3.1c2source-bottom",
+            "source": "stack-67fa526d-780d-4230-9f8e-c5aa0a18d950",
+            "target": "stack-c332e0e0-bf95-4fe6-954f-d3a1b0da8d31",
+            "sourceHandle": "source-left",
+            "targetHandle": "source-right"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": null,
+              "noteHtml": "What? Added cost and trialability composites"
+            },
+            "id": "xy-edge__stack-c332e0e0-bf95-4fe6-954f-d3a1b0da8d31source-top-B3.1c3_mlsource-bottom",
+            "source": "stack-c332e0e0-bf95-4fe6-954f-d3a1b0da8d31",
+            "target": "B3.1c3_ml",
+            "sourceHandle": "source-top",
+            "targetHandle": "source-bottom"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": null,
+              "noteHtml": "<span style=\"font-weight: bold;\">What?</span> Removing the path from non-power perceptions to PBC because that would be theoretically more justified, and practically having two highly correlated variables in power and non-power perceptions would be redundant (if they were to do the same things by pointing towards the same places). I ask myself: do I merge them, or do they operate differently in theory? My call is the latter. <div><br></div>"
+            },
+            "id": "xy-edge__stack-c332e0e0-bf95-4fe6-954f-d3a1b0da8d31source-left-B3.1dsource-right",
+            "source": "stack-c332e0e0-bf95-4fe6-954f-d3a1b0da8d31",
+            "target": "B3.1d",
+            "sourceHandle": "source-left",
+            "targetHandle": "source-right"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": null,
+              "noteHtml": "<span style=\"font-weight: bold;\">Why?</span> Wanted to see if the positive definite problem goes away. It doesn't. "
+            },
+            "id": "xy-edge__B3.1dsource-bottom-B3.2dtarget-top",
+            "source": "B3.1d",
+            "target": "B3.2d",
+            "sourceHandle": "source-bottom",
+            "targetHandle": "target-top"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 35
+              },
+              "bend": null,
+              "noteHtml": "<span style=\"font-weight: bold;\">Why? </span><div>Merging the utility variables (model B3.2d) with the already established enviro-dispositional structure (B2.2.4)</div><div>Just the trialability and cost composites are missing. <br><div><br></div></div>"
+            },
+            "id": "xy-edge__B3.2dsource-left-B4.2asource-right",
+            "source": "B3.2d",
+            "target": "B4.2a",
+            "sourceHandle": "source-left",
+            "targetHandle": "source-right"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": null,
+              "noteHtml": "What?<div>The four exogenous utility variables were not correlating with endogenous social norms in Model B4.2A. </div><div>In this model, relaxed that criterion. </div><div><br></div><div>Chi-square difference test rules in favor of relaxing those restrictions. </div><div><br></div><div>Savalei's RMSEA-D is 0.1960 meaning that those restrictions were adding horrible misfit \n\n<span style=\"color: blue;\">&gt; </span><span style=\"color: blue;\">lrt\n</span>\nScaled and Shifted Chi-Squared Difference Test (method = “satorra.2000”)\n\nlavaan-&gt;lavTestLRT():  \n   lavaan NOTE: The “Chisq” column contains standard test statistics, not the robust test that should be reported per model. A robust \n   difference test is a function of two standard (not robust) statistics.\n\n               Df AIC BIC  Chisq Chisq diff Df diff Pr(&gt;Chisq)    \nfit_semB42a2 1221         6139.0                                  \nfit_semB42a  1225         6507.2     237.93       4  &lt; 2.2e-16 ***\n---\nSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n\n</div>"
+            },
+            "id": "xy-edge__B4.2asource-left-B4.2a2source-right",
+            "source": "B4.2a",
+            "target": "B4.2a2",
+            "sourceHandle": "source-left",
+            "targetHandle": "source-right"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": null,
+              "noteHtml": "What?<div>Merging the environmental variables</div>"
+            },
+            "id": "xy-edge__B4.2a2source-left-B4.2a3source-right",
+            "source": "B4.2a2",
+            "target": "B4.2a3",
+            "sourceHandle": "source-left",
+            "targetHandle": "source-right"
           },
           {
             "type": "annotated",

@@ -1,12 +1,35 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { WORKSPACE_KEY, LEGACY_KEY, PAGE_TYPES, newPage, normalizeWorkspace, workspaceFromLegacy, mergeLegacyLayouts, validateLayout, updatePageLayout, canDeletePage, deleteEmptyPage, pageContentItems, pageContentSummary, removePageContent } from './workspaceState.js';
+import { workspaceFingerprint, reorderPages } from './workspaceUi.js';
 const BASE=import.meta.env.BASE_URL;
+const SAVE_BASELINE_KEY=WORKSPACE_KEY+'-last-file-save';
 export default function Workspace({ Canvas }) {
   const [workspace,setWorkspace]=useState(null),[error,setError]=useState(''),[notice,setNotice]=useState('');
   const [collapsed,setCollapsed]=useState(()=>{try{return localStorage.getItem('sem-pages-collapsed')==='true';}catch{return false;}});
   const [dialog,setDialog]=useState(null),[menu,setMenu]=useState(null),[busy,setBusy]=useState(false),[generation,setGeneration]=useState(0);
   const workspaceRef=useRef(null),canvasApi=useRef(null),fileHandle=useRef(null),pending=useRef(false),bootstrap=useRef(0);
   const pageHistories=useRef(new Map());
+  const [savedFingerprint,setSavedFingerprint]=useState(()=>{try{return localStorage.getItem(SAVE_BASELINE_KEY);}catch{return null;}});
+  const [pageDrop,setPageDrop]=useState(null),draggedPage=useRef(null);
+  const skipPageClick=useRef(false);
+  function pageDragTarget(event){
+    const row=document.elementFromPoint(event.clientX,event.clientY)?.closest('[data-page-id]');
+    if(!row)return null;
+    const rect=row.getBoundingClientRect();return {id:row.dataset.pageId,after:event.clientY>rect.top+rect.height/2};
+  }
+  function finishPageDrag(event,cancel=false){
+    const drag=draggedPage.current,target=pageDragTarget(event);
+    if(drag?.moved){skipPageClick.current=true;if(!cancel&&target){const current=capture();if(current)commit(reorderPages(current,drag.id,target.id,target.after));}}
+    draggedPage.current=null;setPageDrop(null);
+    if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId);
+  }
+  function markFileSaved(value){const fingerprint=workspaceFingerprint(value);setSavedFingerprint(fingerprint);try{localStorage.setItem(SAVE_BASELINE_KEY,fingerprint);}catch{/* Keep session save status even if browser storage is full. */}}
+  useEffect(()=>{
+    const dismiss=event=>{if(!event.target.closest?.('.page-options, .page-more'))setMenu(null);};
+    const escape=event=>{if(event.key==='Escape'){setMenu(null);setPageDrop(null);draggedPage.current=null;}};
+    document.addEventListener('pointerdown',dismiss,true);document.addEventListener('keydown',escape,true);
+    return()=>{document.removeEventListener('pointerdown',dismiss,true);document.removeEventListener('keydown',escape,true);};
+  },[]);
   const [findRequest,setFindRequest]=useState(null),[findResult,setFindResult]=useState(null);
   const findCursor=useRef({}),findSerial=useRef(0);
   const onFindResult=useCallback((token,message,removable)=>setFindResult({token,message,removable}),[]);
@@ -89,7 +112,7 @@ export default function Workspace({ Canvas }) {
       const {handle,value}=await chooseFile();const incoming=normalizeWorkspace(value);
       if(workspaceRef.current&&!window.confirm('Replace all currently open pages with this workspace? Save workspace first if you want to keep the current version.'))return;
       const current=capture();if(current){try{localStorage.setItem(WORKSPACE_KEY+'-before-open',JSON.stringify(current));}catch{/* Export is also available. */}}
-      bootstrap.current++;pageHistories.current.clear();canvasApi.current=null;fileHandle.current=handle;setGeneration(n=>n+1);commit(incoming);setError('');setNotice('Workspace opened.');setMenu(null);
+      bootstrap.current++;pageHistories.current.clear();canvasApi.current=null;fileHandle.current=handle;setGeneration(n=>n+1);markFileSaved(incoming);commit(incoming);setError('');setNotice('Workspace opened.');setMenu(null);
     }catch(openError){if(openError.name!=='AbortError')setError(openError.message);}
     finally{pending.current=false;setBusy(false);}
   }
@@ -110,22 +133,28 @@ export default function Workspace({ Canvas }) {
     try{
       let handle=fileHandle.current;
       if(!handle&&window.showSaveFilePicker)handle=await window.showSaveFilePicker({suggestedName:'workspace.json',types:[{description:'Workspace JSON',accept:{'application/json':['.json']}}]});
-      if(handle){const stream=await handle.createWritable();try{await stream.write(contents);await stream.close();}catch(writeError){try{await stream.abort();}catch{/* original error */}throw writeError;}fileHandle.current=handle;}
+      if(handle){const stream=await handle.createWritable();try{await stream.write(contents);await stream.close();}catch(writeError){try{await stream.abort();}catch{/* original error */}throw writeError;}fileHandle.current=handle;markFileSaved(current);}
       else {const url=URL.createObjectURL(new Blob([contents],{type:'application/json'})),link=document.createElement('a');link.href=url;link.download='workspace.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}
-      setNotice('Workspace saved — all pages included.');
+      setNotice(handle?'Workspace saved — all pages included.':'Workspace download requested. The unsaved marker remains because this browser cannot confirm the file was saved.');
     }catch(saveError){if(saveError.name!=='AbortError')setError('Could not save workspace: '+saveError.message);}
     finally{pending.current=false;setBusy(false);}
   }
   const active=workspace?.pages.find(page=>page.id===workspace.active_page);
+  const unsaved=Boolean(workspace&&workspaceFingerprint(workspace)!==savedFingerprint);
   return <div className="workspace-shell">
     <aside className={'pages-sidebar'+(collapsed?' collapsed':'')} aria-label="Pages">
       <div className="pages-heading"><button aria-label={collapsed?'Expand pages':'Collapse pages'} title={collapsed?'Expand pages':'Collapse pages'} onClick={togglePages}>{collapsed?'▸':'◂'}</button>{!collapsed&&<strong>Pages</strong>}</div>
       <button className="new-page-button" title="New page" disabled={!workspace||busy} onClick={createDialog}>{collapsed?'+':'+ New page'}</button>
       <nav className="pages-list" aria-label="Workspace pages">{workspace?.pages.map((page,index)=>{
         const deletable=canDeletePage(workspace,page.id);
-        return <div key={page.id} className={'page-entry'+(page.id===active?.id?' active':'')}>
+        return <div key={page.id} data-page-id={page.id} className={'page-entry'+(page.id===active?.id?' active':'')+(pageDrop?.id===page.id?(pageDrop.after?' drop-after':' drop-before'):'')}>
           <button className="page-switch" aria-current={page.id===active?.id?'page':undefined} title={page.title+' — '+PAGE_TYPES[page.type].label} disabled={busy}
-            onClick={()=>switchPage(page.id)} onContextMenu={event=>{event.preventDefault();setCollapsed(false);setMenu(page.id);}}>
+            onPointerDown={event=>{if(event.button!==0)return;skipPageClick.current=false;draggedPage.current={id:page.id,x:event.clientX,y:event.clientY,moved:false};event.currentTarget.setPointerCapture(event.pointerId);}}
+            onPointerMove={event=>{const drag=draggedPage.current;if(!drag)return;if(Math.hypot(event.clientX-drag.x,event.clientY-drag.y)>6)drag.moved=true;if(drag.moved){setMenu(null);setPageDrop(pageDragTarget(event));const list=event.currentTarget.closest('.pages-list'),rect=list.getBoundingClientRect();if(event.clientY<rect.top+24)list.scrollTop-=12;else if(event.clientY>rect.bottom-24)list.scrollTop+=12;}}}
+            onPointerUp={event=>finishPageDrag(event)} onPointerCancel={event=>finishPageDrag(event,true)}
+            onLostPointerCapture={()=>{draggedPage.current=null;setPageDrop(null);}}
+            onKeyDown={event=>{if(event.altKey&&['ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();const current=capture(),target=current.pages[index+(event.key==='ArrowUp'?-1:1)];if(target)commit(reorderPages(current,page.id,target.id,event.key==='ArrowDown'));}}}
+            onClick={()=>{if(skipPageClick.current){skipPageClick.current=false;return;}switchPage(page.id);}} onContextMenu={event=>{event.preventDefault();setCollapsed(false);setMenu(page.id);}}>
             <span>{collapsed?index+1:PAGE_TYPES[page.type].icon}</span>{!collapsed&&<span>{page.title}<small>{PAGE_TYPES[page.type].label}</small></span>}
           </button>
           {!collapsed&&<button className="page-more" aria-label={'Options for '+page.title} onClick={()=>setMenu(menu===page.id?null:page.id)}>⋯</button>}
@@ -139,13 +168,13 @@ export default function Workspace({ Canvas }) {
         </div>;
       })}</nav>
       <div className="workspace-file-tools">
-        <button disabled={!workspace||busy} onClick={saveWorkspace} title="Save all pages">{collapsed?'⇩':'Save workspace'}</button>
+        <button disabled={!workspace||busy} onClick={saveWorkspace} title="Save all pages">{collapsed?'⇩':'Save workspace'}{unsaved?' *':''}</button>
         <button disabled={busy} onClick={openWorkspace} title="Open a workspace, replacing all pages">{collapsed?'⇧':'Open workspace'}</button>
         <button disabled={busy} onClick={importLayout} title="Import an old layout as a new page">{collapsed?'⊕':'Import layout as page'}</button>
       </div>
     </aside>
     <main className="workspace-main">
-      <header className="workspace-page-heading"><strong>{active?.title??'Workspace'}</strong><span>{active?PAGE_TYPES[active.type].label:'Loading…'}</span>{busy&&<span role="status">Working…</span>}</header>
+      <header className="workspace-page-heading"><strong>{active?.title??'Workspace'}</strong><span>{active?PAGE_TYPES[active.type].label:'Loading…'}</span>{unsaved&&<span className="unsaved-marker" title="Workspace has changes not saved to a file" aria-label="Workspace has unsaved changes">* Unsaved changes</span>}{busy&&<span role="status">Working…</span>}</header>
       {error&&<div className="workspace-message error-message" role="alert">{error}<button aria-label="Dismiss error" onClick={()=>setError('')}>×</button></div>}
       {notice&&<div className="workspace-message" role="status">{notice}<button aria-label="Dismiss message" onClick={()=>setNotice('')}>×</button></div>}
       {findRequest&&findRequest.pageId===active?.id&&<div className="content-finder" role="status">
