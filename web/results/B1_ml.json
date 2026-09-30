@@ -1,0 +1,3181 @@
+{
+  "schema_version": "1.1",
+  "metadata": {
+    "model_id": "B1_ml",
+    "model_name": "Model B1_ml",
+    "exported_at": "2026-09-30T02:45:06-0400",
+    "lavaan_version": "0.7.2",
+    "estimator": "ML",
+    "estimator_requested": "ML",
+    "estimator_actual": "ML",
+    "se_method": "standard",
+    "test": "standard",
+    "information": ["observed", "observed"],
+    "h1_information": ["structured", "structured"],
+    "likelihood": "normal",
+    "link": "default",
+    "data_treatment": "Continuous",
+    "missing": "ml",
+    "ordered_variables": [],
+    "number_ordered_variables": 0,
+    "parameterization": "delta",
+    "std_lv": false,
+    "meanstructure": true,
+    "fixed_x": false,
+    "auto_var": true,
+    "auto_cov_lv_x": true,
+    "auto_cov_y": false,
+    "mimic": "lavaan",
+    "representation": "LISREL",
+    "converged": true,
+    "post_check": true,
+    "number_parameters": 58,
+    "number_groups": 1
+  },
+  "sample_size": [
+    {
+      "group": "1",
+      "n": 1522
+    }
+  ],
+  "missing_patterns": [
+    {
+      "group": "1",
+      "n_patterns": 195
+    }
+  ],
+  "model_syntax": "\n  # =======================================\n  # Reflective Measurement Model\n  # =======================================\n  Attitude =~ att_appealing + att_desirable +\n              att_goodidea + att_pleasant\n\n  PBC =~ pbc_barrier + pbc_could +\n         pbc_resources\n\n  DescriptiveNorms =~ norms_d_many + norms_d_common +\n                      norms_d_few\n\n  InjunctiveNorms =~ norms_i_consider + norms_i_bad +\n                     norms_i_support\n\n  Intention =~ nextv_bev + nextv_phev + nextv_icev\n\n\n  # =======================================\n  # Structural path\n  # ======================================= \n  Intention  ~ Attitude + PBC + DescriptiveNorms + InjunctiveNorms\n  \n  # =======================================\n  # Covariance paths\n  # =======================================   \n  \n  # all exo ~~ exo allowed with auto.cov.lv.x = TRUE\n  \n",
+  "fit_measures": [
+    {
+      "measure": "npar",
+      "value": 58
+    },
+    {
+      "measure": "fmin",
+      "value": 0.2402494064326897
+    },
+    {
+      "measure": "chisq",
+      "value": 731.31919318110738
+    },
+    {
+      "measure": "df",
+      "value": 94
+    },
+    {
+      "measure": "pvalue",
+      "value": 0
+    },
+    {
+      "measure": "baseline.chisq",
+      "value": 15492.923949468699
+    },
+    {
+      "measure": "baseline.df",
+      "value": 120
+    },
+    {
+      "measure": "baseline.pvalue",
+      "value": 0
+    },
+    {
+      "measure": "cfi",
+      "value": 0.9585427472824301
+    },
+    {
+      "measure": "tli",
+      "value": 0.9470758475945915
+    },
+    {
+      "measure": "cfi.robust",
+      "value": 0.9567075899567494
+    },
+    {
+      "measure": "tli.robust",
+      "value": 0.9447330935618078
+    },
+    {
+      "measure": "nnfi",
+      "value": 0.9470758475945915
+    },
+    {
+      "measure": "rfi",
+      "value": 0.9397402986638651
+    },
+    {
+      "measure": "nfi",
+      "value": 0.9527965672866944
+    },
+    {
+      "measure": "pnfi",
+      "value": 0.7463573110412439
+    },
+    {
+      "measure": "ifi",
+      "value": 0.9586127449377334
+    },
+    {
+      "measure": "rni",
+      "value": 0.9585427472824301
+    },
+    {
+      "measure": "nnfi.robust",
+      "value": 0.9447330935618078
+    },
+    {
+      "measure": "rni.robust",
+      "value": 0.9567075899567494
+    },
+    {
+      "measure": "logl",
+      "value": -31825.076002361555
+    },
+    {
+      "measure": "unrestricted.logl",
+      "value": -31459.416405771004
+    },
+    {
+      "measure": "aic",
+      "value": 63766.15200472311
+    },
+    {
+      "measure": "bic",
+      "value": 64075.163275951563
+    },
+    {
+      "measure": "ntotal",
+      "value": 1522
+    },
+    {
+      "measure": "bic2",
+      "value": 63890.912319265233
+    },
+    {
+      "measure": "rmsea",
+      "value": 0.06674323392807387
+    },
+    {
+      "measure": "rmsea.ci.lower",
+      "value": 0.06228247688362637
+    },
+    {
+      "measure": "rmsea.ci.upper",
+      "value": 0.07129202461228386
+    },
+    {
+      "measure": "rmsea.ci.level",
+      "value": 0.9
+    },
+    {
+      "measure": "rmsea.pvalue",
+      "value": 5.70605784844247e-10
+    },
+    {
+      "measure": "rmsea.close.h0",
+      "value": 0.05
+    },
+    {
+      "measure": "rmsea.notclose.pvalue",
+      "value": 6.434306054102467e-07
+    },
+    {
+      "measure": "rmsea.notclose.h0",
+      "value": 0.08
+    },
+    {
+      "measure": "rmsea.robust",
+      "value": 0.07024244073972589
+    },
+    {
+      "measure": "rmsea.ci.lower.robust",
+      "value": 0.06549252949418431
+    },
+    {
+      "measure": "rmsea.ci.upper.robust",
+      "value": 0.07508665542504185
+    },
+    {
+      "measure": "rmsea.pvalue.robust",
+      "value": 2.636335594274897e-12
+    },
+    {
+      "measure": "rmsea.notclose.pvalue.robust",
+      "value": 0.00042319348254275
+    },
+    {
+      "measure": "rmr",
+      "value": 0.1094463598751757
+    },
+    {
+      "measure": "rmr_nomean",
+      "value": 0.1157000380343138
+    },
+    {
+      "measure": "srmr",
+      "value": 0.06261418859877604
+    },
+    {
+      "measure": "srmr_bentler",
+      "value": 0.06261418859877604
+    },
+    {
+      "measure": "srmr_bentler_nomean",
+      "value": 0.06618921387958819
+    },
+    {
+      "measure": "crmr",
+      "value": 0.06621753071661694
+    },
+    {
+      "measure": "crmr_nomean",
+      "value": 0.07048780143906169
+    },
+    {
+      "measure": "srmr_mplus",
+      "value": 0.06264597852876649
+    },
+    {
+      "measure": "srmr_mplus_nomean",
+      "value": 0.06621415562144622
+    },
+    {
+      "measure": "gfi",
+      "value": 0.9502611943421911
+    },
+    {
+      "measure": "gfi.ci.lower",
+      "value": 0.9436454956371584
+    },
+    {
+      "measure": "gfi.ci.upper",
+      "value": 0.956407421806862
+    },
+    {
+      "measure": "gfi.ci.level",
+      "value": 0.9
+    },
+    {
+      "measure": "gfi.robust",
+      "value": 0.9452023604133482
+    },
+    {
+      "measure": "gfi.ci.lower.robust",
+      "value": 0.9378693724496503
+    },
+    {
+      "measure": "gfi.ci.upper.robust",
+      "value": 0.9520192402145488
+    },
+    {
+      "measure": "cn_05",
+      "value": 245.81153333317849
+    },
+    {
+      "measure": "cn_01",
+      "value": 269.06153409935854
+    },
+    {
+      "measure": "gfi_lisrel",
+      "value": 0.9815282467987112
+    },
+    {
+      "measure": "agfi_lisrel",
+      "value": 0.9701307820574905
+    },
+    {
+      "measure": "pgfi",
+      "value": 0.6069977315728873
+    },
+    {
+      "measure": "mfi",
+      "value": 0.8110958974442631
+    },
+    {
+      "measure": "ecvi",
+      "value": 0.5567143187786514
+    }
+  ],
+  "parameters": [
+    {
+      "lhs": "Attitude",
+      "op": "=~",
+      "rhs": "att_appealing",
+      "est": 1,
+      "se": 0,
+      "z": null,
+      "pvalue": null,
+      "ci.lower": 1,
+      "ci.upper": 1,
+      "std.lv": 1.400330077937087,
+      "std.all": 0.9700834912740551,
+      "section": "loading"
+    },
+    {
+      "lhs": "Attitude",
+      "op": "=~",
+      "rhs": "att_desirable",
+      "est": 0.9857990240274008,
+      "se": 0.01005351052800075,
+      "z": 98.055203829725158,
+      "pvalue": 0,
+      "ci.lower": 0.9660945054743251,
+      "ci.upper": 1.005503542580477,
+      "std.lv": 1.380444024146595,
+      "std.all": 0.9619926043252248,
+      "section": "loading"
+    },
+    {
+      "lhs": "Attitude",
+      "op": "=~",
+      "rhs": "att_goodidea",
+      "est": 0.9304847775587203,
+      "se": 0.01258883111835664,
+      "z": 73.91351657755709,
+      "pvalue": 0,
+      "ci.lower": 0.9058111219592841,
+      "ci.upper": 0.9551584331581564,
+      "std.lv": 1.302985821078076,
+      "std.all": 0.9152249400705692,
+      "section": "loading"
+    },
+    {
+      "lhs": "Attitude",
+      "op": "=~",
+      "rhs": "att_pleasant",
+      "est": 0.7969332596477232,
+      "se": 0.01400755917576521,
+      "z": 56.893085343984509,
+      "pvalue": 0,
+      "ci.lower": 0.7694789481519099,
+      "ci.upper": 0.8243875711435366,
+      "std.lv": 1.115969613593153,
+      "std.all": 0.8572087736561343,
+      "section": "loading"
+    },
+    {
+      "lhs": "PBC",
+      "op": "=~",
+      "rhs": "pbc_barrier",
+      "est": 1,
+      "se": 0,
+      "z": null,
+      "pvalue": null,
+      "ci.lower": 1,
+      "ci.upper": 1,
+      "std.lv": 0.6779604852997182,
+      "std.all": 0.5264574875967482,
+      "section": "loading"
+    },
+    {
+      "lhs": "PBC",
+      "op": "=~",
+      "rhs": "pbc_could",
+      "est": 1.639664364788088,
+      "se": 0.100746931869157,
+      "z": 16.275079889455768,
+      "pvalue": 0,
+      "ci.lower": 1.44220400677163,
+      "ci.upper": 1.837124722804546,
+      "std.lv": 1.111627648480386,
+      "std.all": 0.8126275554079692,
+      "section": "loading"
+    },
+    {
+      "lhs": "PBC",
+      "op": "=~",
+      "rhs": "pbc_resources",
+      "est": 1.690570911797594,
+      "se": 0.1008995681031726,
+      "z": 16.754986602806252,
+      "pvalue": 0,
+      "ci.lower": 1.492811392259729,
+      "ci.upper": 1.888330431335458,
+      "std.lv": 1.146140275795884,
+      "std.all": 0.7501673584260901,
+      "section": "loading"
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "=~",
+      "rhs": "norms_d_many",
+      "est": 1,
+      "se": 0,
+      "z": null,
+      "pvalue": null,
+      "ci.lower": 1,
+      "ci.upper": 1,
+      "std.lv": 0.8943678070998476,
+      "std.all": 0.7397351359261958,
+      "section": "loading"
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "=~",
+      "rhs": "norms_d_common",
+      "est": 1.206205853111833,
+      "se": 0.04360567747115742,
+      "z": 27.661669834384906,
+      "pvalue": 0,
+      "ci.lower": 1.120740295746895,
+      "ci.upper": 1.291671410476771,
+      "std.lv": 1.078791683758631,
+      "std.all": 0.8901071372898225,
+      "section": "loading"
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "=~",
+      "rhs": "norms_d_few",
+      "est": 0.8165980557483786,
+      "se": 0.038604618524682,
+      "z": 21.152859086699269,
+      "pvalue": 0,
+      "ci.lower": 0.7409343938030941,
+      "ci.upper": 0.8922617176936631,
+      "std.lv": 0.7303390124016765,
+      "std.all": 0.5724821840990006,
+      "section": "loading"
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "=~",
+      "rhs": "norms_i_consider",
+      "est": 1,
+      "se": 0,
+      "z": null,
+      "pvalue": null,
+      "ci.lower": 1,
+      "ci.upper": 1,
+      "std.lv": 1.0016644968073,
+      "std.all": 0.8003015384059197,
+      "section": "loading"
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "=~",
+      "rhs": "norms_i_bad",
+      "est": 0.8697005238832636,
+      "se": 0.03454902172023523,
+      "z": 25.172942114707787,
+      "pvalue": 0,
+      "ci.lower": 0.8019856856105105,
+      "ci.upper": 0.9374153621560166,
+      "std.lv": 0.8711481376285745,
+      "std.all": 0.6734905700352036,
+      "section": "loading"
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "=~",
+      "rhs": "norms_i_support",
+      "est": 0.641623339574831,
+      "se": 0.02870744951313844,
+      "z": 22.350412539476253,
+      "pvalue": 0,
+      "ci.lower": 0.5853577724410777,
+      "ci.upper": 0.6978889067085843,
+      "std.lv": 0.6426913195750424,
+      "std.all": 0.6052209432934486,
+      "section": "loading"
+    },
+    {
+      "lhs": "Intention",
+      "op": "=~",
+      "rhs": "nextv_bev",
+      "est": 1,
+      "se": 0,
+      "z": null,
+      "pvalue": null,
+      "ci.lower": 1,
+      "ci.upper": 1,
+      "std.lv": 1.125531862110211,
+      "std.all": 0.8371721973081966,
+      "section": "loading"
+    },
+    {
+      "lhs": "Intention",
+      "op": "=~",
+      "rhs": "nextv_phev",
+      "est": 0.9209369443459006,
+      "se": 0.0336269132785313,
+      "z": 27.386900983679102,
+      "pvalue": 0,
+      "ci.lower": 0.8550294054087275,
+      "ci.upper": 0.9868444832830736,
+      "std.lv": 1.036543873855729,
+      "std.all": 0.7077943515718247,
+      "section": "loading"
+    },
+    {
+      "lhs": "Intention",
+      "op": "=~",
+      "rhs": "nextv_icev",
+      "est": 0.8400732868924407,
+      "se": 0.0352278218382185,
+      "z": 23.846869975396803,
+      "pvalue": 0,
+      "ci.lower": 0.7710280248357388,
+      "ci.upper": 0.9091185489491425,
+      "std.lv": 0.9455292509050943,
+      "std.all": 0.6359276058065985,
+      "section": "loading"
+    },
+    {
+      "lhs": "Intention",
+      "op": "~",
+      "rhs": "Attitude",
+      "est": 0.477159022828295,
+      "se": 0.04883454485935151,
+      "z": 9.770932117880117,
+      "pvalue": 0,
+      "ci.lower": 0.3814450737025604,
+      "ci.upper": 0.5728729719540296,
+      "std.lv": 0.5936572336324525,
+      "std.all": 0.5936572336324525,
+      "section": "regression"
+    },
+    {
+      "lhs": "Intention",
+      "op": "~",
+      "rhs": "PBC",
+      "est": 0.2306713006597549,
+      "se": 0.04791395560985783,
+      "z": 4.814282138131308,
+      "pvalue": 1.477299699015333e-06,
+      "ci.lower": 0.1367616733075827,
+      "ci.upper": 0.3245809280119271,
+      "std.lv": 0.1389441136271374,
+      "std.all": 0.1389441136271374,
+      "section": "regression"
+    },
+    {
+      "lhs": "Intention",
+      "op": "~",
+      "rhs": "DescriptiveNorms",
+      "est": -0.002423908595598379,
+      "se": 0.08165600795691694,
+      "z": -0.02968438766780362,
+      "pvalue": 0.9763187632717947,
+      "ci.lower": -0.1624667433124716,
+      "ci.upper": 0.1576189261212749,
+      "std.lv": -0.001926081249438249,
+      "std.all": -0.001926081249438249,
+      "section": "regression"
+    },
+    {
+      "lhs": "Intention",
+      "op": "~",
+      "rhs": "InjunctiveNorms",
+      "est": 0.2570263710944167,
+      "se": 0.1240119568858213,
+      "z": 2.072593462347044,
+      "pvalue": 0.03821012998568585,
+      "ci.lower": 0.01396740194587304,
+      "ci.upper": 0.5000853402429604,
+      "std.lv": 0.2287400289013636,
+      "std.all": 0.2287400289013636,
+      "section": "regression"
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~~",
+      "rhs": "att_appealing",
+      "est": 0.1228112489732806,
+      "se": 0.008277078852800905,
+      "z": 14.837511054002119,
+      "pvalue": 0,
+      "ci.lower": 0.1065884725245927,
+      "ci.upper": 0.1390340254219685,
+      "std.lv": 0.1228112489732806,
+      "std.all": 0.05893801995754005,
+      "section": "variance"
+    },
+    {
+      "lhs": "att_desirable",
+      "op": "~~",
+      "rhs": "att_desirable",
+      "est": 0.1535534624389973,
+      "se": 0.008791466443915364,
+      "z": 17.466194453289731,
+      "pvalue": 0,
+      "ci.lower": 0.1363225048376308,
+      "ci.upper": 0.1707844200403639,
+      "std.lv": 0.1535534624389973,
+      "std.all": 0.07457022922357151,
+      "section": "variance"
+    },
+    {
+      "lhs": "att_goodidea",
+      "op": "~~",
+      "rhs": "att_goodidea",
+      "est": 0.3290876475013821,
+      "se": 0.01438041510522093,
+      "z": 22.884433105265781,
+      "pvalue": 0,
+      "ci.lower": 0.3009025518124133,
+      "ci.upper": 0.3572727431903509,
+      "std.lv": 0.3290876475013821,
+      "std.all": 0.1623633090728228,
+      "section": "variance"
+    },
+    {
+      "lhs": "att_pleasant",
+      "op": "~~",
+      "rhs": "att_pleasant",
+      "est": 0.4494628219730388,
+      "se": 0.01846869345312351,
+      "z": 24.336470964437584,
+      "pvalue": 0,
+      "ci.lower": 0.413264847963406,
+      "ci.upper": 0.4856607959826715,
+      "std.lv": 0.4494628219730388,
+      "std.all": 0.2651931183669464,
+      "section": "variance"
+    },
+    {
+      "lhs": "pbc_barrier",
+      "op": "~~",
+      "rhs": "pbc_barrier",
+      "est": 1.198742319468028,
+      "se": 0.05133274346666154,
+      "z": 23.352391446729523,
+      "pvalue": 0,
+      "ci.lower": 1.098131991045737,
+      "ci.upper": 1.299352647890318,
+      "std.lv": 1.198742319468028,
+      "std.all": 0.7228425137533198,
+      "section": "variance"
+    },
+    {
+      "lhs": "pbc_could",
+      "op": "~~",
+      "rhs": "pbc_could",
+      "est": 0.6355502462823948,
+      "se": 0.05210105307719512,
+      "z": 12.198414595204758,
+      "pvalue": 0,
+      "ci.lower": 0.5334340586944826,
+      "ci.upper": 0.7376664338703069,
+      "std.lv": 0.6355502462823948,
+      "std.all": 0.339636456191668,
+      "section": "variance"
+    },
+    {
+      "lhs": "pbc_resources",
+      "op": "~~",
+      "rhs": "pbc_resources",
+      "est": 1.020676185203905,
+      "se": 0.06070680806081338,
+      "z": 16.813207905469795,
+      "pvalue": 0,
+      "ci.lower": 0.9016930277883249,
+      "ci.upper": 1.139659342619485,
+      "std.lv": 1.020676185203905,
+      "std.all": 0.4372489343520219,
+      "section": "variance"
+    },
+    {
+      "lhs": "norms_d_many",
+      "op": "~~",
+      "rhs": "norms_d_many",
+      "est": 0.6618788424665286,
+      "se": 0.03324073449223926,
+      "z": 19.911679226614503,
+      "pvalue": 0,
+      "ci.lower": 0.5967282000420814,
+      "ci.upper": 0.7270294848909759,
+      "std.lv": 0.6618788424665286,
+      "std.all": 0.4527919286762526,
+      "section": "variance"
+    },
+    {
+      "lhs": "norms_d_common",
+      "op": "~~",
+      "rhs": "norms_d_common",
+      "est": 0.305103030855339,
+      "se": 0.03068009365893571,
+      "z": 9.944657739546255,
+      "pvalue": 0,
+      "ci.lower": 0.2449711522415093,
+      "ci.upper": 0.3652349094691687,
+      "std.lv": 0.305103030855339,
+      "std.all": 0.2077092841457167,
+      "section": "variance"
+    },
+    {
+      "lhs": "norms_d_few",
+      "op": "~~",
+      "rhs": "norms_d_few",
+      "est": 1.0941201079493,
+      "se": 0.04485322710092989,
+      "z": 24.393341988242742,
+      "pvalue": 0,
+      "ci.lower": 1.006209398241082,
+      "ci.upper": 1.182030817657519,
+      "std.lv": 1.0941201079493,
+      "std.all": 0.6722641488892379,
+      "section": "variance"
+    },
+    {
+      "lhs": "norms_i_consider",
+      "op": "~~",
+      "rhs": "norms_i_consider",
+      "est": 0.5631929763519889,
+      "se": 0.03010970945210411,
+      "z": 18.704696478319292,
+      "pvalue": 0,
+      "ci.lower": 0.5041790302408997,
+      "ci.upper": 0.6222069224630782,
+      "std.lv": 0.5631929763519889,
+      "std.all": 0.3595174476251184,
+      "section": "variance"
+    },
+    {
+      "lhs": "norms_i_bad",
+      "op": "~~",
+      "rhs": "norms_i_bad",
+      "est": 0.9141974060395474,
+      "se": 0.04088555122434394,
+      "z": 22.35991392223713,
+      "pvalue": 0,
+      "ci.lower": 0.8340631981517658,
+      "ci.upper": 0.9943316139273289,
+      "std.lv": 0.9141974060395474,
+      "std.all": 0.5464104520736566,
+      "section": "variance"
+    },
+    {
+      "lhs": "norms_i_support",
+      "op": "~~",
+      "rhs": "norms_i_support",
+      "est": 0.7146047432527457,
+      "se": 0.02996992880553946,
+      "z": 23.844058752674197,
+      "pvalue": 0,
+      "ci.lower": 0.6558647621746588,
+      "ci.upper": 0.7733447243308326,
+      "std.lv": 0.7146047432527457,
+      "std.all": 0.6337076097989884,
+      "section": "variance"
+    },
+    {
+      "lhs": "nextv_bev",
+      "op": "~~",
+      "rhs": "nextv_bev",
+      "est": 0.5407100234223755,
+      "se": 0.03470423380128104,
+      "z": 15.580520420606904,
+      "pvalue": 0,
+      "ci.lower": 0.4726909750608072,
+      "ci.upper": 0.6087290717839439,
+      "std.lv": 0.5407100234223755,
+      "std.all": 0.299142712054166,
+      "section": "variance"
+    },
+    {
+      "lhs": "nextv_phev",
+      "op": "~~",
+      "rhs": "nextv_phev",
+      "est": 1.070250336357743,
+      "se": 0.04889887545346148,
+      "z": 21.887013278584124,
+      "pvalue": 0,
+      "ci.lower": 0.9744103015844485,
+      "ci.upper": 1.166090371131037,
+      "std.lv": 1.070250336357743,
+      "std.all": 0.4990271558830203,
+      "section": "variance"
+    },
+    {
+      "lhs": "nextv_icev",
+      "op": "~~",
+      "rhs": "nextv_icev",
+      "est": 1.316698715259067,
+      "se": 0.05601686203989631,
+      "z": 23.505399397797191,
+      "pvalue": 0,
+      "ci.lower": 1.206907683133921,
+      "ci.upper": 1.426489747384213,
+      "std.lv": 1.316698715259067,
+      "std.all": 0.5955960801730875,
+      "section": "variance"
+    },
+    {
+      "lhs": "Attitude",
+      "op": "~~",
+      "rhs": "Attitude",
+      "est": 1.960924327175289,
+      "se": 0.07591532598062389,
+      "z": 25.830414370818637,
+      "pvalue": 0,
+      "ci.lower": 1.812133022378648,
+      "ci.upper": 2.109715631971929,
+      "std.lv": 1,
+      "std.all": 1,
+      "section": "variance"
+    },
+    {
+      "lhs": "PBC",
+      "op": "~~",
+      "rhs": "PBC",
+      "est": 0.4596304196278295,
+      "se": 0.04966760140380595,
+      "z": 9.254129586225774,
+      "pvalue": 0,
+      "ci.lower": 0.3622837096778788,
+      "ci.upper": 0.5569771295777801,
+      "std.lv": 1,
+      "std.all": 1,
+      "section": "variance"
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "~~",
+      "rhs": "DescriptiveNorms",
+      "est": 0.7998937743765904,
+      "se": 0.05288775564249771,
+      "z": 15.124366021193749,
+      "pvalue": 0,
+      "ci.lower": 0.6962356780941399,
+      "ci.upper": 0.9035518706590409,
+      "std.lv": 1,
+      "std.all": 1,
+      "section": "variance"
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "~~",
+      "rhs": "InjunctiveNorms",
+      "est": 1.003331764164222,
+      "se": 0.05835332257269941,
+      "z": 17.194081158176076,
+      "pvalue": 0,
+      "ci.lower": 0.8889613535434827,
+      "ci.upper": 1.117702174784961,
+      "std.lv": 1,
+      "std.all": 1,
+      "section": "variance"
+    },
+    {
+      "lhs": "Intention",
+      "op": "~~",
+      "rhs": "Intention",
+      "est": 0.3327665051718128,
+      "se": 0.03109449968397328,
+      "z": 10.701780332658874,
+      "pvalue": 0,
+      "ci.lower": 0.2718224056739331,
+      "ci.upper": 0.3937106046696925,
+      "std.lv": 0.2626781918553317,
+      "std.all": 0.2626781918553317,
+      "section": "variance"
+    },
+    {
+      "lhs": "Attitude",
+      "op": "~~",
+      "rhs": "PBC",
+      "est": 0.3612388550103589,
+      "se": 0.03741564444524317,
+      "z": 9.654754324465067,
+      "pvalue": 0,
+      "ci.lower": 0.2879055394393262,
+      "ci.upper": 0.4345721705813916,
+      "std.lv": 0.3805043779397366,
+      "std.all": 0.3805043779397366,
+      "section": "covariance"
+    },
+    {
+      "lhs": "Attitude",
+      "op": "~~",
+      "rhs": "DescriptiveNorms",
+      "est": 0.7130224600792521,
+      "se": 0.04368356792878279,
+      "z": 16.322440997532318,
+      "pvalue": 0,
+      "ci.lower": 0.6274042402226289,
+      "ci.upper": 0.7986406799358753,
+      "std.lv": 0.5693202543842638,
+      "std.all": 0.5693202543842638,
+      "section": "covariance"
+    },
+    {
+      "lhs": "Attitude",
+      "op": "~~",
+      "rhs": "InjunctiveNorms",
+      "est": 1.146694363253661,
+      "se": 0.05482426027932763,
+      "z": 20.915820065994399,
+      "pvalue": 0,
+      "ci.lower": 1.039240787627129,
+      "ci.upper": 1.254147938880193,
+      "std.lv": 0.8175135876020703,
+      "std.all": 0.8175135876020703,
+      "section": "covariance"
+    },
+    {
+      "lhs": "PBC",
+      "op": "~~",
+      "rhs": "DescriptiveNorms",
+      "est": 0.2248270398664262,
+      "se": 0.02480634362717066,
+      "z": 9.063288134901535,
+      "pvalue": 0,
+      "ci.lower": 0.176207499769047,
+      "ci.upper": 0.2734465799638053,
+      "std.lv": 0.3707899908661297,
+      "std.all": 0.3707899908661297,
+      "section": "covariance"
+    },
+    {
+      "lhs": "PBC",
+      "op": "~~",
+      "rhs": "InjunctiveNorms",
+      "est": 0.3278357568818662,
+      "se": 0.0314033913667506,
+      "z": 10.439501678438891,
+      "pvalue": 0,
+      "ci.lower": 0.266286240810619,
+      "ci.upper": 0.3893852729531134,
+      "std.lv": 0.4827581978357229,
+      "std.all": 0.4827581978357229,
+      "section": "covariance"
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "~~",
+      "rhs": "InjunctiveNorms",
+      "est": 0.7334989262052212,
+      "se": 0.04115913989248769,
+      "z": 17.821046020913048,
+      "pvalue": 0,
+      "ci.lower": 0.6528284943812995,
+      "ci.upper": 0.8141693580291428,
+      "std.lv": 0.8187683440632311,
+      "std.all": 0.8187683440632311,
+      "section": "covariance"
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~1",
+      "rhs": "",
+      "est": 2.824848831343953,
+      "se": 0.03711545909930972,
+      "z": 76.109763960766699,
+      "pvalue": 0,
+      "ci.lower": 2.752103868239637,
+      "ci.upper": 2.89759379444827,
+      "std.lv": 2.824848831343953,
+      "std.all": 1.956923770907313,
+      "section": "intercept"
+    },
+    {
+      "lhs": "att_desirable",
+      "op": "~1",
+      "rhs": "",
+      "est": 2.826346255345625,
+      "se": 0.03690534208254059,
+      "z": 76.583662306241834,
+      "pvalue": 0,
+      "ci.lower": 2.754013114026715,
+      "ci.upper": 2.898679396664535,
+      "std.lv": 2.826346255345625,
+      "std.all": 1.969601191606195,
+      "section": "intercept"
+    },
+    {
+      "lhs": "att_goodidea",
+      "op": "~1",
+      "rhs": "",
+      "est": 2.920768910094454,
+      "se": 0.03667950497084043,
+      "z": 79.629452807948596,
+      "pvalue": 0,
+      "ci.lower": 2.848878401380849,
+      "ci.upper": 2.992659418808059,
+      "std.lv": 2.920768910094454,
+      "std.all": 2.051565341278568,
+      "section": "intercept"
+    },
+    {
+      "lhs": "att_pleasant",
+      "op": "~1",
+      "rhs": "",
+      "est": 2.982349079443226,
+      "se": 0.03386478006615946,
+      "z": 88.066394455147844,
+      "pvalue": 0,
+      "ci.lower": 2.915975330169184,
+      "ci.upper": 3.048722828717269,
+      "std.lv": 2.982349079443226,
+      "std.all": 2.290829217807041,
+      "section": "intercept"
+    },
+    {
+      "lhs": "pbc_barrier",
+      "op": "~1",
+      "rhs": "",
+      "est": 2.401891423531287,
+      "se": 0.03367817342018254,
+      "z": 71.318933885288729,
+      "pvalue": 0,
+      "ci.lower": 2.335883416562635,
+      "ci.upper": 2.467899430499939,
+      "std.lv": 2.401891423531287,
+      "std.all": 1.865143694552406,
+      "section": "intercept"
+    },
+    {
+      "lhs": "pbc_could",
+      "op": "~1",
+      "rhs": "",
+      "est": 3.670400103060483,
+      "se": 0.03552797179185541,
+      "z": 103.31015022652946,
+      "pvalue": 0,
+      "ci.lower": 3.600766557904691,
+      "ci.upper": 3.740033648216275,
+      "std.lv": 3.670400103060483,
+      "std.all": 2.683154082391308,
+      "section": "intercept"
+    },
+    {
+      "lhs": "pbc_resources",
+      "op": "~1",
+      "rhs": "",
+      "est": 3.135803974656744,
+      "se": 0.03995577135432661,
+      "z": 78.481878045815364,
+      "pvalue": 0,
+      "ci.lower": 3.057492101827747,
+      "ci.upper": 3.214115847485741,
+      "std.lv": 3.135803974656744,
+      "std.all": 2.052434447935951,
+      "section": "intercept"
+    },
+    {
+      "lhs": "norms_d_many",
+      "op": "~1",
+      "rhs": "",
+      "est": 2.021374616408725,
+      "se": 0.0312900738294223,
+      "z": 64.601145635777016,
+      "pvalue": 0,
+      "ci.lower": 1.960047198629458,
+      "ci.upper": 2.082702034187992,
+      "std.lv": 2.021374616408725,
+      "std.all": 1.671886906881853,
+      "section": "intercept"
+    },
+    {
+      "lhs": "norms_d_common",
+      "op": "~1",
+      "rhs": "",
+      "est": 2.354233428373492,
+      "se": 0.03140412905664669,
+      "z": 74.965729001015504,
+      "pvalue": 0,
+      "ci.lower": 2.292682466456617,
+      "ci.upper": 2.415784390290368,
+      "std.lv": 2.354233428373492,
+      "std.all": 1.942469532338726,
+      "section": "intercept"
+    },
+    {
+      "lhs": "norms_d_few",
+      "op": "~1",
+      "rhs": "",
+      "est": 2.066860244304362,
+      "se": 0.03299804455298695,
+      "z": 62.635840162755088,
+      "pvalue": 0,
+      "ci.lower": 2.002185265420259,
+      "ci.upper": 2.131535223188464,
+      "std.lv": 2.066860244304362,
+      "std.all": 1.620125238819899,
+      "section": "intercept"
+    },
+    {
+      "lhs": "norms_i_consider",
+      "op": "~1",
+      "rhs": "",
+      "est": 2.545594146197722,
+      "se": 0.03328499501635898,
+      "z": 76.47872997867681,
+      "pvalue": 0,
+      "ci.lower": 2.480356754740063,
+      "ci.upper": 2.610831537655381,
+      "std.lv": 2.545594146197722,
+      "std.all": 2.033857561940787,
+      "section": "intercept"
+    },
+    {
+      "lhs": "norms_i_bad",
+      "op": "~1",
+      "rhs": "",
+      "est": 3.579725815990451,
+      "se": 0.03420247057493545,
+      "z": 104.66278475841384,
+      "pvalue": 0,
+      "ci.lower": 3.512690205481287,
+      "ci.upper": 3.646761426499615,
+      "std.lv": 3.579725815990451,
+      "std.all": 2.7675104568829,
+      "section": "intercept"
+    },
+    {
+      "lhs": "norms_i_support",
+      "op": "~1",
+      "rhs": "",
+      "est": 3.962699325881121,
+      "se": 0.02771346369835081,
+      "z": 142.9882373785322,
+      "pvalue": 0,
+      "ci.lower": 3.908381935145495,
+      "ci.upper": 4.017016716616746,
+      "std.lv": 3.962699325881121,
+      "std.all": 3.731664876979953,
+      "section": "intercept"
+    },
+    {
+      "lhs": "nextv_bev",
+      "op": "~1",
+      "rhs": "",
+      "est": 2.019797741813126,
+      "se": 0.03526864466581962,
+      "z": 57.268935649534612,
+      "pvalue": 0,
+      "ci.lower": 1.950672468484579,
+      "ci.upper": 2.088923015141673,
+      "std.lv": 2.019797741813126,
+      "std.all": 1.502328428500992,
+      "section": "intercept"
+    },
+    {
+      "lhs": "nextv_phev",
+      "op": "~1",
+      "rhs": "",
+      "est": 2.664109487030547,
+      "se": 0.0385831548875596,
+      "z": 69.048513393847387,
+      "pvalue": 0,
+      "ci.lower": 2.588487893041,
+      "ci.upper": 2.739731081020095,
+      "std.lv": 2.664109487030547,
+      "std.all": 1.819162405422295,
+      "section": "intercept"
+    },
+    {
+      "lhs": "nextv_icev",
+      "op": "~1",
+      "rhs": "",
+      "est": 2.285647970282666,
+      "se": 0.03910035720555576,
+      "z": 58.455935792778355,
+      "pvalue": 0,
+      "ci.lower": 2.209012678377125,
+      "ci.upper": 2.362283262188206,
+      "std.lv": 2.285647970282666,
+      "std.all": 1.537241328142116,
+      "section": "intercept"
+    },
+    {
+      "lhs": "Attitude",
+      "op": "~1",
+      "rhs": "",
+      "est": 0,
+      "se": 0,
+      "z": null,
+      "pvalue": null,
+      "ci.lower": 0,
+      "ci.upper": 0,
+      "std.lv": 0,
+      "std.all": 0,
+      "section": "intercept"
+    },
+    {
+      "lhs": "PBC",
+      "op": "~1",
+      "rhs": "",
+      "est": 0,
+      "se": 0,
+      "z": null,
+      "pvalue": null,
+      "ci.lower": 0,
+      "ci.upper": 0,
+      "std.lv": 0,
+      "std.all": 0,
+      "section": "intercept"
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "~1",
+      "rhs": "",
+      "est": 0,
+      "se": 0,
+      "z": null,
+      "pvalue": null,
+      "ci.lower": 0,
+      "ci.upper": 0,
+      "std.lv": 0,
+      "std.all": 0,
+      "section": "intercept"
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "~1",
+      "rhs": "",
+      "est": 0,
+      "se": 0,
+      "z": null,
+      "pvalue": null,
+      "ci.lower": 0,
+      "ci.upper": 0,
+      "std.lv": 0,
+      "std.all": 0,
+      "section": "intercept"
+    },
+    {
+      "lhs": "Intention",
+      "op": "~1",
+      "rhs": "",
+      "est": 0,
+      "se": 0,
+      "z": null,
+      "pvalue": null,
+      "ci.lower": 0,
+      "ci.upper": 0,
+      "std.lv": 0,
+      "std.all": 0,
+      "section": "intercept"
+    }
+  ],
+  "r_squared": [
+    {
+      "group": "1",
+      "variable": "att_appealing",
+      "r2": 0.94106198004246
+    },
+    {
+      "group": "1",
+      "variable": "att_desirable",
+      "r2": 0.9254297707764285
+    },
+    {
+      "group": "1",
+      "variable": "att_goodidea",
+      "r2": 0.8376366909271772
+    },
+    {
+      "group": "1",
+      "variable": "att_pleasant",
+      "r2": 0.7348068816330535
+    },
+    {
+      "group": "1",
+      "variable": "pbc_barrier",
+      "r2": 0.2771574862466802
+    },
+    {
+      "group": "1",
+      "variable": "pbc_could",
+      "r2": 0.660363543808332
+    },
+    {
+      "group": "1",
+      "variable": "pbc_resources",
+      "r2": 0.5627510656479782
+    },
+    {
+      "group": "1",
+      "variable": "norms_d_many",
+      "r2": 0.5472080713237475
+    },
+    {
+      "group": "1",
+      "variable": "norms_d_common",
+      "r2": 0.7922907158542833
+    },
+    {
+      "group": "1",
+      "variable": "norms_d_few",
+      "r2": 0.3277358511107621
+    },
+    {
+      "group": "1",
+      "variable": "norms_i_consider",
+      "r2": 0.6404825523748816
+    },
+    {
+      "group": "1",
+      "variable": "norms_i_bad",
+      "r2": 0.4535895479263434
+    },
+    {
+      "group": "1",
+      "variable": "norms_i_support",
+      "r2": 0.3662923902010116
+    },
+    {
+      "group": "1",
+      "variable": "nextv_bev",
+      "r2": 0.7008572879458339
+    },
+    {
+      "group": "1",
+      "variable": "nextv_phev",
+      "r2": 0.5009728441169797
+    },
+    {
+      "group": "1",
+      "variable": "nextv_icev",
+      "r2": 0.4044039198269125
+    },
+    {
+      "group": "1",
+      "variable": "Intention",
+      "r2": 0.7373218081446683
+    }
+  ],
+  "modification_indices": [
+    {
+      "lhs": "Intention",
+      "op": "=~",
+      "rhs": "pbc_barrier",
+      "mi": 186.93317020268665,
+      "epc": 0.4907265596006532,
+      "sepc.lv": 0.5523283784142606,
+      "sepc.all": 0.4289002334698142,
+      "sepc.nox": 0.4289002334698142
+    },
+    {
+      "lhs": "Attitude",
+      "op": "=~",
+      "rhs": "pbc_barrier",
+      "mi": 178.00615989450532,
+      "epc": 0.3315068728867003,
+      "sepc.lv": 0.4642190451461131,
+      "sepc.all": 0.3604805847853235,
+      "sepc.nox": 0.3604805847853235
+    },
+    {
+      "lhs": "pbc_could",
+      "op": "~~",
+      "rhs": "pbc_resources",
+      "mi": 152.67192218691278,
+      "epc": 1.408368263855688,
+      "sepc.lv": 1.408368263855688,
+      "sepc.all": 1.748627457621191,
+      "sepc.nox": 1.748627457621191
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "=~",
+      "rhs": "pbc_barrier",
+      "mi": 147.40761219517108,
+      "epc": 0.4843330084374178,
+      "sepc.lv": 0.4851391791836319,
+      "sepc.all": 0.3767257221412423,
+      "sepc.nox": 0.3767257221412423
+    },
+    {
+      "lhs": "norms_i_bad",
+      "op": "~~",
+      "rhs": "norms_i_support",
+      "mi": 113.42070946435022,
+      "epc": 0.2730629479254005,
+      "sepc.lv": 0.2730629479254005,
+      "sepc.all": 0.3378390404011777,
+      "sepc.nox": 0.3378390404011777
+    },
+    {
+      "lhs": "norms_d_many",
+      "op": "~~",
+      "rhs": "norms_d_few",
+      "mi": 96.080596584491815,
+      "epc": 0.279361685463197,
+      "sepc.lv": 0.279361685463197,
+      "sepc.all": 0.3282805051744501,
+      "sepc.nox": 0.3282805051744501
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "=~",
+      "rhs": "norms_d_common",
+      "mi": 81.278625944686809,
+      "epc": 0.8018503796625468,
+      "sepc.lv": 0.8031850570594274,
+      "sepc.all": 0.6627051011018791,
+      "sepc.nox": 0.6627051011018791
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "=~",
+      "rhs": "pbc_barrier",
+      "mi": 73.784305919004979,
+      "epc": 0.3568000034059128,
+      "sepc.lv": 0.3191104366193644,
+      "sepc.all": 0.2477992189386406,
+      "sepc.nox": 0.2477992189386406
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "=~",
+      "rhs": "norms_i_consider",
+      "mi": 56.52093279553322,
+      "epc": 0.6095185490048652,
+      "sepc.lv": 0.5451337680601623,
+      "sepc.all": 0.4355464275774301,
+      "sepc.nox": 0.4355464275774301
+    },
+    {
+      "lhs": "norms_d_common",
+      "op": "~~",
+      "rhs": "norms_i_consider",
+      "mi": 46.024056469558403,
+      "epc": 0.14884021920118,
+      "sepc.lv": 0.14884021920118,
+      "sepc.all": 0.3590611561835369,
+      "sepc.nox": 0.3590611561835369
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~~",
+      "rhs": "att_desirable",
+      "mi": 41.661029936775797,
+      "epc": 0.0777578021808024,
+      "sepc.lv": 0.0777578021808024,
+      "sepc.all": 0.5662328950281077,
+      "sepc.nox": 0.5662328950281077
+    },
+    {
+      "lhs": "att_desirable",
+      "op": "~~",
+      "rhs": "att_pleasant",
+      "mi": 36.330387354303205,
+      "epc": -0.06045095198221397,
+      "sepc.lv": -0.06045095198221397,
+      "sepc.all": -0.2301052092496959,
+      "sepc.nox": -0.2301052092496959
+    },
+    {
+      "lhs": "Attitude",
+      "op": "=~",
+      "rhs": "norms_d_common",
+      "mi": 35.930429974104193,
+      "epc": 0.1696778132227526,
+      "sepc.lv": 0.2376049454144117,
+      "sepc.all": 0.1960469856718382,
+      "sepc.nox": 0.1960469856718382
+    },
+    {
+      "lhs": "norms_i_consider",
+      "op": "~~",
+      "rhs": "norms_i_bad",
+      "mi": 35.517984360971589,
+      "epc": -0.196970349879166,
+      "sepc.lv": -0.196970349879166,
+      "sepc.all": -0.2745062575935555,
+      "sepc.nox": -0.2745062575935555
+    },
+    {
+      "lhs": "att_pleasant",
+      "op": "~~",
+      "rhs": "nextv_bev",
+      "mi": 35.386274173359062,
+      "epc": -0.1031953135841011,
+      "sepc.lv": -0.1031953135841011,
+      "sepc.all": -0.2093297128976208,
+      "sepc.nox": -0.2093297128976208
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "=~",
+      "rhs": "pbc_resources",
+      "mi": 34.462321560345806,
+      "epc": -0.2973930353094671,
+      "sepc.lv": -0.297888045067253,
+      "sepc.all": -0.1949725462004533,
+      "sepc.nox": -0.1949725462004533
+    },
+    {
+      "lhs": "pbc_barrier",
+      "op": "~~",
+      "rhs": "pbc_could",
+      "mi": 34.346230125455108,
+      "epc": -0.305934419125534,
+      "sepc.lv": -0.305934419125534,
+      "sepc.all": -0.3505019798931949,
+      "sepc.nox": -0.3505019798931949
+    },
+    {
+      "lhs": "Attitude",
+      "op": "=~",
+      "rhs": "nextv_bev",
+      "mi": 33.340308017334984,
+      "epc": 0.4264598759568485,
+      "sepc.lv": 0.5971845913356942,
+      "sepc.all": 0.444186747045768,
+      "sepc.nox": 0.444186747045768
+    },
+    {
+      "lhs": "Attitude",
+      "op": "=~",
+      "rhs": "pbc_resources",
+      "mi": 30.688809695011813,
+      "epc": -0.1658107677525782,
+      "sepc.lv": -0.2321898053297761,
+      "sepc.all": -0.1519719851016964,
+      "sepc.nox": -0.1519719851016964
+    },
+    {
+      "lhs": "Intention",
+      "op": "=~",
+      "rhs": "pbc_resources",
+      "mi": 30.391601710882458,
+      "epc": -0.2501536894436175,
+      "sepc.lv": -0.2815559478932143,
+      "sepc.all": -0.1842829242987196,
+      "sepc.nox": -0.1842829242987196
+    },
+    {
+      "lhs": "Intention",
+      "op": "=~",
+      "rhs": "norms_d_common",
+      "mi": 26.317139857901196,
+      "epc": 0.2045928164523556,
+      "sepc.lv": 0.2302757336759924,
+      "sepc.all": 0.1899996794334867,
+      "sepc.nox": 0.1899996794334867
+    },
+    {
+      "lhs": "norms_d_common",
+      "op": "~~",
+      "rhs": "norms_d_few",
+      "mi": 26.307962739678583,
+      "epc": -0.1624536866579239,
+      "sepc.lv": -0.1624536866579239,
+      "sepc.all": -0.2811731269345002,
+      "sepc.nox": -0.2811731269345002
+    },
+    {
+      "lhs": "att_goodidea",
+      "op": "~~",
+      "rhs": "att_pleasant",
+      "mi": 24.917417888852174,
+      "epc": 0.05952099261673612,
+      "sepc.lv": 0.05952099261673612,
+      "sepc.all": 0.1547631239634686,
+      "sepc.nox": 0.1547631239634686
+    },
+    {
+      "lhs": "pbc_barrier",
+      "op": "~~",
+      "rhs": "nextv_bev",
+      "mi": 23.696177508970298,
+      "epc": 0.1370391300224983,
+      "sepc.lv": 0.1370391300224983,
+      "sepc.all": 0.1702156407237535,
+      "sepc.nox": 0.1702156407237535
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "=~",
+      "rhs": "norms_d_few",
+      "mi": 23.31299523701454,
+      "epc": -0.3319943572083235,
+      "sepc.lv": -0.3325469607559384,
+      "sepc.all": -0.2606696440643368,
+      "sepc.nox": -0.2606696440643368
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "=~",
+      "rhs": "norms_d_many",
+      "mi": 21.634972077037176,
+      "epc": -0.3332416895198173,
+      "sepc.lv": -0.3337963692480823,
+      "sepc.all": -0.2760842917390858,
+      "sepc.nox": -0.2760842917390858
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "=~",
+      "rhs": "norms_i_support",
+      "mi": 21.618890913709674,
+      "epc": -0.3003139474246804,
+      "sepc.lv": -0.2685911265997104,
+      "sepc.all": -0.2529316485998472,
+      "sepc.nox": -0.2529316485998472
+    },
+    {
+      "lhs": "Intention",
+      "op": "=~",
+      "rhs": "pbc_could",
+      "mi": 21.488033184550218,
+      "epc": -0.2007153708710001,
+      "sepc.lv": -0.2259115451305784,
+      "sepc.all": -0.1651469778651679,
+      "sepc.nox": -0.1651469778651679
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "=~",
+      "rhs": "att_appealing",
+      "mi": 19.708782715129409,
+      "epc": -0.124021473729571,
+      "sepc.lv": -0.1242279070766306,
+      "sepc.all": -0.08605931109335274,
+      "sepc.nox": -0.08605931109335274
+    },
+    {
+      "lhs": "norms_i_support",
+      "op": "~~",
+      "rhs": "nextv_bev",
+      "mi": 19.239131892516099,
+      "epc": -0.09698643833214522,
+      "sepc.lv": -0.09698643833214522,
+      "sepc.all": -0.156025597146641,
+      "sepc.nox": -0.156025597146641
+    },
+    {
+      "lhs": "norms_d_many",
+      "op": "~~",
+      "rhs": "norms_d_common",
+      "mi": 18.974416701486426,
+      "epc": -0.1886142765089895,
+      "sepc.lv": -0.1886142765089895,
+      "sepc.all": -0.4197223074638026,
+      "sepc.nox": -0.4197223074638026
+    },
+    {
+      "lhs": "Attitude",
+      "op": "=~",
+      "rhs": "norms_d_few",
+      "mi": 18.183238980857304,
+      "epc": -0.1157694238846536,
+      "sepc.lv": -0.1621154063711286,
+      "sepc.all": -0.1270754818508826,
+      "sepc.nox": -0.1270754818508826
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "=~",
+      "rhs": "norms_i_bad",
+      "mi": 17.778932135735143,
+      "epc": -0.3322307173647513,
+      "sepc.lv": -0.2971364581407219,
+      "sepc.all": -0.2297182234885973,
+      "sepc.nox": -0.2297182234885973
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~~",
+      "rhs": "att_goodidea",
+      "mi": 15.225536304463171,
+      "epc": -0.04086372597252146,
+      "sepc.lv": -0.04086372597252146,
+      "sepc.all": -0.2032652313617271,
+      "sepc.nox": -0.2032652313617271
+    },
+    {
+      "lhs": "Attitude",
+      "op": "=~",
+      "rhs": "pbc_could",
+      "mi": 14.930383584027121,
+      "epc": -0.1092603011675375,
+      "sepc.lv": -0.1530004860493674,
+      "sepc.all": -0.1118471739385873,
+      "sepc.nox": -0.1118471739385873
+    },
+    {
+      "lhs": "pbc_barrier",
+      "op": "~~",
+      "rhs": "pbc_resources",
+      "mi": 13.508507227160116,
+      "epc": -0.1961707573335641,
+      "sepc.lv": -0.1961707573335641,
+      "sepc.all": -0.1773484344337819,
+      "sepc.nox": -0.1773484344337819
+    },
+    {
+      "lhs": "Intention",
+      "op": "=~",
+      "rhs": "norms_d_few",
+      "mi": 13.439962379345355,
+      "epc": -0.1382037070268748,
+      "sepc.lv": -0.1555526757204925,
+      "sepc.all": -0.1219312319713988,
+      "sepc.nox": -0.1219312319713988
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "=~",
+      "rhs": "att_pleasant",
+      "mi": 13.308329431097755,
+      "epc": 0.1051657079964709,
+      "sepc.lv": 0.09405682364290663,
+      "sepc.all": 0.0722477865587486,
+      "sepc.nox": 0.0722477865587486
+    },
+    {
+      "lhs": "pbc_could",
+      "op": "~~",
+      "rhs": "norms_i_support",
+      "mi": 12.998675473781823,
+      "epc": 0.08868227094447897,
+      "sepc.lv": 0.08868227094447897,
+      "sepc.all": 0.1315918258659347,
+      "sepc.nox": 0.1315918258659347
+    },
+    {
+      "lhs": "att_desirable",
+      "op": "~~",
+      "rhs": "nextv_bev",
+      "mi": 12.953198003473561,
+      "epc": 0.04223811652473523,
+      "sepc.lv": 0.04223811652473523,
+      "sepc.all": 0.1465860110835316,
+      "sepc.nox": 0.1465860110835316
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "=~",
+      "rhs": "att_pleasant",
+      "mi": 12.272776075099628,
+      "epc": 0.1439926841624829,
+      "sepc.lv": 0.1442323595255459,
+      "sepc.all": 0.1107890775200785,
+      "sepc.nox": 0.1107890775200785
+    },
+    {
+      "lhs": "norms_d_few",
+      "op": "~~",
+      "rhs": "norms_i_support",
+      "mi": 12.156415122686779,
+      "epc": -0.08822948263394977,
+      "sepc.lv": -0.08822948263394977,
+      "sepc.all": -0.09978109957270741,
+      "sepc.nox": -0.09978109957270741
+    },
+    {
+      "lhs": "Attitude",
+      "op": "=~",
+      "rhs": "nextv_phev",
+      "mi": 12.102766788806683,
+      "epc": -0.2323949779642999,
+      "sepc.lv": -0.3254296776049359,
+      "sepc.all": -0.2222166311068015,
+      "sepc.nox": -0.2222166311068015
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "=~",
+      "rhs": "nextv_bev",
+      "mi": 11.450338988245857,
+      "epc": -0.2821141462955576,
+      "sepc.lv": -0.2825837243913608,
+      "sepc.all": -0.2101861754750435,
+      "sepc.nox": -0.2101861754750435
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "=~",
+      "rhs": "pbc_resources",
+      "mi": 11.055073953976724,
+      "epc": -0.1657822762320778,
+      "sepc.lv": -0.1482703308497046,
+      "sepc.all": -0.09704533099078866,
+      "sepc.nox": -0.09704533099078866
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "=~",
+      "rhs": "nextv_bev",
+      "mi": 10.820006435548793,
+      "epc": -0.1704502145353506,
+      "sepc.lv": -0.1524451845936801,
+      "sepc.all": -0.1133889447750242,
+      "sepc.nox": -0.1133889447750242
+    },
+    {
+      "lhs": "Intention",
+      "op": "=~",
+      "rhs": "att_goodidea",
+      "mi": 10.440236513545141,
+      "epc": 0.1175509248215359,
+      "sepc.lv": 0.1323073113071608,
+      "sepc.all": 0.09293343726626667,
+      "sepc.nox": 0.09293343726626667
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "=~",
+      "rhs": "pbc_could",
+      "mi": 10.241079571525031,
+      "epc": -0.1548447474680755,
+      "sepc.lv": -0.1551024860558633,
+      "sepc.all": -0.113383788405744,
+      "sepc.nox": -0.113383788405744
+    },
+    {
+      "lhs": "Attitude",
+      "op": "=~",
+      "rhs": "norms_d_many",
+      "mi": 10.105816013343091,
+      "epc": -0.07947209298079581,
+      "sepc.lv": -0.1112871621576212,
+      "sepc.all": -0.09204605015072725,
+      "sepc.nox": -0.09204605015072725
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "=~",
+      "rhs": "att_goodidea",
+      "mi": 10.044833222420438,
+      "epc": 0.1136967577887067,
+      "sepc.lv": 0.1138860056790463,
+      "sepc.all": 0.0799942033415543,
+      "sepc.nox": 0.0799942033415543
+    },
+    {
+      "lhs": "Intention",
+      "op": "=~",
+      "rhs": "att_appealing",
+      "mi": 9.118836610593341,
+      "epc": -0.08648853645304337,
+      "sepc.lv": -0.09734560348518077,
+      "sepc.all": -0.0674365025624527,
+      "sepc.nox": -0.0674365025624527
+    },
+    {
+      "lhs": "norms_d_common",
+      "op": "~~",
+      "rhs": "norms_i_bad",
+      "mi": 8.730986576324892,
+      "epc": -0.0696421729044274,
+      "sepc.lv": -0.0696421729044274,
+      "sepc.all": -0.1318648544630569,
+      "sepc.nox": -0.1318648544630569
+    },
+    {
+      "lhs": "norms_i_consider",
+      "op": "~~",
+      "rhs": "norms_i_support",
+      "mi": 8.601038104969435,
+      "epc": -0.07362496952186129,
+      "sepc.lv": -0.07362496952186129,
+      "sepc.all": -0.1160549224543251,
+      "sepc.nox": -0.1160549224543251
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "=~",
+      "rhs": "att_appealing",
+      "mi": 8.522837726046893,
+      "epc": -0.05609041427485845,
+      "sepc.lv": -0.05016546081432714,
+      "sepc.all": -0.03475229600140078,
+      "sepc.nox": -0.03475229600140078
+    },
+    {
+      "lhs": "att_desirable",
+      "op": "~~",
+      "rhs": "pbc_could",
+      "mi": 8.26850682965661,
+      "epc": -0.03741723824923784,
+      "sepc.lv": -0.03741723824923784,
+      "sepc.all": -0.1197752198624364,
+      "sepc.nox": -0.1197752198624364
+    },
+    {
+      "lhs": "PBC",
+      "op": "=~",
+      "rhs": "norms_i_support",
+      "mi": 7.696296899402371,
+      "epc": 0.1390332737808093,
+      "sepc.lv": 0.09425906576524604,
+      "sepc.all": 0.08876354629174414,
+      "sepc.nox": 0.08876354629174414
+    },
+    {
+      "lhs": "PBC",
+      "op": "=~",
+      "rhs": "nextv_bev",
+      "mi": 7.539412622290288,
+      "epc": -0.1722372804409326,
+      "sepc.lv": -0.1167700702344383,
+      "sepc.all": -0.08685374405547031,
+      "sepc.nox": -0.08685374405547031
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "=~",
+      "rhs": "pbc_could",
+      "mi": 7.293117319301754,
+      "epc": -0.1271361585546063,
+      "sepc.lv": -0.1137064873295818,
+      "sepc.all": -0.08312228016186807,
+      "sepc.nox": -0.08312228016186807
+    },
+    {
+      "lhs": "Intention",
+      "op": "=~",
+      "rhs": "norms_d_many",
+      "mi": 7.040497509611378,
+      "epc": -0.0929522839388861,
+      "sepc.lv": -0.1046207572291315,
+      "sepc.all": -0.08653224037719988,
+      "sepc.nox": -0.08653224037719988
+    },
+    {
+      "lhs": "PBC",
+      "op": "=~",
+      "rhs": "att_goodidea",
+      "mi": 6.964018891948135,
+      "epc": 0.07950948279017613,
+      "sepc.lv": 0.0539042875383574,
+      "sepc.all": 0.03786269008746466,
+      "sepc.nox": 0.03786269008746466
+    },
+    {
+      "lhs": "norms_i_bad",
+      "op": "~~",
+      "rhs": "nextv_phev",
+      "mi": 6.826698380727294,
+      "epc": 0.083487313404952,
+      "sepc.lv": 0.083487313404952,
+      "sepc.all": 0.08440298515669503,
+      "sepc.nox": 0.08440298515669503
+    },
+    {
+      "lhs": "PBC",
+      "op": "=~",
+      "rhs": "att_pleasant",
+      "mi": 6.791425645843366,
+      "epc": 0.09032084204884137,
+      "sepc.lv": 0.06123396190811169,
+      "sepc.all": 0.04703559017557187,
+      "sepc.nox": 0.04703559017557187
+    },
+    {
+      "lhs": "pbc_resources",
+      "op": "~~",
+      "rhs": "norms_i_bad",
+      "mi": 6.665435545592235,
+      "epc": -0.08579685782906177,
+      "sepc.lv": -0.08579685782906177,
+      "sepc.all": -0.08881931093763767,
+      "sepc.nox": -0.08881931093763767
+    },
+    {
+      "lhs": "nextv_phev",
+      "op": "~~",
+      "rhs": "nextv_icev",
+      "mi": 6.658104336437275,
+      "epc": 0.1012542895763415,
+      "sepc.lv": 0.1012542895763415,
+      "sepc.all": 0.08529577871753834,
+      "sepc.nox": 0.08529577871753834
+    },
+    {
+      "lhs": "Attitude",
+      "op": "=~",
+      "rhs": "norms_i_bad",
+      "mi": 6.470032493765302,
+      "epc": 0.120990308209436,
+      "sepc.lv": 0.1694263677245517,
+      "sepc.all": 0.1309846810766568,
+      "sepc.nox": 0.1309846810766568
+    },
+    {
+      "lhs": "PBC",
+      "op": "=~",
+      "rhs": "nextv_icev",
+      "mi": 6.063481264426914,
+      "epc": 0.1680318598385639,
+      "sepc.lv": 0.113918961241967,
+      "sepc.all": 0.07661763209253718,
+      "sepc.nox": 0.07661763209253718
+    },
+    {
+      "lhs": "Attitude",
+      "op": "=~",
+      "rhs": "norms_i_consider",
+      "mi": 6.062216591366351,
+      "epc": -0.1222628245780163,
+      "sepc.lv": -0.1712083106701419,
+      "sepc.all": -0.1367905869219929,
+      "sepc.nox": -0.1367905869219929
+    },
+    {
+      "lhs": "att_pleasant",
+      "op": "~~",
+      "rhs": "norms_i_support",
+      "mi": 5.442211190813306,
+      "epc": 0.03895184394247413,
+      "sepc.lv": 0.03895184394247413,
+      "sepc.all": 0.06873029171396382,
+      "sepc.nox": 0.06873029171396382
+    },
+    {
+      "lhs": "att_pleasant",
+      "op": "~~",
+      "rhs": "nextv_phev",
+      "mi": 5.39616018795904,
+      "epc": 0.0501798844032642,
+      "sepc.lv": 0.0501798844032642,
+      "sepc.all": 0.07235025779577546,
+      "sepc.nox": 0.07235025779577546
+    },
+    {
+      "lhs": "PBC",
+      "op": "=~",
+      "rhs": "norms_d_few",
+      "mi": 5.384635639188247,
+      "epc": -0.1242956115783421,
+      "sepc.lv": -0.08426751314627808,
+      "sepc.all": -0.06605377660975924,
+      "sepc.nox": -0.06605377660975924
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "=~",
+      "rhs": "nextv_icev",
+      "mi": 5.354050264279965,
+      "epc": 0.1863530148344982,
+      "sepc.lv": 0.186663198832721,
+      "sepc.all": 0.1255426852339738,
+      "sepc.nox": 0.1255426852339738
+    },
+    {
+      "lhs": "Intention",
+      "op": "=~",
+      "rhs": "norms_i_bad",
+      "mi": 5.345528709634592,
+      "epc": 0.1460163537430349,
+      "sepc.lv": 0.1643460585269414,
+      "sepc.all": 0.1270570593672564,
+      "sepc.nox": 0.1270570593672564
+    },
+    {
+      "lhs": "att_pleasant",
+      "op": "~~",
+      "rhs": "pbc_barrier",
+      "mi": 5.268543228887162,
+      "epc": 0.04979389517104912,
+      "sepc.lv": 0.04979389517104912,
+      "sepc.all": 0.06783694707747476,
+      "sepc.nox": 0.06783694707747476
+    },
+    {
+      "lhs": "pbc_barrier",
+      "op": "~~",
+      "rhs": "norms_i_support",
+      "mi": 5.26650834106749,
+      "epc": -0.06159928679764984,
+      "sepc.lv": -0.06159928679764984,
+      "sepc.all": -0.06655486668149857,
+      "sepc.nox": -0.06655486668149857
+    },
+    {
+      "lhs": "Attitude",
+      "op": "=~",
+      "rhs": "nextv_icev",
+      "mi": 5.245423614974042,
+      "epc": -0.1458220575110594,
+      "sepc.lv": -0.2041990131594083,
+      "sepc.all": -0.1373366180075656,
+      "sepc.nox": -0.1373366180075656
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~~",
+      "rhs": "nextv_icev",
+      "mi": 5.183604325255782,
+      "epc": -0.03404823261627662,
+      "sepc.lv": -0.03404823261627662,
+      "sepc.all": -0.08467053295272001,
+      "sepc.nox": -0.08467053295272001
+    },
+    {
+      "lhs": "pbc_resources",
+      "op": "~~",
+      "rhs": "nextv_bev",
+      "mi": 5.175811650127428,
+      "epc": -0.06835649452842353,
+      "sepc.lv": -0.06835649452842353,
+      "sepc.all": -0.09201393036962302,
+      "sepc.nox": -0.09201393036962302
+    },
+    {
+      "lhs": "pbc_barrier",
+      "op": "~~",
+      "rhs": "norms_d_common",
+      "mi": 5.131422689602215,
+      "epc": 0.05462422459721145,
+      "sepc.lv": 0.05462422459721145,
+      "sepc.all": 0.09032315629528988,
+      "sepc.nox": 0.09032315629528988
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~~",
+      "rhs": "norms_i_consider",
+      "mi": 4.66232055464525,
+      "epc": -0.02364061195656354,
+      "sepc.lv": -0.02364061195656354,
+      "sepc.all": -0.08988992650774311,
+      "sepc.nox": -0.08988992650774311
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "=~",
+      "rhs": "nextv_icev",
+      "mi": 4.640552160016417,
+      "epc": 0.1192290514621777,
+      "sepc.lv": 0.1066346252988227,
+      "sepc.all": 0.07171846021416271,
+      "sepc.nox": 0.07171846021416271
+    },
+    {
+      "lhs": "att_goodidea",
+      "op": "~~",
+      "rhs": "nextv_bev",
+      "mi": 4.627279853987961,
+      "epc": 0.03245434705671141,
+      "sepc.lv": 0.03245434705671141,
+      "sepc.all": 0.07693693399825499,
+      "sepc.nox": 0.07693693399825499
+    },
+    {
+      "lhs": "PBC",
+      "op": "=~",
+      "rhs": "att_appealing",
+      "mi": 4.617046644644835,
+      "epc": -0.04906615223338085,
+      "sepc.lv": -0.03326491237993273,
+      "sepc.all": -0.02304438278294303,
+      "sepc.nox": -0.02304438278294303
+    },
+    {
+      "lhs": "norms_d_many",
+      "op": "~~",
+      "rhs": "norms_i_support",
+      "mi": 4.563420700224062,
+      "epc": -0.04529831846118645,
+      "sepc.lv": -0.04529831846118645,
+      "sepc.all": -0.06586578679870705,
+      "sepc.nox": -0.06586578679870705
+    },
+    {
+      "lhs": "nextv_bev",
+      "op": "~~",
+      "rhs": "nextv_icev",
+      "mi": 4.360411970885593,
+      "epc": -0.07800407217705957,
+      "sepc.lv": -0.07800407217705957,
+      "sepc.all": -0.09244679500058725,
+      "sepc.nox": -0.09244679500058725
+    },
+    {
+      "lhs": "att_goodidea",
+      "op": "~~",
+      "rhs": "nextv_icev",
+      "mi": 3.971444776976726,
+      "epc": 0.04018011937787148,
+      "sepc.lv": 0.04018011937787148,
+      "sepc.all": 0.06103967692320512,
+      "sepc.nox": 0.06103967692320512
+    },
+    {
+      "lhs": "norms_i_support",
+      "op": "~~",
+      "rhs": "nextv_icev",
+      "mi": 3.895918676082445,
+      "epc": 0.0572078812788278,
+      "sepc.lv": 0.0572078812788278,
+      "sepc.all": 0.05897659710946852,
+      "sepc.nox": 0.05897659710946852
+    },
+    {
+      "lhs": "att_desirable",
+      "op": "~~",
+      "rhs": "att_goodidea",
+      "mi": 3.895670784244757,
+      "epc": -0.02040563464013501,
+      "sepc.lv": -0.02040563464013501,
+      "sepc.all": -0.09077463451917443,
+      "sepc.nox": -0.09077463451917443
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~~",
+      "rhs": "att_pleasant",
+      "mi": 3.73838452847303,
+      "epc": 0.019177021303736,
+      "sepc.lv": 0.019177021303736,
+      "sepc.all": 0.08162349553717074,
+      "sepc.nox": 0.08162349553717074
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~~",
+      "rhs": "pbc_resources",
+      "mi": 3.65358069228523,
+      "epc": -0.02758613458934062,
+      "sepc.lv": -0.02758613458934062,
+      "sepc.all": -0.07791620396776745,
+      "sepc.nox": -0.07791620396776745
+    },
+    {
+      "lhs": "att_desirable",
+      "op": "~~",
+      "rhs": "norms_i_consider",
+      "mi": 3.632448626961666,
+      "epc": 0.02158464165672982,
+      "sepc.lv": 0.02158464165672982,
+      "sepc.all": 0.07339837097036667,
+      "sepc.nox": 0.07339837097036667
+    },
+    {
+      "lhs": "pbc_could",
+      "op": "~~",
+      "rhs": "nextv_bev",
+      "mi": 3.493847798847264,
+      "epc": -0.04989757663254681,
+      "sepc.lv": -0.04989757663254681,
+      "sepc.all": -0.08511817392523852,
+      "sepc.nox": -0.08511817392523852
+    },
+    {
+      "lhs": "pbc_resources",
+      "op": "~~",
+      "rhs": "nextv_icev",
+      "mi": 3.468511147041585,
+      "epc": 0.0730659898912096,
+      "sepc.lv": 0.0730659898912096,
+      "sepc.all": 0.06302720896167649,
+      "sepc.nox": 0.06302720896167649
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "=~",
+      "rhs": "nextv_phev",
+      "mi": 3.196119495156051,
+      "epc": 0.09562198807849448,
+      "sepc.lv": 0.08552122778829088,
+      "sepc.all": 0.05839737563917597,
+      "sepc.nox": 0.05839737563917597
+    },
+    {
+      "lhs": "pbc_barrier",
+      "op": "~~",
+      "rhs": "norms_i_bad",
+      "mi": 3.179330359670043,
+      "epc": 0.05628149747500385,
+      "sepc.lv": 0.05628149747500385,
+      "sepc.all": 0.05376290572454243,
+      "sepc.nox": 0.05376290572454243
+    },
+    {
+      "lhs": "att_goodidea",
+      "op": "~~",
+      "rhs": "nextv_phev",
+      "mi": 3.157724382200569,
+      "epc": -0.03336545568869882,
+      "sepc.lv": -0.03336545568869882,
+      "sepc.all": -0.05622100225790978,
+      "sepc.nox": -0.05622100225790978
+    },
+    {
+      "lhs": "norms_i_bad",
+      "op": "~~",
+      "rhs": "nextv_bev",
+      "mi": 3.121860886092051,
+      "epc": -0.04643532485049121,
+      "sepc.lv": -0.04643532485049121,
+      "sepc.all": -0.06604596431950835,
+      "sepc.nox": -0.06604596431950835
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "=~",
+      "rhs": "att_goodidea",
+      "mi": 3.079605231982142,
+      "epc": 0.04404335872332614,
+      "sepc.lv": 0.03939096215869314,
+      "sepc.all": 0.0276684445815253,
+      "sepc.nox": 0.0276684445815253
+    },
+    {
+      "lhs": "att_pleasant",
+      "op": "~~",
+      "rhs": "norms_i_bad",
+      "mi": 3.073518709500389,
+      "epc": 0.03427906156109636,
+      "sepc.lv": 0.03427906156109636,
+      "sepc.all": 0.05347638539758984,
+      "sepc.nox": 0.05347638539758984
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~~",
+      "rhs": "norms_i_support",
+      "mi": 2.933090762226803,
+      "epc": -0.01837535191790541,
+      "sepc.lv": -0.01837535191790541,
+      "sepc.all": -0.06202740952869178,
+      "sepc.nox": -0.06202740952869178
+    },
+    {
+      "lhs": "att_goodidea",
+      "op": "~~",
+      "rhs": "pbc_barrier",
+      "mi": 2.852161112332773,
+      "epc": 0.03173941095572753,
+      "sepc.lv": 0.03173941095572753,
+      "sepc.all": 0.0505335900880417,
+      "sepc.nox": 0.0505335900880417
+    },
+    {
+      "lhs": "PBC",
+      "op": "=~",
+      "rhs": "norms_d_common",
+      "mi": 2.750610392062109,
+      "epc": 0.08457098144782475,
+      "sepc.lv": 0.05733578362464074,
+      "sepc.all": 0.04730754880180949,
+      "sepc.nox": 0.04730754880180949
+    },
+    {
+      "lhs": "att_pleasant",
+      "op": "~~",
+      "rhs": "norms_i_consider",
+      "mi": 2.60293279425335,
+      "epc": -0.02707432917913651,
+      "sepc.lv": -0.02707432917913651,
+      "sepc.all": -0.05381238030518111,
+      "sepc.nox": -0.05381238030518111
+    },
+    {
+      "lhs": "norms_d_many",
+      "op": "~~",
+      "rhs": "norms_i_bad",
+      "mi": 2.493343989950792,
+      "epc": -0.03965126418796722,
+      "sepc.lv": -0.03965126418796722,
+      "sepc.all": -0.05097389225653919,
+      "sepc.nox": -0.05097389225653919
+    },
+    {
+      "lhs": "att_goodidea",
+      "op": "~~",
+      "rhs": "norms_i_support",
+      "mi": 2.373112139743169,
+      "epc": 0.022282932104489,
+      "sepc.lv": 0.022282932104489,
+      "sepc.all": 0.04594979722233167,
+      "sepc.nox": 0.04594979722233167
+    },
+    {
+      "lhs": "norms_d_common",
+      "op": "~~",
+      "rhs": "nextv_bev",
+      "mi": 2.315281088190475,
+      "epc": -0.03160709217963171,
+      "sepc.lv": -0.03160709217963171,
+      "sepc.all": -0.07781782208509579,
+      "sepc.nox": -0.07781782208509579
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "=~",
+      "rhs": "nextv_phev",
+      "mi": 2.099849941235678,
+      "epc": 0.1175487820388901,
+      "sepc.lv": 0.1177444416112959,
+      "sepc.all": 0.08040069774514262,
+      "sepc.nox": 0.08040069774514262
+    },
+    {
+      "lhs": "PBC",
+      "op": "=~",
+      "rhs": "norms_i_consider",
+      "mi": 2.063285595990922,
+      "epc": -0.08949675185746166,
+      "sepc.lv": -0.06067526132203316,
+      "sepc.all": -0.04847781381288789,
+      "sepc.nox": -0.04847781381288789
+    },
+    {
+      "lhs": "pbc_barrier",
+      "op": "~~",
+      "rhs": "nextv_phev",
+      "mi": 2.005240137880067,
+      "epc": -0.0495436596898122,
+      "sepc.lv": -0.0495436596898122,
+      "sepc.all": -0.0437403726364634,
+      "sepc.nox": -0.0437403726364634
+    },
+    {
+      "lhs": "norms_i_bad",
+      "op": "~~",
+      "rhs": "nextv_icev",
+      "mi": 1.998627395693569,
+      "epc": 0.04823999932908445,
+      "sepc.lv": 0.04823999932908445,
+      "sepc.all": 0.04396874754302171,
+      "sepc.nox": 0.04396874754302171
+    },
+    {
+      "lhs": "Intention",
+      "op": "=~",
+      "rhs": "att_desirable",
+      "mi": 1.994434491443556,
+      "epc": 0.04133552271964301,
+      "sepc.lv": 0.04652444785793874,
+      "sepc.all": 0.03242157883751959,
+      "sepc.nox": 0.03242157883751959
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~~",
+      "rhs": "norms_d_few",
+      "mi": 1.978966146225788,
+      "epc": -0.0182711765103665,
+      "sepc.lv": -0.0182711765103665,
+      "sepc.all": -0.04984423550248186,
+      "sepc.nox": -0.04984423550248186
+    },
+    {
+      "lhs": "pbc_could",
+      "op": "~~",
+      "rhs": "norms_d_common",
+      "mi": 1.940443538758841,
+      "epc": -0.03153186006880242,
+      "sepc.lv": -0.03153186006880242,
+      "sepc.all": -0.07160632477909375,
+      "sepc.nox": -0.07160632477909375
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~~",
+      "rhs": "norms_i_bad",
+      "mi": 1.921102180503708,
+      "epc": -0.01751828303111879,
+      "sepc.lv": -0.01751828303111879,
+      "sepc.all": -0.05228203364874631,
+      "sepc.nox": -0.05228203364874631
+    },
+    {
+      "lhs": "att_pleasant",
+      "op": "~~",
+      "rhs": "norms_d_many",
+      "mi": 1.891341075122418,
+      "epc": 0.02308557682468436,
+      "sepc.lv": 0.02308557682468436,
+      "sepc.all": 0.04232574333261949,
+      "sepc.nox": 0.04232574333261949
+    },
+    {
+      "lhs": "att_goodidea",
+      "op": "~~",
+      "rhs": "norms_i_bad",
+      "mi": 1.731036980636445,
+      "epc": 0.02235526078111483,
+      "sepc.lv": 0.02235526078111483,
+      "sepc.all": 0.04075716405538098,
+      "sepc.nox": 0.04075716405538098
+    },
+    {
+      "lhs": "Intention",
+      "op": "=~",
+      "rhs": "att_pleasant",
+      "mi": 1.672816423251304,
+      "epc": -0.05381554182248401,
+      "sepc.lv": -0.06057110699793037,
+      "sepc.all": -0.04652643200697354,
+      "sepc.nox": -0.04652643200697354
+    },
+    {
+      "lhs": "att_pleasant",
+      "op": "~~",
+      "rhs": "norms_d_few",
+      "mi": 1.614503791534639,
+      "epc": 0.0258502348505338,
+      "sepc.lv": 0.0258502348505338,
+      "sepc.all": 0.03686252720757124,
+      "sepc.nox": 0.03686252720757124
+    },
+    {
+      "lhs": "Intention",
+      "op": "=~",
+      "rhs": "norms_i_support",
+      "mi": 1.594707345846732,
+      "epc": -0.06488614909846541,
+      "sepc.lv": -0.07303142821995656,
+      "sepc.all": -0.06877352864603137,
+      "sepc.nox": -0.06877352864603137
+    },
+    {
+      "lhs": "att_goodidea",
+      "op": "~~",
+      "rhs": "norms_i_consider",
+      "mi": 1.49763356510504,
+      "epc": 0.01787068988602655,
+      "sepc.lv": 0.01787068988602655,
+      "sepc.all": 0.04151039948304176,
+      "sepc.nox": 0.04151039948304176
+    },
+    {
+      "lhs": "norms_d_common",
+      "op": "~~",
+      "rhs": "norms_i_support",
+      "mi": 1.423232547542968,
+      "epc": -0.02342160777250495,
+      "sepc.lv": -0.02342160777250495,
+      "sepc.all": -0.05016034277449368,
+      "sepc.nox": -0.05016034277449368
+    },
+    {
+      "lhs": "att_desirable",
+      "op": "~~",
+      "rhs": "nextv_icev",
+      "mi": 1.326087213302678,
+      "epc": -0.01786513130689225,
+      "sepc.lv": -0.01786513130689225,
+      "sepc.all": -0.03973133883584647,
+      "sepc.nox": -0.03973133883584647
+    },
+    {
+      "lhs": "att_desirable",
+      "op": "~~",
+      "rhs": "nextv_phev",
+      "mi": 1.318975879187217,
+      "epc": -0.01663342801242222,
+      "sepc.lv": -0.01663342801242222,
+      "sepc.all": -0.04103073243847474,
+      "sepc.nox": -0.04103073243847474
+    },
+    {
+      "lhs": "PBC",
+      "op": "=~",
+      "rhs": "att_desirable",
+      "mi": 1.272421200250597,
+      "epc": -0.02650639843642237,
+      "sepc.lv": -0.0179702907475046,
+      "sepc.all": -0.01252299006282462,
+      "sepc.nox": -0.01252299006282462
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~~",
+      "rhs": "pbc_could",
+      "mi": 1.261957916712449,
+      "epc": 0.01408405607698292,
+      "sepc.lv": 0.01408405607698292,
+      "sepc.all": 0.05041197658403334,
+      "sepc.nox": 0.05041197658403334
+    },
+    {
+      "lhs": "norms_d_few",
+      "op": "~~",
+      "rhs": "norms_i_bad",
+      "mi": 1.233150854507178,
+      "epc": 0.03311991537878876,
+      "sepc.lv": 0.03311991537878876,
+      "sepc.all": 0.03311591249332648,
+      "sepc.nox": 0.03311591249332648
+    },
+    {
+      "lhs": "pbc_barrier",
+      "op": "~~",
+      "rhs": "norms_d_many",
+      "mi": 1.139568461261955,
+      "epc": -0.02884206204437123,
+      "sepc.lv": -0.02884206204437123,
+      "sepc.all": -0.03237979826154239,
+      "sepc.nox": -0.03237979826154239
+    },
+    {
+      "lhs": "Intention",
+      "op": "=~",
+      "rhs": "norms_i_consider",
+      "mi": 1.113345505792951,
+      "epc": -0.06928286493572279,
+      "sepc.lv": -0.07798007198343432,
+      "sepc.all": -0.06230386698566675,
+      "sepc.nox": -0.06230386698566675
+    },
+    {
+      "lhs": "pbc_could",
+      "op": "~~",
+      "rhs": "norms_d_few",
+      "mi": 1.059439776669006,
+      "epc": -0.03039791634429561,
+      "sepc.lv": -0.03039791634429561,
+      "sepc.all": -0.03645325973209401,
+      "sepc.nox": -0.03645325973209401
+    },
+    {
+      "lhs": "pbc_resources",
+      "op": "~~",
+      "rhs": "norms_i_consider",
+      "mi": 1.01884667736891,
+      "epc": -0.02931786504807769,
+      "sepc.lv": -0.02931786504807769,
+      "sepc.all": -0.03866871457740357,
+      "sepc.nox": -0.03866871457740357
+    },
+    {
+      "lhs": "pbc_resources",
+      "op": "~~",
+      "rhs": "nextv_phev",
+      "mi": 1.003917575718624,
+      "epc": 0.03675121554386253,
+      "sepc.lv": 0.03675121554386253,
+      "sepc.all": 0.03516292793002428,
+      "sepc.nox": 0.03516292793002428
+    },
+    {
+      "lhs": "pbc_resources",
+      "op": "~~",
+      "rhs": "norms_d_many",
+      "mi": 0.9832376493844746,
+      "epc": 0.02790027825610486,
+      "sepc.lv": 0.02790027825610486,
+      "sepc.all": 0.03394495946309708,
+      "sepc.nox": 0.03394495946309708
+    },
+    {
+      "lhs": "norms_d_common",
+      "op": "~~",
+      "rhs": "nextv_icev",
+      "mi": 0.9756803781619651,
+      "epc": 0.0258321277411289,
+      "sepc.lv": 0.0258321277411289,
+      "sepc.all": 0.04075620262900728,
+      "sepc.nox": 0.04075620262900728
+    },
+    {
+      "lhs": "att_desirable",
+      "op": "~~",
+      "rhs": "norms_d_many",
+      "mi": 0.9622308373071553,
+      "epc": -0.01093342576242486,
+      "sepc.lv": -0.01093342576242486,
+      "sepc.all": -0.03429550516111975,
+      "sepc.nox": -0.03429550516111975
+    },
+    {
+      "lhs": "att_desirable",
+      "op": "~~",
+      "rhs": "pbc_barrier",
+      "mi": 0.9170208033853913,
+      "epc": 0.01379972094241772,
+      "sepc.lv": 0.01379972094241772,
+      "sepc.all": 0.0321645573173533,
+      "sepc.nox": 0.0321645573173533
+    },
+    {
+      "lhs": "PBC",
+      "op": "=~",
+      "rhs": "nextv_phev",
+      "mi": 0.9145820312267393,
+      "epc": 0.0625794359687141,
+      "sepc.lv": 0.04242638477913205,
+      "sepc.all": 0.02897046257442074,
+      "sepc.nox": 0.02897046257442074
+    },
+    {
+      "lhs": "att_desirable",
+      "op": "~~",
+      "rhs": "pbc_resources",
+      "mi": 0.8840325494018811,
+      "epc": 0.01409861437300329,
+      "sepc.lv": 0.01409861437300329,
+      "sepc.all": 0.03561251409163305,
+      "sepc.nox": 0.03561251409163305
+    },
+    {
+      "lhs": "att_pleasant",
+      "op": "~~",
+      "rhs": "nextv_icev",
+      "mi": 0.8566524711334388,
+      "epc": 0.0215291419419641,
+      "sepc.lv": 0.0215291419419641,
+      "sepc.all": 0.02798572924154963,
+      "sepc.nox": 0.02798572924154963
+    },
+    {
+      "lhs": "att_pleasant",
+      "op": "~~",
+      "rhs": "pbc_could",
+      "mi": 0.846820114553115,
+      "epc": 0.01798221195843436,
+      "sepc.lv": 0.01798221195843436,
+      "sepc.all": 0.03364505787242243,
+      "sepc.nox": 0.03364505787242243
+    },
+    {
+      "lhs": "PBC",
+      "op": "=~",
+      "rhs": "norms_i_bad",
+      "mi": 0.7616077828258289,
+      "epc": -0.05314599618938051,
+      "sepc.lv": -0.03603088536828938,
+      "sepc.all": -0.0278557233579355,
+      "sepc.nox": -0.0278557233579355
+    },
+    {
+      "lhs": "att_pleasant",
+      "op": "~~",
+      "rhs": "norms_d_common",
+      "mi": 0.6759975420126169,
+      "epc": 0.01226377020204788,
+      "sepc.lv": 0.01226377020204788,
+      "sepc.all": 0.03311721870106599,
+      "sepc.nox": 0.03311721870106599
+    },
+    {
+      "lhs": "pbc_barrier",
+      "op": "~~",
+      "rhs": "norms_i_consider",
+      "mi": 0.6413489111032775,
+      "epc": -0.02177929193031542,
+      "sepc.lv": -0.02177929193031542,
+      "sepc.all": -0.02650649002051509,
+      "sepc.nox": -0.02650649002051509
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~~",
+      "rhs": "nextv_phev",
+      "mi": 0.4757642804062905,
+      "epc": -0.009640691716379419,
+      "sepc.lv": -0.009640691716379419,
+      "sepc.all": -0.02659172035331966,
+      "sepc.nox": -0.02659172035331966
+    },
+    {
+      "lhs": "norms_i_support",
+      "op": "~~",
+      "rhs": "nextv_phev",
+      "mi": 0.399956129358166,
+      "epc": 0.01710747760136752,
+      "sepc.lv": 0.01710747760136752,
+      "sepc.all": 0.01956186900189388,
+      "sepc.nox": 0.01956186900189388
+    },
+    {
+      "lhs": "norms_d_common",
+      "op": "~~",
+      "rhs": "nextv_phev",
+      "mi": 0.3961704720108788,
+      "epc": 0.01546264635179166,
+      "sepc.lv": 0.01546264635179166,
+      "sepc.all": 0.02705938212950591,
+      "sepc.nox": 0.02705938212950591
+    },
+    {
+      "lhs": "norms_d_few",
+      "op": "~~",
+      "rhs": "nextv_bev",
+      "mi": 0.3606453414653624,
+      "epc": 0.01579153975802213,
+      "sepc.lv": 0.01579153975802213,
+      "sepc.all": 0.02053098416529151,
+      "sepc.nox": 0.02053098416529151
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~~",
+      "rhs": "norms_d_common",
+      "mi": 0.3455047786318365,
+      "epc": 0.005646436720414864,
+      "sepc.lv": 0.005646436720414864,
+      "sepc.all": 0.02916971126981743,
+      "sepc.nox": 0.02916971126981743
+    },
+    {
+      "lhs": "norms_i_consider",
+      "op": "~~",
+      "rhs": "nextv_icev",
+      "mi": 0.3318100597572503,
+      "epc": 0.0170325177854276,
+      "sepc.lv": 0.0170325177854276,
+      "sepc.all": 0.01977912295329835,
+      "sepc.nox": 0.01977912295329835
+    },
+    {
+      "lhs": "norms_d_many",
+      "op": "~~",
+      "rhs": "norms_i_consider",
+      "mi": 0.3090542668840944,
+      "epc": -0.01241094567742476,
+      "sepc.lv": -0.01241094567742476,
+      "sepc.all": -0.02032764231876155,
+      "sepc.nox": -0.02032764231876155
+    },
+    {
+      "lhs": "att_goodidea",
+      "op": "~~",
+      "rhs": "norms_d_many",
+      "mi": 0.295099003752733,
+      "epc": -0.007893573409277092,
+      "sepc.lv": -0.007893573409277092,
+      "sepc.all": -0.01691331012784857,
+      "sepc.nox": -0.01691331012784857
+    },
+    {
+      "lhs": "norms_d_many",
+      "op": "~~",
+      "rhs": "nextv_bev",
+      "mi": 0.2471199495680738,
+      "epc": 0.01089548804104935,
+      "sepc.lv": 0.01089548804104935,
+      "sepc.all": 0.01821273752694299,
+      "sepc.nox": 0.01821273752694299
+    },
+    {
+      "lhs": "norms_d_many",
+      "op": "~~",
+      "rhs": "nextv_icev",
+      "mi": 0.2438861713611757,
+      "epc": -0.01434306149800055,
+      "sepc.lv": -0.01434306149800055,
+      "sepc.all": -0.01536418066277901,
+      "sepc.nox": -0.01536418066277901
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~~",
+      "rhs": "nextv_bev",
+      "mi": 0.2429722198278749,
+      "epc": 0.005602239046925045,
+      "sepc.lv": 0.005602239046925045,
+      "sepc.all": 0.02174004065646543,
+      "sepc.nox": 0.02174004065646543
+    },
+    {
+      "lhs": "pbc_could",
+      "op": "~~",
+      "rhs": "norms_d_many",
+      "mi": 0.2320455061217015,
+      "epc": 0.01179414756437397,
+      "sepc.lv": 0.01179414756437397,
+      "sepc.all": 0.01818454178655142,
+      "sepc.nox": 0.01818454178655142
+    },
+    {
+      "lhs": "att_desirable",
+      "op": "~~",
+      "rhs": "norms_d_few",
+      "mi": 0.1969987997510622,
+      "epc": -0.005995630752110322,
+      "sepc.lv": -0.005995630752110322,
+      "sepc.all": -0.01462758302457458,
+      "sepc.nox": -0.01462758302457458
+    },
+    {
+      "lhs": "pbc_could",
+      "op": "~~",
+      "rhs": "norms_i_consider",
+      "mi": 0.1913799287934382,
+      "epc": 0.01131500164691368,
+      "sepc.lv": 0.01131500164691368,
+      "sepc.all": 0.01891259231173719,
+      "sepc.nox": 0.01891259231173719
+    },
+    {
+      "lhs": "att_desirable",
+      "op": "~~",
+      "rhs": "norms_i_support",
+      "mi": 0.1894629016402179,
+      "epc": -0.004845321301425738,
+      "sepc.lv": -0.004845321301425738,
+      "sepc.all": -0.01462715377091744,
+      "sepc.nox": -0.01462715377091744
+    },
+    {
+      "lhs": "pbc_could",
+      "op": "~~",
+      "rhs": "norms_i_bad",
+      "mi": 0.1059932548290079,
+      "epc": 0.009489337029577919,
+      "sepc.lv": 0.009489337029577919,
+      "sepc.all": 0.01244918536698688,
+      "sepc.nox": 0.01244918536698688
+    },
+    {
+      "lhs": "att_goodidea",
+      "op": "~~",
+      "rhs": "pbc_could",
+      "mi": 0.1051888095309563,
+      "epc": 0.005493155662741147,
+      "sepc.lv": 0.005493155662741147,
+      "sepc.all": 0.01201133195973187,
+      "sepc.nox": 0.01201133195973187
+    },
+    {
+      "lhs": "norms_i_consider",
+      "op": "~~",
+      "rhs": "nextv_phev",
+      "mi": 0.09952455933393568,
+      "epc": 0.008810056922000915,
+      "sepc.lv": 0.008810056922000915,
+      "sepc.all": 0.01134768868865627,
+      "sepc.nox": 0.01134768868865627
+    },
+    {
+      "lhs": "pbc_could",
+      "op": "~~",
+      "rhs": "nextv_icev",
+      "mi": 0.09750592291365429,
+      "epc": -0.01067636716325575,
+      "sepc.lv": -0.01067636716325575,
+      "sepc.all": -0.01167092691085905,
+      "sepc.nox": -0.01167092691085905
+    },
+    {
+      "lhs": "norms_i_consider",
+      "op": "~~",
+      "rhs": "nextv_bev",
+      "mi": 0.09117719459424831,
+      "epc": 0.007182275449084313,
+      "sepc.lv": 0.007182275449084313,
+      "sepc.all": 0.01301521155226113,
+      "sepc.nox": 0.01301521155226113
+    },
+    {
+      "lhs": "DescriptiveNorms",
+      "op": "=~",
+      "rhs": "att_desirable",
+      "mi": 0.07813970462824921,
+      "epc": -0.005517290567504328,
+      "sepc.lv": -0.00493448706599152,
+      "sepc.all": -0.003438705214111763,
+      "sepc.nox": -0.003438705214111763
+    },
+    {
+      "lhs": "pbc_resources",
+      "op": "~~",
+      "rhs": "norms_i_support",
+      "mi": 0.07141510456961342,
+      "epc": 0.007532575278792409,
+      "sepc.lv": 0.007532575278792409,
+      "sepc.all": 0.00881995851563425,
+      "sepc.nox": 0.00881995851563425
+    },
+    {
+      "lhs": "pbc_barrier",
+      "op": "~~",
+      "rhs": "norms_d_few",
+      "mi": 0.06648002484639515,
+      "epc": -0.008440529626797805,
+      "sepc.lv": -0.008440529626797805,
+      "sepc.all": -0.007370115263710982,
+      "sepc.nox": -0.007370115263710982
+    },
+    {
+      "lhs": "InjunctiveNorms",
+      "op": "=~",
+      "rhs": "att_desirable",
+      "mi": 0.06498769667875748,
+      "epc": 0.007293493111506137,
+      "sepc.lv": 0.007305633107504304,
+      "sepc.all": 0.005091090182868815,
+      "sepc.nox": 0.005091090182868815
+    },
+    {
+      "lhs": "pbc_barrier",
+      "op": "~~",
+      "rhs": "nextv_icev",
+      "mi": 0.06192837820617218,
+      "epc": 0.00933760040492943,
+      "sepc.lv": 0.00933760040492943,
+      "sepc.all": 0.007432401460694146,
+      "sepc.nox": 0.007432401460694146
+    },
+    {
+      "lhs": "Attitude",
+      "op": "=~",
+      "rhs": "norms_i_support",
+      "mi": 0.03422045808242885,
+      "epc": 0.007136820649781034,
+      "sepc.lv": 0.00999390461673089,
+      "sepc.all": 0.009411237082402164,
+      "sepc.nox": 0.009411237082402164
+    },
+    {
+      "lhs": "PBC",
+      "op": "=~",
+      "rhs": "norms_d_many",
+      "mi": 0.03211614261512899,
+      "epc": -0.008331255597587696,
+      "sepc.lv": -0.005648262088096548,
+      "sepc.all": -0.004671699820047772,
+      "sepc.nox": -0.004671699820047772
+    },
+    {
+      "lhs": "nextv_bev",
+      "op": "~~",
+      "rhs": "nextv_phev",
+      "mi": 0.0300218835120765,
+      "epc": -0.007066131599964474,
+      "sepc.lv": -0.007066131599964474,
+      "sepc.all": -0.009288740385757518,
+      "sepc.nox": -0.009288740385757518
+    },
+    {
+      "lhs": "norms_d_few",
+      "op": "~~",
+      "rhs": "nextv_icev",
+      "mi": 0.02622184051017998,
+      "epc": -0.005687799863807056,
+      "sepc.lv": -0.005687799863807056,
+      "sepc.all": -0.004738802411286538,
+      "sepc.nox": -0.004738802411286538
+    },
+    {
+      "lhs": "att_goodidea",
+      "op": "~~",
+      "rhs": "norms_d_few",
+      "mi": 0.02252459096573346,
+      "epc": -0.002646079306920596,
+      "sepc.lv": -0.002646079306920596,
+      "sepc.all": -0.004409756064042075,
+      "sepc.nox": -0.004409756064042075
+    },
+    {
+      "lhs": "norms_d_few",
+      "op": "~~",
+      "rhs": "norms_i_consider",
+      "mi": 0.01997575341477297,
+      "epc": -0.003659154301154736,
+      "sepc.lv": -0.003659154301154736,
+      "sepc.all": -0.004661434741139656,
+      "sepc.nox": -0.004661434741139656
+    },
+    {
+      "lhs": "pbc_resources",
+      "op": "~~",
+      "rhs": "norms_d_few",
+      "mi": 0.01479400744944787,
+      "epc": 0.004141146246681974,
+      "sepc.lv": 0.004141146246681974,
+      "sepc.all": 0.003918718592132203,
+      "sepc.nox": 0.003918718592132203
+    },
+    {
+      "lhs": "att_desirable",
+      "op": "~~",
+      "rhs": "norms_i_bad",
+      "mi": 0.0126082914224358,
+      "epc": -0.001470956314337794,
+      "sepc.lv": -0.001470956314337794,
+      "sepc.all": -0.003925997111183165,
+      "sepc.nox": -0.003925997111183165
+    },
+    {
+      "lhs": "pbc_could",
+      "op": "~~",
+      "rhs": "nextv_phev",
+      "mi": 0.008092778587843521,
+      "epc": 0.002884281465964941,
+      "sepc.lv": 0.002884281465964941,
+      "sepc.all": 0.003497196274534216,
+      "sepc.nox": 0.003497196274534216
+    },
+    {
+      "lhs": "att_desirable",
+      "op": "~~",
+      "rhs": "norms_d_common",
+      "mi": 0.006545366536584137,
+      "epc": 0.0008057148513470357,
+      "sepc.lv": 0.0008057148513470357,
+      "sepc.all": 0.003722445097687329,
+      "sepc.nox": 0.003722445097687329
+    },
+    {
+      "lhs": "norms_d_few",
+      "op": "~~",
+      "rhs": "nextv_phev",
+      "mi": 0.003722548257671595,
+      "epc": -0.001993923698663882,
+      "sepc.lv": -0.001993923698663882,
+      "sepc.all": -0.001842609682074804,
+      "sepc.nox": -0.001842609682074804
+    },
+    {
+      "lhs": "att_goodidea",
+      "op": "~~",
+      "rhs": "pbc_resources",
+      "mi": 0.003662184464514442,
+      "epc": 0.001181357978349261,
+      "sepc.lv": 0.001181357978349261,
+      "sepc.all": 0.002038363984419474,
+      "sepc.nox": 0.002038363984419474
+    },
+    {
+      "lhs": "att_pleasant",
+      "op": "~~",
+      "rhs": "pbc_resources",
+      "mi": 0.002999059003844761,
+      "epc": 0.001234247668227494,
+      "sepc.lv": 0.001234247668227494,
+      "sepc.all": 0.00182226459555749,
+      "sepc.nox": 0.00182226459555749
+    },
+    {
+      "lhs": "pbc_resources",
+      "op": "~~",
+      "rhs": "norms_d_common",
+      "mi": 0.002814008369254171,
+      "epc": 0.001354250513713244,
+      "sepc.lv": 0.001354250513713244,
+      "sepc.all": 0.002426787544014131,
+      "sepc.nox": 0.002426787544014131
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~~",
+      "rhs": "pbc_barrier",
+      "mi": 0.0013651446543109,
+      "epc": -0.0005119849477500499,
+      "sepc.lv": -0.0005119849477500499,
+      "sepc.all": -0.001334366714824164,
+      "sepc.nox": -0.001334366714824164
+    },
+    {
+      "lhs": "att_appealing",
+      "op": "~~",
+      "rhs": "norms_d_many",
+      "mi": 0.001078026980771122,
+      "epc": 0.0003520318568392626,
+      "sepc.lv": 0.0003520318568392626,
+      "sepc.all": 0.001234734670425505,
+      "sepc.nox": 0.001234734670425505
+    },
+    {
+      "lhs": "att_goodidea",
+      "op": "~~",
+      "rhs": "norms_d_common",
+      "mi": 0.0008575269289515848,
+      "epc": -0.0003787638221853633,
+      "sepc.lv": -0.0003787638221853633,
+      "sepc.all": -0.001195334457551717,
+      "sepc.nox": -0.001195334457551717
+    },
+    {
+      "lhs": "norms_d_many",
+      "op": "~~",
+      "rhs": "nextv_phev",
+      "mi": 0.0006320757793694758,
+      "epc": -0.0006802955629364914,
+      "sepc.lv": -0.0006802955629364914,
+      "sepc.all": -0.0008082872021429535,
+      "sepc.nox": -0.0008082872021429535
+    }
+  ]
+}

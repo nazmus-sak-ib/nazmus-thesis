@@ -9,16 +9,19 @@
       "type": "model",
       "layout": {
         "viewport": {
-          "x": -95.59396477342284,
-          "y": 64.45058928787307,
-          "zoom": 0.5
+          "x": -640.0376149007247,
+          "y": 182.51223411064734,
+          "zoom": 0.6909564351119143
         },
         "comparison_ids": [
-          "cfa:[\"U2a\",\"U2a\"]",
-          "cfa:[\"U2b\",\"U2b\"]"
+          "cfa:[\"cfa_comp3\",\"cfa_comp3\"]",
+          "cfa:[\"cfa_comp3\",\"cfa_comp3_wt\"]",
+          "cfa:[\"cfa_comp3\",\"cfa_comp3_ml\"]",
+          "cfa:[\"cfa_comp3\",\"cfa_comp3_ml_wt\"]"
         ],
         "model_variants": {
-          "U1a": "U1a"
+          "U1a": "U1a",
+          "cfa_comp1": "cfa_comp1_ml_wt"
         },
         "matrix_settings": {
           "[\"U1a\",\"latent\"]": {
@@ -202,7 +205,15 @@
             "width": 320,
             "height": 260
           },
+          "B3.1c3": {
+            "width": 320,
+            "height": 260
+          },
           "B3.1c3_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1c4": {
             "width": 320,
             "height": 260
           },
@@ -231,6 +242,18 @@
             "height": 260
           },
           "B4.2b": {
+            "width": 320,
+            "height": 260
+          },
+          "cfa_comp1": {
+            "width": 320,
+            "height": 260
+          },
+          "cfa_comp2": {
+            "width": 320,
+            "height": 260
+          },
+          "cfa_comp3": {
             "width": 320,
             "height": 260
           },
@@ -265,13 +288,83 @@
           "U2b2": {
             "width": 582,
             "height": 292
+          },
+          "cfa_comp1_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "cfa_comp2_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "cfa_comp3_ml": {
+            "width": 320,
+            "height": 260
           }
         },
         "model_notes": {
+          "cfa_comp1": "<span style=\"font-weight: bold;\">Comparing the unweighted ordinal versus ML</span><div><ul><li>The ML version has better CFI, TLI, and SRMR in robust versions. Has worse RMSEA.</li><li>A non-robust CFI and TLI, which you can't really compare for the ordinal version, are better- way better than the ML version. It goes on to show that the robust stats heavily penalize for ordinality. </li><li>The unweighted ordinal version has slightly higher reliability omega than the ML version, at 0.89 versus 0.86.</li><li>Towing and comfort -- the weakest items -- have their R-square reduced from 47% to sub-40 from ordinal to ML.</li></ul></div><div><span style=\"font-weight: bold;\">Comparing unweighted versus weighted</span></div><div><ul><li>Both ordinal and continuous robust CFI and TLI reduce by 0.3 to 0.5, which were already below the guideline value. The robust RMSEA likewise increases by 0.04 to 0.06, which is already horrible. The SRMR, on the other hand, worsens but remains decent before and after applying weight.</li><li>Applying a weight increase increases omega by 0.03 in ordinal and by 0.01 in ML.</li><li>Towing and comfort -- the weakest items -- improve in the R-square under the application of weight. In the original method, the effect is more profound.</li></ul></div><div><br></div><div><br></div><div><br></div>",
+          "cfa_comp2": "<span style=\"font-weight: bold;\">Comparing the unweighted ordinal versus ML</span><div><br></div><div><ul><li>Like the first model family, the unweighted. The ML version, compared to its unweighted ordinal sibling in the second family, has slightly better CFI, TLI, and SRMR, but, in robust versions, has a worse RMSEA.</li><li>Power perceptions have a slightly better unweighted ordinal omega than ML, but a slightly worse one for non-power. </li><li>Towing and comfort -- the weakest items -- have better R-squares compared to the first CFA across both ordinal and ML in this second CFA. And like the first CFA, the R-squared goes down in the ML version.</li></ul></div><div><br></div><div><span style=\"font-weight: bold;\">Comparing unweighted versus weighted</span></div><div><br></div><div><ul><li>The robust CFI and TLI are just as bad in the weighted ordinal version as in the first CFÃ. The ML is much better in the weighted version.</li></ul><div><span style=\"font-weight: bold;\">Looking at the discriminant validity</span></div><ul><li>The upper limit of Ronkko's confidence interval goes above 0.9 when weight is applied in either estimator. In fact in the ML version, it's as high as 0.97 and in both unweighted versions it's 0.86. Although model refit failed at 0.9, it's dangerously close.</li></ul></div><div><br></div>",
+          "cfa_comp3": "<span style=\"font-weight: bold;\">The discriminant validity </span><div>Comparing the path loadings and stuff has become tedious, as in the other two model families. Here I'm going to look only at discriminant validity, which I feel should be the important criterion because, as I've noted in the modeling later, these two split constructs create a positive-definite problem. </div><div><br></div><div>This Comparison family 3 shows slightly lower discriminant validity between the two constructs than Comparison family 2 -- as I would have expected because this split of constructs was EFA-based, which wasn't super clean itself. </div><div><br></div><div>Across the four variants of (Continuous, ordinal) X (weighted, unweighted): the highest value of latent correlation can be seen in the ordinal weighted case of around 0.86, and the lowest value is in the continuous unweighted case of 0.78. </div><div><br></div><div>This creates some empirical support for using them separately. But I think the positive non-definite problem will still persist if two variables are highly correlated and don't really differ in their regression paths (or, in other words, the variable they're pointing to remains the same). However, it still might be useful to have them separately for the dominance analysis. </div><div><br></div><div>Of course, it is redundant to say, but Model family one doesn't have a discriminant validity problem because it has only one construct. </div><div><br></div><div><br></div>",
           "U1a": "Range and comparable data show high latent correlations and the HTMT2 value is also near the guideline value where the problems start<div><br></div><div>This is the first time I've applied Ronkko's (2022) workflow -- they kind of criticized all the things I've done before to assess discriminant validity. And I've felt the problems along the way, too. </div><div><br></div><div>The numbers are not too legible here but these are the cases that would get flagged by his workflow of looking at the upper CI and comparing a chi^2 against a less restrictive model.</div><div><br></div><div><span style=\"background-color: rgb(242, 228, 145);\">Although compatibility and range concerns may seem very similar, they are perhaps not similar enough to warrant a forced merge. From a theoretical standpoint, I still am going to merge them. </span></div><div>\n lhs              rhs    est    se ci.lower ci.upper    UL                 class_CI class_chi2\n190         Attitude        Intention  0.855 0.012    0.833    0.878 0.878                 Marginal   Marginal\n209    Compatibility        RangeConc -0.848 0.012   -0.871   -0.825 0.871                 Marginal   Marginal\n186         Attitude    Compatibility  0.844 0.010    0.826    0.863 0.863                 Marginal   Marginal\n185         Attitude  InjunctiveNorms  0.823 0.013    0.799    0.848 0.848                 Marginal   Marginal\n198 DescriptiveNorms  InjunctiveNorms  0.816 0.015    0.786    0.845 0.845                 Marginal   Marginal\n208  InjunctiveNorms        Intention  0.799 0.018    0.764    0.834 0.834                 Marginal   Marginal\n212    Compatibility        Intention  0.775 0.016    0.742    0.807 0.807                 Marginal   Marginal\n\n</div>",
           "U1b": "Savalei's RMSEA-D 0.056 ---&gt; This added restriction doesn't add a lot of misfit. Although these might not be the best stat.<div><br></div><div><br></div>"
         },
-        "stacks": [],
+        "stacks": [
+          {
+            "id": "stack-0f30124e-bbf9-4352-ac57-e366f629c445",
+            "title": "Comparison Family 1",
+            "members": [
+              "cfa_comp1",
+              "cfa_comp1_ml"
+            ],
+            "active_model": "cfa_comp1",
+            "position": {
+              "x": -176.09,
+              "y": -1100.93
+            },
+            "width": 320,
+            "height": 260,
+            "in_use": true,
+            "hidden": false,
+            "has_position": true
+          },
+          {
+            "id": "stack-8c982a6a-8dab-45b3-824a-f5a6e8de4978",
+            "title": "Comparison family 2",
+            "members": [
+              "cfa_comp2",
+              "cfa_comp2_ml"
+            ],
+            "active_model": "cfa_comp2",
+            "position": {
+              "x": 67.01,
+              "y": -702.5
+            },
+            "width": 320,
+            "height": 260,
+            "in_use": true,
+            "hidden": false,
+            "has_position": true
+          },
+          {
+            "id": "stack-71ba6d54-983d-4f57-a07e-5ddc3e4e5fa3",
+            "title": "Comparison family, 3",
+            "members": [
+              "cfa_comp3",
+              "cfa_comp3_ml"
+            ],
+            "active_model": "cfa_comp3",
+            "position": {
+              "x": 389.58,
+              "y": -1109.89
+            },
+            "width": 320,
+            "height": 260,
+            "in_use": true,
+            "hidden": false,
+            "has_position": true
+          }
+        ],
         "used_models": [
           "U1a",
           "U1b",
@@ -282,6 +375,18 @@
           "U2b2"
         ],
         "model_positions": {
+          "cfa_comp1": {
+            "x": -176.09,
+            "y": -1100.93
+          },
+          "cfa_comp2": {
+            "x": 115.19,
+            "y": -675.27
+          },
+          "cfa_comp3": {
+            "x": 389.58,
+            "y": -1109.89
+          },
           "U1a": {
             "x": -782.62,
             "y": 37
@@ -309,6 +414,18 @@
           "U2b2": {
             "x": 1558.27,
             "y": 580.33
+          },
+          "cfa_comp1_ml": {
+            "x": 263.9,
+            "y": -848.07
+          },
+          "cfa_comp2_ml": {
+            "x": -114.17,
+            "y": -728.68
+          },
+          "cfa_comp3_ml": {
+            "x": 676.54,
+            "y": -907.77
           }
         },
         "hidden_models": [],
@@ -329,6 +446,25 @@
               "expandedSize": {
                 "width": 692,
                 "height": 166
+              }
+            }
+          },
+          {
+            "id": "note-1790799173063",
+            "type": "note",
+            "position": {
+              "x": -173.21,
+              "y": -1253.22
+            },
+            "width": 800,
+            "height": 110,
+            "data": {
+              "title": "Note",
+              "text": "Comparison family 1 was a starting point with all BEV versus ICEV. Compare items loading on one construct.\nIn comparison family 3, I split them according to the EFA results. \nIn comparison, Family 2, I split them according to what I thought would be a theoretically coherent one. ",
+              "collapsed": false,
+              "expandedSize": {
+                "width": 800,
+                "height": 110
               }
             }
           }
@@ -390,6 +526,138 @@
             "target": "U2b",
             "sourceHandle": "source-right",
             "targetHandle": "source-left"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": {
+                "x": 2.0943305423381844,
+                "y": -19.083381377079036
+              },
+              "noteHtml": "<span style=\"font-weight: bold;\">What changes from 1 to 3?</span> This split of relative advantage or performance comparison items into two variables was driven by EFA. EFA results were not clear-cut, but they showed a split into two-ish factors with an item set distribution like this. <div><br></div><div><span style=\"font-weight: bold;\">Chi-square test of differences</span>: The restriction imposed by cfa_comp1 worsens the global fit compared to cfa_comp3. In other words, comp3 is the one data would suggest going with. </div><div><br></div><div>&gt; lavTestLRT(fit_cfa_comp1, fit_cfa_comp3)</div><div><br></div><div>Scaled and Shifted Chi-Squared Difference Test (method = “satorra.2000”)</div><div><br></div><div>lavaan-&gt;lavTestLRT():  </div><div>   lavaan NOTE: The “Chisq” column contains standard test statistics, not the robust test that should be reported per model. A robust difference test is a </div><div>   function of two standard (not robust) statistics.</div><div><br></div><div>              Df AIC BIC  Chisq Chisq diff Df diff Pr(&gt;Chisq)    </div><div>fit_cfa_comp3 13         167.20                                  </div><div>fit_cfa_comp1 14         325.14     185.04       1  &lt; 2.2e-16 ***</div><div>---</div><div>Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1</div><div><br></div>"
+            },
+            "id": "xy-edge__stack-0f30124e-bbf9-4352-ac57-e366f629c445source-right-stack-71ba6d54-983d-4f57-a07e-5ddc3e4e5fa3source-left",
+            "source": "stack-0f30124e-bbf9-4352-ac57-e366f629c445",
+            "target": "stack-71ba6d54-983d-4f57-a07e-5ddc3e4e5fa3",
+            "sourceHandle": "source-right",
+            "targetHandle": "source-left"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": {
+                "x": -41.8938855708578,
+                "y": 17.257102840956577
+              },
+              "noteHtml": ""
+            },
+            "id": "xy-edge__stack-0f30124e-bbf9-4352-ac57-e366f629c445source-bottom-stack-8c982a6a-8dab-45b3-824a-f5a6e8de4978source-top",
+            "source": "cfa_comp1",
+            "target": "cfa_comp2",
+            "sourceHandle": "source-bottom",
+            "targetHandle": "source-left"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": {
+                "x": 62.60129744360563,
+                "y": 15.456057185125815
+              },
+              "noteHtml": ""
+            },
+            "id": "xy-edge__stack-71ba6d54-983d-4f57-a07e-5ddc3e4e5fa3source-bottom-stack-8c982a6a-8dab-45b3-824a-f5a6e8de4978source-right",
+            "source": "cfa_comp3",
+            "target": "cfa_comp2",
+            "sourceHandle": "source-bottom",
+            "targetHandle": "source-right"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": {
+                "x": -46.520698508057706,
+                "y": 2.119238549311376
+              },
+              "noteHtml": "Chi-square difference test again prefers comparison family 2 over comparison family 1 <div><br></div><div>[[<span style=\"font-weight: bold;\">unweighted ordinal comparison</span>; </div><div><ul><li>although here all four versions, namely (weighted, unweighted) X (ordinal, continuous), are available graphically</li><li>Not humanly possible and not even practical to compare everything. I have to make the decisions based on one set of comparisons and ordinal unweighted is my default.]]</li></ul><div><br></div><div><span style=\"color: rgb(62, 145, 234);\">&gt; lavTestLRT(fit_cfa_comp1, fit_cfa_comp2)</span></div><div><br></div><div>Scaled and Shifted Chi-Squared Difference Test (method = “satorra.2000”)</div><div><br></div><div>lavaan-&gt;lavTestLRT():  </div><div>   lavaan NOTE: The “Chisq” column contains standard test statistics, not the robust test that should be reported per model. A robust difference test is a </div><div>   function of two standard (not robust) statistics.</div><div><br></div><div>              Df AIC BIC  Chisq Chisq diff Df diff Pr(&gt;Chisq)    </div><div>fit_cfa_comp2 13         184.01                                  </div><div>fit_cfa_comp1 14         325.14     173.51       1  &lt; 2.2e-16 ***</div><div>---</div><div>Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1</div><div><br></div></div>"
+            },
+            "id": "xy-edge__stack-0f30124e-bbf9-4352-ac57-e366f629c445source-bottom-stack-8c982a6a-8dab-45b3-824a-f5a6e8de4978target-left",
+            "source": "stack-0f30124e-bbf9-4352-ac57-e366f629c445",
+            "target": "stack-8c982a6a-8dab-45b3-824a-f5a6e8de4978",
+            "sourceHandle": "source-bottom",
+            "targetHandle": "target-left"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": {
+                "x": 94.62908245265214,
+                "y": -5.968291101764862
+              },
+              "noteHtml": ""
+            },
+            "id": "xy-edge__stack-8c982a6a-8dab-45b3-824a-f5a6e8de4978source-right-stack-71ba6d54-983d-4f57-a07e-5ddc3e4e5fa3source-bottom",
+            "source": "stack-8c982a6a-8dab-45b3-824a-f5a6e8de4978",
+            "target": "stack-71ba6d54-983d-4f57-a07e-5ddc3e4e5fa3",
+            "sourceHandle": "source-right",
+            "targetHandle": "source-bottom"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": {
+                "x": 2.0943305423381844,
+                "y": -19.083381377079036
+              },
+              "noteHtml": "<span style=\"font-weight: bold;\">What changes from 1 to 3?</span> This split of relative advantage or performance comparison items into two variables was driven by EFA. EFA results were not clear-cut, but they showed a split into two-ish factors with an item set distribution like this. <div><br></div><div><span style=\"font-weight: bold;\">Chi-square test of differences</span>: The restriction imposed by cfa_comp1 worsens the global fit compared to cfa_comp3. In other words, comp3 is the one data would suggest going with. </div><div><br></div><div>&gt; lavTestLRT(fit_cfa_comp1, fit_cfa_comp3)</div><div><br></div><div>Scaled and Shifted Chi-Squared Difference Test (method = “satorra.2000”)</div><div><br></div><div>lavaan-&gt;lavTestLRT():  </div><div>   lavaan NOTE: The “Chisq” column contains standard test statistics, not the robust test that should be reported per model. A robust difference test is a </div><div>   function of two standard (not robust) statistics.</div><div><br></div><div>              Df AIC BIC  Chisq Chisq diff Df diff Pr(&gt;Chisq)    </div><div>fit_cfa_comp3 13         167.20                                  </div><div>fit_cfa_comp1 14         325.14     185.04       1  &lt; 2.2e-16 ***</div><div>---</div><div>Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1</div><div><br></div>"
+            },
+            "id": "xy-edge__stack-0f30124e-bbf9-4352-ac57-e366f629c445source-right-stack-71ba6d54-983d-4f57-a07e-5ddc3e4e5fa3source-left",
+            "source": "stack-0f30124e-bbf9-4352-ac57-e366f629c445",
+            "target": "stack-71ba6d54-983d-4f57-a07e-5ddc3e4e5fa3",
+            "sourceHandle": "source-right",
+            "targetHandle": "source-left"
           }
         ]
       }
@@ -400,16 +668,13 @@
       "type": "model",
       "layout": {
         "viewport": {
-          "x": 2720.3207606964147,
-          "y": 671.0730047241119,
-          "zoom": 0.5
+          "x": 2060.432295755201,
+          "y": 1360.3916739375172,
+          "zoom": 0.6909564351119143
         },
         "comparison_ids": [
-          "B2.2.4",
-          "B4.2a2",
-          "B4.2a",
-          "B4.2a3",
-          "B1.2"
+          "B3.1c3",
+          "B3.1c3_ml"
         ],
         "model_variants": {},
         "matrix_settings": {},
@@ -419,8 +684,8 @@
             "id": "shape-5898caf5-80b3-40f5-89d1-5153b2c04e90",
             "type": "shape",
             "position": {
-              "x": -1465.7629777347138,
-              "y": -679.456735594481
+              "x": -1453.7629777347138,
+              "y": -495.45673559448096
             },
             "width": 4954,
             "height": 60,
@@ -439,11 +704,11 @@
             "id": "shape-d3730f13-b48c-4d3d-bc7a-7406cb9dd845",
             "type": "shape",
             "position": {
-              "x": -1465.7629777347138,
-              "y": -1567.456735594481
+              "x": -1503.7629777347138,
+              "y": -2194.456735594481
             },
             "width": 60,
-            "height": 1324,
+            "height": 2169,
             "dragHandle": ".decoration-drag",
             "data": {
               "fill": "#e8ffd1",
@@ -641,7 +906,15 @@
             "width": 320,
             "height": 260
           },
+          "B3.1c3": {
+            "width": 320,
+            "height": 260
+          },
           "B3.1c3_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B3.1c4": {
             "width": 320,
             "height": 260
           },
@@ -670,6 +943,18 @@
             "height": 318
           },
           "B4.2b": {
+            "width": 320,
+            "height": 260
+          },
+          "cfa_comp1": {
+            "width": 320,
+            "height": 260
+          },
+          "cfa_comp2": {
+            "width": 320,
+            "height": 260
+          },
+          "cfa_comp3": {
             "width": 320,
             "height": 260
           },
@@ -702,6 +987,22 @@
             "height": 260
           },
           "U2b2": {
+            "width": 320,
+            "height": 260
+          },
+          "B3x.1a": {
+            "width": 320,
+            "height": 260
+          },
+          "B3x.1a_ml": {
+            "width": 320,
+            "height": 260
+          },
+          "B3x.1c": {
+            "width": 320,
+            "height": 260
+          },
+          "B3x.1c_ml": {
             "width": 320,
             "height": 260
           },
@@ -745,8 +1046,12 @@
           "B3.1c": "<ul><li>SRMR and robust RMSEA become better. Robust CFI and robust TLI get slightly worse.</li></ul><div><ul><li>Descriptive norms on intention become more strongly negative but become significant. </li><li>Other stuff retains significance and the direction of their signs. </li></ul></div><div><ul><li>So overall nothing crazy. </li></ul></div><div><br></div>",
           "B3.1c2": "<span style=\"color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0.08); font-size: 13.3333px;\">2: lavaan-&gt;lav_object_post_check():  \n   covariance matrix of latent variables is not positive definite ; use lavInspect(fit, \"cov.lv\") to investigate. </span><div><br></div><div><br></div><div><span style=\"font-weight: bold;\">Comparing this (B3.1c2) versus B3.1c</span></div><div><ul><li>All global stats get a tiny tad better to the third decimal point. TLI gets 0.001 worse. </li><li>All comparable variables retain their signs and significance. </li><li>No crazy changes overall. </li></ul></div><div>------------------------------------------</div><div><span style=\"font-weight: bold;\">This (B3.1c2) alone</span></div><div><ul><li>However, the newly introduced power perception and non-power perception might be fighting for the same information due to their latent high intercorrelation. </li><li>Non-power perception has a positive regression effect on attitude while power perception has a negative one. </li><li>The opposite is true of their impacts on PBC. \n\n</li></ul></div><div></div>",
           "B3.1c2_ml": "<div><span style=\"font-weight: bold;\">This (B3.1c2_ml) versus its ordinal version (B3.1c2)</span></div><div><ul><li>The impact of observability on attitude becomes positive but insignificant. </li><li>The effect of non-power perceptions on PBC becomes insignificant at 7.1%. Previously, it was hovering dangerously at 4.3%.</li><li>The rest retain their sign and significance. </li><li>That means that the fight between power and non-power remains the same as the ordinal version. </li></ul></div><div><br></div><div><br></div><div><br></div><div><br></div>",
+          "B3.1c3": "<span style=\"color: rgb(100, 72, 13); font-size: 13.3333px;\">Warning messages</span><span style=\"color: rgb(0, 0, 0); font-size: 13.3333px;\">:\n1: lavaan-&gt;lav_data_full():  \n   12 cases were deleted due to missing values in exogenous variable(s), while fixed.x = TRUE. \n2: lavaan-&gt;lav_object_post_check():  \n   some estimated ov variances are negative </span>\n\n<div><span style=\"font-weight: 700;\">Comparing the model B3.1C3 with its own ML version</span></div><div><span style=\"font-weight: 700;\">What changes from ordinal to ML?</span></div><div><ul><li>In the ordinal version, both norms were significant, and the injunctive norm had a counterintuitive sign. In the ML version, the descriptive norm becomes negative in a counterintuitive way, but it also becomes insignificant. </li><li>Observability on attitude flips in sign and gets positive (from a counterintuitive negative). </li><li>The trialability composite on attitude goes from -0.2 to +0.1 and remains significant. </li><li>Public charger access --&gt; Attitude almost becomes insignificant at 4%. </li></ul></div><div> <span style=\"font-weight: bold;\">What doesn't change but remains interesting? </span></div><div><ul><li>Power perception --&gt; Attitude remains counterintuitively negative and significant. </li><li>Non-power perception increases in magnitude and remains significant. </li><li>Non-power perception seems to be stealing some influence from power perceptions. </li><li>The cost composite reduces almost 10-fold and becomes almost insignificant. </li></ul></div><div><ul><li>R-square of intention drops from 83% to 75% in the ML version. PBC, attitude, and norms all see some sort of drop in their R-square as well. </li></ul></div><div>The ML model has visibly worse CFI and TLI and SRMR compared to the robust version but has better RMSEA. And all those tabs are independently failing the guideline. </div><div><br></div><div>Worth noting that I don't have the robust versions for the ordinal model because it was not positive definite and typically I compare the robust stats for ordinal. A comparison of non-robust wouldn't be too appropriate. </div><div><br></div><div>I assume from similar trends that the gap in robust stats would be less between the two types of models. </div><div><span style=\"font-weight: 700;\"><br></span></div>",
+          "B3.1c4": "<span style=\"color: rgb(100, 72, 13); font-size: 13.3333px;\">Warning message</span><span style=\"color: rgb(0, 0, 0); font-size: 13.3333px;\">:\nlavaan-&gt;lav_object_post_check():  \n   covariance matrix of latent variables is not positive definite ; use lavInspect(fit, \"cov.lv\") to investigate. </span>\n\n",
           "B3.1d": "<span style=\"color: rgb(0, 0, 0); background-color: rgba(0, 0, 0, 0.08); font-size: 13.3333px;\">4: lavaan-&gt;lav_object_post_check():  \n   covariance matrix of latent variables is not positive definite ; use lavInspect(fit, \"cov.lv\") to investigate. </span><div><br></div><div>Interesting. The only way this model differed from Model B3.1C2 is that I didn't allow any path from non-power perceptions to PBC. This reduces the impact of power perception on PBC, and that path also becomes insignificant. </div><div><br></div><div>Most importantly, this model, like the previous one, exhibits a non-positive-definite structure. The lowest eigenvalue is slightly negative, as I found after some digging with ChatGPT. Further digging showed a linear combination in the problematic eigenvalue direction and the problem might be associated with descriptive and injunctive norm so I'm going to merge them. And see what happens. Hopefully the positive definite problem will go away. \n\n</div>",
-          "B4.2a": "<span style=\"font-weight: bold;\">Compared to the final environmental dispositional model, here....</span><div><ul><li>the effect of symbolism on attitude vanishes, becomes negative at 0.01, and is insignificant at 92%. </li><li>The effect of institutional trust on attitude remains significant but halves in magnitude. </li><li>The effect of awareness of consequences on institutional trust flips in sign but remains the same in magnitude, which is the craziest jump. </li></ul></div><div><span style=\"font-weight: bold;\">Compared to the final-ish utility model, here....</span></div><div><ul><li>The effect of observability on attitude becomes insignificant and moves from -0.605 to -0.03. It was the counterintuitive sign all along. </li><li>The effect of finding public chargers halves in magnitude. </li><li>Perception of power on attitude becomes insignificant. </li><li>Perception of non-power on attitude halves in magnitude and remains significant. </li><li>Perception of power on PBC becomes insignificant. </li></ul></div><div><br></div>"
+          "B4.2a": "<span style=\"font-weight: bold;\">Compared to the final environmental dispositional model, here....</span><div><ul><li>the effect of symbolism on attitude vanishes, becomes negative at 0.01, and is insignificant at 92%. </li><li>The effect of institutional trust on attitude remains significant but halves in magnitude. </li><li>The effect of awareness of consequences on institutional trust flips in sign but remains the same in magnitude, which is the craziest jump. </li></ul></div><div><span style=\"font-weight: bold;\">Compared to the final-ish utility model, here....</span></div><div><ul><li>The effect of observability on attitude becomes insignificant and moves from -0.605 to -0.03. It was the counterintuitive sign all along. </li><li>The effect of finding public chargers halves in magnitude. </li><li>Perception of power on attitude becomes insignificant. </li><li>Perception of non-power on attitude halves in magnitude and remains significant. </li><li>Perception of power on PBC becomes insignificant. </li></ul></div><div><br></div>",
+          "B3x.1a": "Fits nicely ",
+          "B3x.1c": "<span style=\"color: rgb(100, 72, 13); font-size: 13.3333px;\">Warning message</span><span style=\"color: rgb(0, 0, 0); font-size: 13.3333px;\">:\nlavaan-&gt;lav_object_post_check():  \n   covariance matrix of latent variables is not positive definite ; use lavInspect(fit, \"cov.lv\") to investigate.</span><div><br></div><div><br></div><div>This is the first model in this line that shows positive indefiniteness. And if I move to model B3.1C by just merging range and compatibility, that goes away. \n\n</div>"
         },
         "stacks": [
           {
@@ -818,8 +1123,8 @@
             ],
             "active_model": "B3.1b1",
             "position": {
-              "x": -1872.52,
-              "y": -1452.67
+              "x": -2112.56,
+              "y": -1474.9
             },
             "width": 320,
             "height": 260,
@@ -862,6 +1167,60 @@
             "in_use": true,
             "hidden": false,
             "has_position": true
+          },
+          {
+            "id": "stack-b0d00534-1353-4c6c-996f-d34ac76a1d82",
+            "title": "Version stack",
+            "members": [
+              "B3.1c3",
+              "B3.1c3_ml"
+            ],
+            "active_model": "B3.1c3",
+            "position": {
+              "x": -2647.51,
+              "y": -1478.63
+            },
+            "width": 320,
+            "height": 260,
+            "in_use": true,
+            "hidden": false,
+            "has_position": true
+          },
+          {
+            "id": "stack-65c3483a-c0d4-498c-9ecd-e57054e72bac",
+            "title": "Model B3x.1a family",
+            "members": [
+              "B3x.1a_ml",
+              "B3x.1a"
+            ],
+            "active_model": "B3x.1a",
+            "position": {
+              "x": -1986.51,
+              "y": -1872.61
+            },
+            "width": 320,
+            "height": 260,
+            "in_use": true,
+            "hidden": false,
+            "has_position": true
+          },
+          {
+            "id": "stack-36ba99df-66a8-4e22-b558-122002fddbc9",
+            "title": "Version stack",
+            "members": [
+              "B3x.1c",
+              "B3x.1c_ml"
+            ],
+            "active_model": "B3x.1c",
+            "position": {
+              "x": -2407.66,
+              "y": -1992.74
+            },
+            "width": 320,
+            "height": 260,
+            "in_use": true,
+            "hidden": false,
+            "has_position": true
           }
         ],
         "used_models": [
@@ -881,7 +1240,7 @@
           "B2.2.3b",
           "B2.2.3c",
           "B2.2.4",
-          "B3.1c3_ml",
+          "B3.1c4",
           "B3.1d",
           "B3.2d",
           "B4.2a",
@@ -890,12 +1249,12 @@
         ],
         "model_positions": {
           "B1": {
-            "x": -1395.81,
-            "y": -1076.15
+            "x": -1394.76,
+            "y": -1347.4
           },
           "B1.2": {
-            "x": -1361.09,
-            "y": -596.19
+            "x": -1367.09,
+            "y": -398.19
           },
           "B2.1.1": {
             "x": -737.65,
@@ -922,8 +1281,8 @@
             "y": -1243.81
           },
           "B2.1.2": {
-            "x": -313.84,
-            "y": -605.82
+            "x": -314.34,
+            "y": -427.82
           },
           "B2.1a": {
             "x": -543.03,
@@ -974,8 +1333,8 @@
             "y": -1512.48
           },
           "B2.2.2": {
-            "x": 2230.47,
-            "y": -586.63
+            "x": 2236.47,
+            "y": -358.63
           },
           "B2.2.3a": {
             "x": 2210.4,
@@ -990,8 +1349,8 @@
             "y": -1484.72
           },
           "B2.2.4": {
-            "x": 3159.5,
-            "y": -595.32
+            "x": 3121.5,
+            "y": -321.32
           },
           "B3.1a": {
             "x": -1863.43,
@@ -1025,29 +1384,53 @@
             "x": -2403.03,
             "y": -938.76
           },
+          "B3.1c3": {
+            "x": -2357.61,
+            "y": -1450.27
+          },
           "B3.1c3_ml": {
             "x": -2645.28,
             "y": -1447.36
+          },
+          "B3.1c4": {
+            "x": -2561.26,
+            "y": -715.8
           },
           "B3.1d": {
             "x": -3055.26,
             "y": -1100.11
           },
           "B3.2d": {
-            "x": -3055.27,
-            "y": -633.14
+            "x": -2990.8,
+            "y": -437.97
           },
           "B4.2a": {
-            "x": -3863.56,
-            "y": -660.03
+            "x": -3838.11,
+            "y": -475.95
           },
           "B4.2a2": {
-            "x": -4569.07,
-            "y": -657.82
+            "x": -4561.07,
+            "y": -473.82
           },
           "B4.2a3": {
-            "x": -5150.21,
-            "y": -651.64
+            "x": -5165.36,
+            "y": -473.84
+          },
+          "B3x.1a": {
+            "x": -1980.72,
+            "y": -1900.11
+          },
+          "B3x.1a_ml": {
+            "x": -2132.68,
+            "y": -1955.11
+          },
+          "B3x.1c": {
+            "x": -2549.5,
+            "y": -1889.98
+          },
+          "B3x.1c_ml": {
+            "x": -2364.25,
+            "y": -1829.2
           },
           "B2.2.1c4": {
             "x": 2767.42,
@@ -1068,25 +1451,6 @@
         },
         "hidden_models": [],
         "notes": [
-          {
-            "id": "note-1790130681733",
-            "type": "note",
-            "position": {
-              "x": -1240.72,
-              "y": -2303.87
-            },
-            "width": 240,
-            "height": 64,
-            "data": {
-              "title": "as",
-              "text": "",
-              "collapsed": true,
-              "expandedSize": {
-                "width": 800,
-                "height": 208
-              }
-            }
-          },
           {
             "id": "note-1790185733564",
             "type": "note",
@@ -1110,8 +1474,8 @@
             "id": "note-1790657988599",
             "type": "note",
             "position": {
-              "x": -4530.12,
-              "y": -313.63
+              "x": -4528.12,
+              "y": -127.63
             },
             "width": 460,
             "height": 148,
@@ -1122,6 +1486,25 @@
               "expandedSize": {
                 "width": 460,
                 "height": 148
+              }
+            }
+          },
+          {
+            "id": "note-1790743677231",
+            "type": "note",
+            "position": {
+              "x": -2654.18,
+              "y": -1585.48
+            },
+            "width": 240,
+            "height": 64,
+            "data": {
+              "title": "Note about B3.1c3",
+              "text": "Like I mentioned in there, ordinal was positive and indefinite and ML fit can't really compare both. But I'm going to throw this model in the dominance analysis because, in a way, it's my full model as far as the performance side is concerned. Specifically I'm going to compare this against Model I 3.0 and G 3.0. ",
+              "collapsed": true,
+              "expandedSize": {
+                "width": 487,
+                "height": 167
               }
             }
           }
@@ -1175,7 +1558,10 @@
                 "ends": "end",
                 "size": 36
               },
-              "bend": null,
+              "bend": {
+                "x": -35.52015263774763,
+                "y": 19.297147390864666
+              },
               "noteHtml": "<span style=\"font-weight: bold;\">Why?</span><div>Add environmental stuff to core TPB</div>"
             },
             "id": "xy-edge__B1source-right-B2.1atarget-left",
@@ -1587,7 +1973,7 @@
             },
             "id": "xy-edge__stack-c332e0e0-bf95-4fe6-954f-d3a1b0da8d31source-top-B3.1c3_mlsource-bottom",
             "source": "stack-c332e0e0-bf95-4fe6-954f-d3a1b0da8d31",
-            "target": "B3.1c3_ml",
+            "target": "stack-b0d00534-1353-4c6c-996f-d34ac76a1d82",
             "sourceHandle": "source-top",
             "targetHandle": "source-bottom"
           },
@@ -1683,6 +2069,72 @@
             "id": "xy-edge__B4.2a2source-left-B4.2a3source-right",
             "source": "B4.2a2",
             "target": "B4.2a3",
+            "sourceHandle": "source-left",
+            "targetHandle": "source-right"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 18
+              },
+              "bend": {
+                "x": -41.70400503454948,
+                "y": 5.664791196357328
+              },
+              "noteHtml": "What?<div>Breaking up range and compatibility because i wanted to do Dominance Analysis -- compare it against model I41</div>"
+            },
+            "id": "xy-edge__stack-c332e0e0-bf95-4fe6-954f-d3a1b0da8d31source-top-B3.1c4source-bottom",
+            "source": "stack-c332e0e0-bf95-4fe6-954f-d3a1b0da8d31",
+            "target": "B3.1c4",
+            "sourceHandle": "source-bottom",
+            "targetHandle": "source-top"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 36
+              },
+              "bend": {
+                "x": 38.57457803812895,
+                "y": 9.872890049168973
+              },
+              "noteHtml": "<span style=\"font-weight: bold;\">What?</span> Adding performance items to the core TIP before the first time.<div><br></div><div>This is parallel to B3.1A. There I merged range and compatibility as one. </div><div><br></div><div><span style=\"background-color: rgb(238, 225, 155);\">Here, I enter range and compatibility separately. </span></div>"
+            },
+            "id": "xy-edge__B1source-left-stack-65c3483a-c0d4-498c-9ecd-e57054e72bacsource-right",
+            "source": "B1",
+            "target": "stack-65c3483a-c0d4-498c-9ecd-e57054e72bac",
+            "sourceHandle": "source-left",
+            "targetHandle": "source-right"
+          },
+          {
+            "type": "annotated",
+            "data": {
+              "appearance": {
+                "color": "#64748b",
+                "thickness": 2,
+                "head": "filled",
+                "ends": "end",
+                "size": 18
+              },
+              "bend": {
+                "x": 19.667727425181056,
+                "y": 11.969902759634124
+              },
+              "noteHtml": "<span style=\"font-weight: bold;\">What?</span> Just like I moved from model B3.1A to model B3.1C by adding performance perceptions as a reflective latent variable, I'm doing the same here. <div><br></div><div>Adding performance perceptions or relative advantage, or basically all the BEV versus ICEV items, as a reflective latent variable to ModelB3x.1A </div>"
+            },
+            "id": "xy-edge__stack-65c3483a-c0d4-498c-9ecd-e57054e72bacsource-left-stack-36ba99df-66a8-4e22-b558-122002fddbc9source-right",
+            "source": "stack-65c3483a-c0d4-498c-9ecd-e57054e72bac",
+            "target": "stack-36ba99df-66a8-4e22-b558-122002fddbc9",
             "sourceHandle": "source-left",
             "targetHandle": "source-right"
           },

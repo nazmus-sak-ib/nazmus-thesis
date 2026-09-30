@@ -258,6 +258,84 @@
       "title": "Model B4.2b3",
       "image": "models/B4.2b3.svg",
       "results": "results/B4.2b3.json"
+    },
+    {
+      "id": "B3.1c4",
+      "title": "Model B3.1c4",
+      "image": "models/B3.1c4.svg",
+      "results": "results/B3.1c4.json"
+    },
+    {
+      "id": "B3.1c4_ml",
+      "title": "Model B3.1c4_ml",
+      "image": "models/B3.1c4_ml.svg",
+      "results": "results/B3.1c4_ml.json"
+    },
+    {
+      "id": "B1_ml",
+      "title": "Model B1_ml",
+      "image": "models/B1_ml.svg",
+      "results": "results/B1_ml.json"
+    },
+    {
+      "id": "cfa_comp1_ml",
+      "title": "Model cfa_comp1_ml",
+      "image": "models/cfa_comp1_ml.svg",
+      "results": "results/cfa_comp1_ml.json"
+    },
+    {
+      "id": "cfa_comp1",
+      "title": "Model cfa_comp1",
+      "image": "models/cfa_comp1.svg",
+      "results": "results/cfa_comp1.json"
+    },
+    {
+      "id": "cfa_comp2",
+      "title": "Model cfa_comp2",
+      "image": "models/cfa_comp2.svg",
+      "results": "results/cfa_comp2.json"
+    },
+    {
+      "id": "cfa_comp2_ml",
+      "title": "Model cfa_comp2_ml",
+      "image": "models/cfa_comp2_ml.svg",
+      "results": "results/cfa_comp2_ml.json"
+    },
+    {
+      "id": "cfa_comp3_ml",
+      "title": "Model cfa_comp3_ml",
+      "image": "models/cfa_comp3_ml.svg",
+      "results": "results/cfa_comp3_ml.json"
+    },
+    {
+      "id": "cfa_comp3",
+      "title": "Model cfa_comp3",
+      "image": "models/cfa_comp3.svg",
+      "results": "results/cfa_comp3.json"
+    },
+    {
+      "id": "B3x.1a",
+      "title": "Model B3x.1a",
+      "image": "models/B3x.1a.svg",
+      "results": "results/B3x.1a.json"
+    },
+    {
+      "id": "B3x.1a_ml",
+      "title": "Model B3x.1a_ml",
+      "image": "models/B3x.1a_ml.svg",
+      "results": "results/B3x.1a_ml.json"
+    },
+    {
+      "id": "B3x.1c_ml",
+      "title": "Model B3x.1c_ml",
+      "image": "models/B3x.1c_ml.svg",
+      "results": "results/B3x.1c_ml.json"
+    },
+    {
+      "id": "B3x.1c",
+      "title": "Model B3x.1c",
+      "image": "models/B3x.1c.svg",
+      "results": "results/B3x.1c.json"
     }
   ]
 }
