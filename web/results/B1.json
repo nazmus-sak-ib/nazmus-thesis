@@ -1,9 +1,9 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "metadata": {
     "model_id": "B1",
     "model_name": "Model B1",
-    "exported_at": "2026-09-27T12:37:55-0400",
+    "exported_at": "2026-10-01T02:37:03-0400",
     "lavaan_version": "0.7.2",
     "estimator": "DWLS",
     "estimator_requested": "WLSMV",
@@ -30,7 +30,35 @@
     "converged": true,
     "post_check": true,
     "number_parameters": 90,
-    "number_groups": 1
+    "number_groups": 1,
+    "latent_variables": [
+      "Attitude",
+      "PBC",
+      "DescriptiveNorms",
+      "InjunctiveNorms",
+      "Intention"
+    ],
+    "observed_variables": [
+      "att_appealing",
+      "att_desirable",
+      "att_goodidea",
+      "att_pleasant",
+      "pbc_barrier",
+      "pbc_could",
+      "pbc_resources",
+      "norms_d_many",
+      "norms_d_common",
+      "norms_d_few",
+      "norms_i_consider",
+      "norms_i_bad",
+      "norms_i_support",
+      "nextv_bev",
+      "nextv_phev",
+      "nextv_icev"
+    ],
+    "group_labels": [],
+    "latent_correlation_source": "lavaan::lavInspect(fit, \"cor.lv\")",
+    "latent_covariance_source": "lavaan::lavInspect(fit, \"cov.lv\")"
   },
   "sample_size": [
     {
@@ -4357,5 +4385,114 @@
       "sepc.all": 0.000533055157646239,
       "sepc.nox": 0.000533055157646239
     }
-  ]
+  ],
+  "latent_correlations": {
+    "kind": "matrix",
+    "row_names": [
+      "Attitude",
+      "PBC",
+      "DescriptiveNorms",
+      "InjunctiveNorms",
+      "Intention"
+    ],
+    "column_names": [
+      "Attitude",
+      "PBC",
+      "DescriptiveNorms",
+      "InjunctiveNorms",
+      "Intention"
+    ],
+    "values": [
+      [
+        1,
+        0.4977645486399609,
+        0.5963104172735203,
+        0.821549443851135,
+        0.8600379780328126
+      ],
+      [
+        0.4977645486399609,
+        1,
+        0.401074424509178,
+        0.5184265722731021,
+        0.5578799629728031
+      ],
+      [
+        0.5963104172735203,
+        0.4010744245091779,
+        1,
+        0.8127746568817964,
+        0.5968114830225489
+      ],
+      [
+        0.8215494438511349,
+        0.5184265722731021,
+        0.8127746568817964,
+        1,
+        0.7995445919986847
+      ],
+      [
+        0.8600379780328126,
+        0.5578799629728032,
+        0.5968114830225489,
+        0.7995445919986847,
+        1
+      ]
+    ]
+  },
+  "latent_covariances": {
+    "kind": "matrix",
+    "row_names": [
+      "Attitude",
+      "PBC",
+      "DescriptiveNorms",
+      "InjunctiveNorms",
+      "Intention"
+    ],
+    "column_names": [
+      "Attitude",
+      "PBC",
+      "DescriptiveNorms",
+      "InjunctiveNorms",
+      "Intention"
+    ],
+    "values": [
+      [
+        0.9691667787187305,
+        0.4278239584276472,
+        0.4720582958681558,
+        0.7019098752926259,
+        0.8063896615199493
+      ],
+      [
+        0.4278239584276472,
+        0.7622260016001047,
+        0.2815728828327742,
+        0.3928054641800999,
+        0.4638854015210202
+      ],
+      [
+        0.4720582958681558,
+        0.2815728828327742,
+        0.6466182485900199,
+        0.5672082239666525,
+        0.4570768348708521
+      ],
+      [
+        0.7019098752926259,
+        0.3928054641800999,
+        0.5672082239666525,
+        0.7531765230961877,
+        0.660874720217087
+      ],
+      [
+        0.8063896615199493,
+        0.4638854015210202,
+        0.4570768348708521,
+        0.660874720217087,
+        0.9071020000202656
+      ]
+    ]
+  },
+  "latent_matrix_diagnostics": []
 }

@@ -1,20 +1,63 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.2",
   "metadata": {
     "model_id": "B1.2",
     "model_name": "Model B1.2",
-    "exported_at": "2026-09-22T23:15:25-0400",
+    "exported_at": "2026-10-01T02:36:33-0400",
     "lavaan_version": "0.7.2",
     "estimator": "DWLS",
+    "estimator_requested": "WLSMV",
+    "estimator_actual": "DWLS",
     "se_method": "robust.sem",
     "test": ["standard", "scaled.shifted"],
+    "information": ["expected", "expected"],
+    "h1_information": ["unstructured", "unstructured"],
+    "likelihood": "default",
+    "link": "default",
+    "data_treatment": "Ordinal",
     "missing": "pairwise",
+    "ordered_variables": ["att_appealing", "att_desirable", "att_goodidea", "att_pleasant", "pbc_barrier", "pbc_could", "pbc_resources", "norms_d_many", "norms_d_common", "norms_d_few", "norms_i_consider", "norms_i_bad", "norms_i_support", "nextv_bev", "nextv_phev", "nextv_icev"],
+    "number_ordered_variables": 16,
     "parameterization": "delta",
+    "std_lv": false,
+    "meanstructure": true,
+    "fixed_x": false,
+    "auto_var": true,
+    "auto_cov_lv_x": true,
+    "auto_cov_y": false,
+    "mimic": "lavaan",
+    "representation": "LISREL",
     "converged": true,
     "post_check": true,
     "number_parameters": 86,
     "number_groups": 1,
-    "ordered_variables": ["att_appealing", "att_desirable", "att_goodidea", "att_pleasant", "pbc_barrier", "pbc_could", "pbc_resources", "norms_d_many", "norms_d_common", "norms_d_few", "norms_i_consider", "norms_i_bad", "norms_i_support", "nextv_bev", "nextv_phev", "nextv_icev"]
+    "latent_variables": [
+      "Attitude",
+      "PBC",
+      "SocialNorms",
+      "Intention"
+    ],
+    "observed_variables": [
+      "att_appealing",
+      "att_desirable",
+      "att_goodidea",
+      "att_pleasant",
+      "pbc_barrier",
+      "pbc_could",
+      "pbc_resources",
+      "norms_d_many",
+      "norms_d_common",
+      "norms_d_few",
+      "norms_i_consider",
+      "norms_i_bad",
+      "norms_i_support",
+      "nextv_bev",
+      "nextv_phev",
+      "nextv_icev"
+    ],
+    "group_labels": [],
+    "latent_correlation_source": "lavaan::lavInspect(fit, \"cor.lv\")",
+    "latent_covariance_source": "lavaan::lavInspect(fit, \"cov.lv\")"
   },
   "sample_size": [
     {
@@ -28,7 +71,7 @@
       "n_patterns": 195
     }
   ],
-  "model_syntax": "\n  # =======================================\n  # Reflective Measurement Model\n  # =======================================\n  Attitude =~ att_appealing + att_desirable +\n              att_goodidea + att_pleasant\n\n  PBC =~ pbc_barrier + pbc_could +\n         pbc_resources\n\n  SocialNorms =~ norms_d_many + norms_d_common +\n                      norms_d_few + \n                 norms_i_consider + norms_i_bad +\n                      norms_i_support\n\n  Intention =~ nextv_bev + nextv_phev + nextv_icev\n\n\n  # =======================================\n  # Structural path\n  # ======================================= \n  Intention  ~ Attitude + PBC + SocialNorms\n",
+  "model_syntax": "\n  # =======================================\n  # Reflective Measurement Model\n  # =======================================\n  Attitude =~ att_appealing + att_desirable +\n              att_goodidea + att_pleasant\n\n  PBC =~ pbc_barrier + pbc_could +\n         pbc_resources\n\n  SocialNorms =~ norms_d_many + norms_d_common +\n                      norms_d_few + \n                 norms_i_consider + norms_i_bad +\n                      norms_i_support\n\n  Intention =~ nextv_bev + nextv_phev + nextv_icev\n\n\n  # =======================================\n  # Structural path\n  # ======================================= \n  Intention  ~ Attitude + PBC + SocialNorms\n  \n  # =======================================\n  # Covariance paths\n  # =======================================   \n  \n  # all exo ~~ exo allowed with auto.cov.lv.x = TRUE  \n",
   "fit_measures": [
     {
       "measure": "npar",
@@ -1836,7 +1879,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "att_desirable",
@@ -1850,7 +1893,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "att_goodidea",
@@ -1864,7 +1907,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "att_pleasant",
@@ -1878,7 +1921,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "pbc_barrier",
@@ -1892,7 +1935,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "pbc_could",
@@ -1906,7 +1949,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "pbc_resources",
@@ -1920,7 +1963,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "norms_d_many",
@@ -1934,7 +1977,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "norms_d_common",
@@ -1948,7 +1991,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "norms_d_few",
@@ -1962,7 +2005,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "norms_i_consider",
@@ -1976,7 +2019,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "norms_i_bad",
@@ -1990,7 +2033,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "norms_i_support",
@@ -2004,7 +2047,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "nextv_bev",
@@ -2018,7 +2061,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "nextv_phev",
@@ -2032,7 +2075,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "nextv_icev",
@@ -2046,7 +2089,7 @@
       "ci.upper": 1,
       "std.lv": 1,
       "std.all": 1,
-      "section": "other"
+      "section": "scaling_factor"
     },
     {
       "lhs": "att_appealing",
@@ -2060,7 +2103,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "att_desirable",
@@ -2074,7 +2117,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "att_goodidea",
@@ -2088,7 +2131,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "att_pleasant",
@@ -2102,7 +2145,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "pbc_barrier",
@@ -2116,7 +2159,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "pbc_could",
@@ -2130,7 +2173,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "pbc_resources",
@@ -2144,7 +2187,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "norms_d_many",
@@ -2158,7 +2201,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "norms_d_common",
@@ -2172,7 +2215,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "norms_d_few",
@@ -2186,7 +2229,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "norms_i_consider",
@@ -2200,7 +2243,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "norms_i_bad",
@@ -2214,7 +2257,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "norms_i_support",
@@ -2228,7 +2271,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "nextv_bev",
@@ -2242,7 +2285,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "nextv_phev",
@@ -2256,7 +2299,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "nextv_icev",
@@ -2270,7 +2313,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "Attitude",
@@ -2284,7 +2327,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "PBC",
@@ -2298,7 +2341,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "SocialNorms",
@@ -2312,7 +2355,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     },
     {
       "lhs": "Intention",
@@ -2326,7 +2369,7 @@
       "ci.upper": 0,
       "std.lv": 0,
       "std.all": 0,
-      "section": "other"
+      "section": "intercept"
     }
   ],
   "r_squared": [
@@ -4097,5 +4140,88 @@
       "sepc.all": 0.002545531350638755,
       "sepc.nox": 0.002545531350638755
     }
-  ]
+  ],
+  "latent_correlations": {
+    "kind": "matrix",
+    "row_names": [
+      "Attitude",
+      "PBC",
+      "SocialNorms",
+      "Intention"
+    ],
+    "column_names": [
+      "Attitude",
+      "PBC",
+      "SocialNorms",
+      "Intention"
+    ],
+    "values": [
+      [
+        1,
+        0.4977733574913677,
+        0.7534890414678593,
+        0.859908538841621
+      ],
+      [
+        0.4977733574913677,
+        1,
+        0.4816254244818001,
+        0.5578506740293026
+      ],
+      [
+        0.7534890414678593,
+        0.4816254244818001,
+        1,
+        0.7349066269965104
+      ],
+      [
+        0.859908538841621,
+        0.5578506740293026,
+        0.7349066269965104,
+        1
+      ]
+    ]
+  },
+  "latent_covariances": {
+    "kind": "matrix",
+    "row_names": [
+      "Attitude",
+      "PBC",
+      "SocialNorms",
+      "Intention"
+    ],
+    "column_names": [
+      "Attitude",
+      "PBC",
+      "SocialNorms",
+      "Intention"
+    ],
+    "values": [
+      [
+        0.9691150270958202,
+        0.4278717454587854,
+        0.5505169144095017,
+        0.806530370099481
+      ],
+      [
+        0.4278717454587854,
+        0.7624100171184625,
+        0.3121114953102658,
+        0.4640802208635794
+      ],
+      [
+        0.5505169144095017,
+        0.3121114953102658,
+        0.5508230750390901,
+        0.5196596858570099
+      ],
+      [
+        0.806530370099481,
+        0.4640802208635794,
+        0.5196596858570099,
+        0.9077402653736801
+      ]
+    ]
+  },
+  "latent_matrix_diagnostics": []
 }

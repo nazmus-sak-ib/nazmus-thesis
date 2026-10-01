@@ -1,3 +1,4 @@
+import {validateStickerLibrary,stickerModel} from './stickers.js';
 import { comparisonIdentity } from './cfaResults.js';
 export const WORKSPACE_KEY = 'sem-multipage-workspace';
 export const LEGACY_KEY = 'sem-model-layout';
@@ -26,8 +27,9 @@ export function mergeLegacyLayouts(file={},browser={}) {
 export function validateLayout(value) {
   if(!value || typeof value!=='object' || Array.isArray(value))throw Error('A page layout must be a JSON object.');
   for(const key of ['used_models','hidden_models','stacks','notes','edges','decorations'])if(value[key]!==undefined&&!Array.isArray(value[key]))throw Error(key+' must be an array.');
-  for(const key of ['model_positions','positions','model_notes','model_sizes','model_variants','matrix_settings'])if(value[key]!==undefined&&(!value[key]||typeof value[key]!=='object'||Array.isArray(value[key])))throw Error(key+' must be an object.');
+  for(const key of ['model_positions','positions','model_notes','model_sizes','model_variants','matrix_settings','sticker_assignments','statistics_style','row_orders'])if(value[key]!==undefined&&(!value[key]||typeof value[key]!=='object'||Array.isArray(value[key])))throw Error(key+' must be an object.');
   for(const key of ['notes','stacks','edges','decorations'])if(value[key]?.some(item=>!item||typeof item!=='object'||typeof item.id!=='string'))throw Error('Invalid '+key+' entry.');
+  if(Object.values(value.sticker_assignments??{}).some(ids=>!Array.isArray(ids)||ids.some(id=>typeof id!=='string')))throw Error('Invalid sticker assignments.');
   return value;
 }
 export function newPage(title,type='model',layout=emptyLayout()) {
@@ -35,6 +37,7 @@ export function newPage(title,type='model',layout=emptyLayout()) {
 }
 export function normalizeWorkspace(value) {
   if(!value || value.kind!=='sem-workspace' || value.schema_version!=='10.0' || !Array.isArray(value.pages) || !value.pages.length)throw Error('This is not a supported workspace file.');
+  validateStickerLibrary(value.sticker_families);
   const seen=new Set();
   const pages=value.pages.map(page=>{
     if(!page||typeof page.id!=='string'||!page.id||seen.has(page.id)||!PAGE_TYPES[page.type]||typeof page.title!=='string')throw Error('Every page needs a unique ID, a name, and a supported type.');
@@ -45,7 +48,7 @@ export function normalizeWorkspace(value) {
   return {...value,pages,active_page:seen.has(value.active_page)?value.active_page:pages[0].id};
 }
 function hasModelContent(layout) {
-  return ['used_models','hidden_models','stacks'].some(key=>layout[key]?.length)||Object.keys(layout.model_notes??{}).length>0||Object.keys(layout.model_positions??{}).length>0;
+  return ['used_models','hidden_models','stacks'].some(key=>layout[key]?.length)||Object.keys(layout.model_notes??{}).length>0||Object.keys(layout.model_positions??{}).length>0||Object.values(layout.sticker_assignments??{}).some(ids=>ids.length);
 }
 // Positions and default sizes are reusable placement hints, not page content.
 export function pageContentItems(page) {
@@ -53,10 +56,11 @@ export function pageContentItems(page) {
   const members=new Set(stacks.flatMap(s=>s.members??[]));
   const add=(kind,id,label)=>items.push({kind,id,key:kind+':'+id,label});
   for(const n of l.notes??[])add('note',n.id,'Canvas note: '+(n.data?.title||n.id));
-  for(const n of l.decorations??[])add(n.type==='container'?'container':'shape',n.id,(n.type==='container'?'Container: ':'Shape: ')+(n.data?.title||n.id));
+  for(const n of l.decorations??[])add(n.type==='text'?'text':n.type==='container'?'container':'shape',n.id,(n.type==='text'?'Canvas text: ':n.type==='container'?'Container: ':'Shape: ')+(n.data?.title||n.id));
   for(const s of stacks)add('stack',s.id,(s.hidden?'Hidden stack: ':'Stack: ')+(s.title||s.id));
   for(const id of new Set([...legacyUsed(l),...(l.hidden_models??[])]))if(!members.has(id))add('model',id,(l.hidden_models?.includes(id)?'Hidden model: ':'Model: ')+id);
   for(const id of Object.keys(l.model_notes??{}))if(l.model_notes[id])add('model-note',id,'Model note: '+id);
+  for(const id of new Set(Object.keys(l.sticker_assignments??{}).filter(key=>l.sticker_assignments[key]?.length).map(stickerModel).filter(Boolean)))add('stickers',id,'Model stickers: '+id);
   for(const e of l.edges??[])add('edge',e.id,'Arrow: '+e.source+' → '+e.target);
   if(l.retained_content&&Object.keys(l.retained_content).length)add('retained','retained','Other retained page data');
   return items;
@@ -71,6 +75,7 @@ export function pageHasContent(page) { return pageContentItems(page).length>0; }
 export function removePageContent(layout,item) {
   const l=structuredClone(layout), removed=new Set([item.id]);
   if(item.kind==='retained'){delete l.retained_content;return l;}
+  if(item.kind==='stickers'){for(const key of Object.keys(l.sticker_assignments??{}))if(stickerModel(key)===item.id)delete l.sticker_assignments[key];return l;}
   if(item.kind==='model-note'){delete l.model_notes?.[item.id];return l;}
   if(item.kind==='edge'){l.edges=(l.edges??[]).filter(e=>e.id!==item.id);return l;}
   if(item.kind==='stack')for(const id of l.stacks?.find(s=>s.id===item.id)?.members??[])removed.add(id);
@@ -81,6 +86,7 @@ export function removePageContent(layout,item) {
   l.stacks=l.stacks.map(s=>({...s,members:(s.members??[]).filter(id=>!removed.has(id))}));
   l.decorations=l.decorations.map(n=>({...n,data:{...n.data,members:(n.data?.members??[]).filter(id=>!removed.has(id))}}));
   l.edges=(l.edges??[]).filter(e=>!removed.has(e.source)&&!removed.has(e.target));
+  for(const key of Object.keys(l.sticker_assignments??{}))if(removed.has(stickerModel(key)))delete l.sticker_assignments[key];
   for(const id of removed)if(l.model_variants)delete l.model_variants[id];
   l.comparison_ids=(l.comparison_ids??[]).filter(id=>!removed.has(comparisonIdentity(id).modelId));
   return l;

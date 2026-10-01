@@ -1,3 +1,15 @@
+import ViewportMenu from './ViewportMenu.jsx';
+import OrderedRows from './OrderedRows.jsx';
+import {RowOrderContext} from './rowOrderContext.js';
+import {resultRowKeys} from './rowOrder.js';
+import { StatisticsContext, ResultDataContext } from './statisticsContext.js';
+import { StatisticalCell, StatisticsControls } from './StatisticsStyle.jsx';
+import { statisticsSettings } from './statisticsStyle.js';
+import { ModelStickers, StickerAction, StickerLibrary } from './Stickers.jsx';
+import { STICKER_MIME, stickerKey, stickerEntries, applySticker, enforceStickerFamilies } from './stickers.js';
+import { contentMinZoom, clearStackEndpoints } from './canvasGeometry.js';
+import CanvasText, { StableTextField } from './CanvasText.jsx';
+import { sortModels, SORT_OPTIONS } from './librarySort.js';
 import { MatrixSettingsContext } from './matrixContext.js';
 import { CFA_VIEWS, variantsOf, selectResult, comparisonKey, comparisonIdentity, normalizeCfaData, cfaViewAvailable, reliabilityRows } from './cfaResults.js';
 import CfaView from './CfaViews.jsx';
@@ -373,9 +385,10 @@ function RichModelNotes({ value, onChange, label = 'Model notes', placeholder = 
 }
 function ModelNode({ data, selected }) {
   return (
-    <div className={"model-node method-" + (data.methodSummary?.treatment ?? "unknown")}>
+    <div onDragOver={data.onStickerDragOver} onDrop={data.onStickerDrop} className={"model-node method-" + (data.methodSummary?.treatment ?? "unknown")}>
       <NodeResizer isVisible={selected} {...MODEL_LIMITS} handleStyle={{ width: 12, height: 12 }} />
       <ModelNoteButton data={data} />
+      <ModelStickers data={data} />
       <ConnectionHandles />
 
       <img
@@ -414,7 +427,7 @@ function NoteNode({ id, data, selected }) {
         {data.collapsed ? '▸' : '▾'}
       </button>
 
-      <input
+      <StableTextField
         className="note-title nodrag"
         value={data.title ?? ''}
         placeholder="Heading"
@@ -425,7 +438,7 @@ function NoteNode({ id, data, selected }) {
         }
       />
 
-      {!data.collapsed && <textarea
+      {!data.collapsed && <StableTextField multiline
         className="note-text nodrag nowheel"
         value={data.text ?? ''}
         placeholder="Type here..."
@@ -513,7 +526,7 @@ function reconcileModelLibrary(current, catalog, makeNode, savedLayout = {}) {
     const model = byId.get(node.id);
     if (!model) return [];
     return [{ ...node, data: { ...node.data,
-      title: model.title || model.id, image: model.image, results: model.results, methodSummary: model.methodSummary } }];
+      title: model.title || model.id, image: model.image, results: model.results, jsonModified:model.jsonModified, svgModified:model.svgModified, methodSummary: model.methodSummary } }];
   });
   const added = catalog.filter(model => !existingIds.has(model.id)).map(model => {
     const node = makeNode(model), position = savedLayout.model_positions?.[model.id];
@@ -659,9 +672,10 @@ function displayVersionNodes(nodes) {
 
 function StackNode({ data, selected }) {
   return (
-    <div className={"model-node version-stack method-" + (data.methodSummary?.treatment ?? "unknown")}>
+    <div onDragOver={data.onStickerDragOver} onDrop={data.onStickerDrop} className={"model-node version-stack method-" + (data.methodSummary?.treatment ?? "unknown")}>
       <NodeResizer isVisible={selected} {...MODEL_LIMITS} handleStyle={{ width: 12, height: 12 }} />
       <ModelNoteButton data={data} />
+      <ModelStickers data={data} />
       <ConnectionHandles />
       <div className="stack-caption">{data.title} <span>{data.versionIndex} of {data.memberIds.length}</span></div>
       <img src={BASE + data.image} alt={data.activeTitle} draggable={false} />
@@ -671,9 +685,9 @@ function StackNode({ data, selected }) {
 }
 
 
-const DECORATION_TYPES = ['shape', 'container'];
+const DECORATION_TYPES = ['shape', 'container', 'text'];
 const isDecoration = node => DECORATION_TYPES.includes(node.type);
-const isGroupItem = node => node.type === 'note' || (['model','stack'].includes(node.type) && node.data.inUse && !node.data.stackId);
+const isGroupItem = node => ['note','text'].includes(node.type) || (['model','stack'].includes(node.type) && node.data.inUse && !node.data.stackId);
 function itemBox(node) {
   return { x: node.position.x, y: node.position.y, width: node.width ?? node.measured?.width ?? 320, height: node.height ?? node.measured?.height ?? 260 };
 }
@@ -684,6 +698,8 @@ function decorationStyle(data = {}) {
     thickness: boundedSize(data.thickness,2,0,12), line: ['solid','dashed','dotted'].includes(data.line) ? data.line : 'solid' };
 }
 function normalizeDecoration(node) {
+  if(node.type === 'text') return {id:node.id,type:'text',position:node.position??{x:0,y:0},width:boundedSize(node.width,300,20,5000),height:boundedSize(node.height,60,9,1000),data:{text:typeof node.data?.text==='string'?node.data.text:'Text',color:/^#[0-9a-f]{6}$/i.test(node.data?.color)?node.data.color:'#222222',bold:Boolean(node.data?.bold),underline:Boolean(node.data?.underline),align:['left','center','right'].includes(node.data?.align)?node.data.align:'left',fontSize:boundedSize(node.data?.fontSize,32,4,500),baseWidth:boundedSize(node.data?.baseWidth,node.width??300,20,5000)}};
+
   const type = node.type === 'container' ? 'container' : 'shape';
   const kind = type === 'container' ? 'rectangle' : ['rectangle','circle','rounded'].includes(node.data?.kind) ? node.data.kind : 'rectangle';
   const width = boundedSize(node.width,300,60,5000), height = kind === 'circle' ? width : boundedSize(node.height,200,60,5000);
@@ -750,6 +766,7 @@ function DecorationNode({ data, selected, type }) {
 }
 
 const nodeTypes = {
+  text: CanvasText,
   shape: DecorationNode,
   container: DecorationNode,
   stack: StackNode,
@@ -758,14 +775,15 @@ const nodeTypes = {
 };
 
 
-const ARROW_DEFAULTS = { color: '#64748b', thickness: 2, head: 'filled', size: 18, ends: 'end' };
+const ARROW_DEFAULTS = { color: '#64748b', thickness: 2, head: 'filled', size: 36, ends: 'end', line: 'solid' };
 function arrowAppearance(edge) {
   const value = edge.data?.appearance ?? {};
   return { color: /^#[0-9a-f]{6}$/i.test(value.color) ? value.color : ARROW_DEFAULTS.color,
     thickness: boundedSize(value.thickness, 2, 1, 6),
+    line: ['solid','dashed','dotted'].includes(value.line) ? value.line : 'solid',
     head: ['none','open','filled'].includes(value.head) ? value.head : 'filled',
     ends: ['none','start','end','both'].includes(value.ends) ? value.ends : 'end',
-    size: boundedSize(value.size, 18, 8, 36) };
+    size: boundedSize(value.size, 36, 8, 56) };
 }
 function arrowBend(value) {
   return value && Number.isFinite(value.x) && Number.isFinite(value.y) ? { x: value.x, y: value.y } : null;
@@ -794,7 +812,8 @@ function AnnotatedEdge(props) {
   const dragging = useRef(false);
   const endpointDrag = useRef(null);
   const [endpointPreview, setEndpointPreview] = useState(null);
-  const [path, x, y] = routedArrow(props);
+  const routed = clearStackEndpoints(props,id=>getInternalNode(id)?.type==='stack');
+  const [path, x, y] = routedArrow(routed);
   useEffect(() => {
     const cancel = event => {
       if (event.key === 'Escape') { endpointDrag.current = null; setEndpointPreview(null); }
@@ -840,7 +859,7 @@ function AnnotatedEdge(props) {
     [endpointPreview.end+'Position']: endpointPreview.snap?.side ?? props[endpointPreview.end+'Position'] } : props;
   const visiblePath = endpointPreview ? routedArrow(previewProps)[0] : path;
   function move(point) {
-    const bend = { x: point.x - (props.sourceX + props.targetX) / 2, y: point.y - (props.sourceY + props.targetY) / 2 };
+    const bend = { x: point.x - (routed.sourceX + routed.targetX) / 2, y: point.y - (routed.sourceY + routed.targetY) / 2 };
     setEdges(current => current.map(edge => edge.id === props.id ? { ...edge, data: { ...edge.data, bend } } : edge));
   }
   return <>
@@ -917,6 +936,7 @@ function DataTable({ rows, preferredColumns = null }) {
     );
   }
 
+  const rowKeys = resultRowKeys(rows);
   const availableColumns = Array.from(
     new Set(
       rows.flatMap(row => Object.keys(row))
@@ -940,17 +960,17 @@ function DataTable({ rows, preferredColumns = null }) {
           </tr>
         </thead>
 
-        <tbody>
+        <OrderedRows>
           {rows.map((row, rowIndex) => (
-            <tr key={rowIndex}>
+            <tr key={rowKeys[rowIndex]}>
               {columns.map(column => (
-                <td key={column}>
+                <StatisticalCell key={column} row={row} field={column}>
                   {formatValue(row[column])}
-                </td>
+                </StatisticalCell>
               ))}
             </tr>
           ))}
-        </tbody>
+        </OrderedRows>
       </table>
     </div>
   );
@@ -990,7 +1010,8 @@ function ModelSpecification({ syntax, title = 'Model specification' }) {
   );
 }
 
-function ResultContent({ data, view }) {
+function ResultContent({data,view}) {return <ResultDataContext.Provider value={data}><StatisticsControls/><ResultContentBody data={data} view={view}/></ResultDataContext.Provider>;}
+function ResultContentBody({ data, view }) {
   if (!data) {
     return null;
   }
@@ -1456,19 +1477,19 @@ function SimpleComparisonTable({
           </tr>
         </thead>
 
-        <tbody>
+        <OrderedRows>
           {rowLabels.map(label => (
             <tr key={label}>
               <td>{label}</td>
 
               {models.map(model => (
-                <td key={model.id}>
+                <StatisticalCell key={model.id} row={{measure:label,value:valueGetter(model,label)}} field="value" data={model.data}>
                   {formatValue(valueGetter(model, label))}
-                </td>
+                </StatisticalCell>
               ))}
             </tr>
           ))}
-        </tbody>
+        </OrderedRows>
       </table>
     </div>
   );
@@ -1557,7 +1578,7 @@ function ParameterComparisonTable({
           </tr>
         </thead>
 
-        <tbody>
+        <OrderedRows>
           {keys.map(key => {
             const identity = identityFor(key);
 
@@ -1571,30 +1592,30 @@ function ParameterComparisonTable({
                 {grouping === 'model'
                   ? models.flatMap((model, modelIndex) =>
                       selectedFields.map((field, fieldIndex) => (
-                        <td
+                        <StatisticalCell row={maps[modelIndex].get(key)} field={field} data={model.data}
                           key={`${model.id}-${field}`}
                           className={fieldIndex === 0 ? 'compare-divider-left' : ''}
                         >
                           {section === 'threshold' && !methodSummaries[modelIndex].supportsThresholds && methodSummaries[modelIndex].treatment === 'continuous'
                             ? 'N/A' : formatValue(maps[modelIndex].get(key)?.[field])}
-                        </td>
+                        </StatisticalCell>
                       ))
                     )
                   : selectedFields.flatMap(field =>
                       models.map((model, modelIndex) => (
-                        <td
+                        <StatisticalCell row={maps[modelIndex].get(key)} field={field} data={model.data}
                           key={`${field}-${model.id}`}
                           className={modelIndex === 0 ? 'compare-divider-left' : ''}
                         >
                           {section === 'threshold' && !methodSummaries[modelIndex].supportsThresholds && methodSummaries[modelIndex].treatment === 'continuous'
                             ? 'N/A' : formatValue(maps[modelIndex].get(key)?.[field])}
-                        </td>
+                        </StatisticalCell>
                       ))
                     )}
               </tr>
             );
           })}
-        </tbody>
+        </OrderedRows>
       </table>
     </div>
   );
@@ -1681,7 +1702,7 @@ function MIComparisonTable({
           </tr>
         </thead>
 
-        <tbody>
+        <OrderedRows>
           {keys.map(key => {
             const identity = identityFor(key);
 
@@ -1716,13 +1737,14 @@ function MIComparisonTable({
               </tr>
             );
           })}
-        </tbody>
+        </OrderedRows>
       </table>
     </div>
   );
 }
 
-function ComparisonContent({
+function ComparisonContent(props) {return <><StatisticsControls/><ComparisonContentBody {...props}/></>;}
+function ComparisonContentBody({
   models,
   view,
   parameterFields,
@@ -1869,7 +1891,7 @@ function ComparisonContent({
             </tr>
           </thead>
 
-          <tbody>
+          <OrderedRows>
             {keys.map((key, index) => (
               <tr key={key}>
                 <td>{formatValue(rowObjects[index].group)}</td>
@@ -1882,7 +1904,7 @@ function ComparisonContent({
                 ))}
               </tr>
             ))}
-          </tbody>
+          </OrderedRows>
         </table>
       </div>
     );
@@ -2055,7 +2077,7 @@ let sharedCatalogPromise = null;
 
 export default function App() { return <Workspace Canvas={PageCanvas} />; }
 
-function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controllerRef, findRequest, onFindResult, historyStore }) {
+function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controllerRef, findRequest, onFindResult, historyStore, stickerFamilies = [], activeLibrary, setActiveLibrary, onStickerFamiliesChange }) {
   const supportsModels = PAGE_TYPES[pageType].models;
   const [initialPageLayout] = useState(initialLayout);
   const publishedLayout = useRef(null);
@@ -2082,7 +2104,8 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
   const [foundLibraryId,setFoundLibraryId]=useState(null);
   const handledFind=useRef(null);
   const libraryCards=useRef(new Map());
-  const [libraryOpen, setLibraryOpen] = useState(supportsModels);
+  const libraryOpen=activeLibrary==='models';
+  const setLibraryOpen=value=>setActiveLibrary(current=>(typeof value==='function'?value(current==='models'):value)?'models':null);
   const [libraryQuery, setLibraryQuery] = useState('');
   const refreshPending = useRef(false);
   const [flowInstance, setFlowInstance] = useState(null);
@@ -2116,6 +2139,11 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
   const resultRequest=useRef(0);
   const [resultWindow, setResultWindow] = useState(null);
 
+  const [stickerAssignments,setStickerAssignments]=useState(initialLayout.sticker_assignments??{});
+  const [stickerAction,setStickerAction]=useState(null);
+  useEffect(()=>{setStickerAssignments(current=>{const next=enforceStickerFamilies(current,stickerFamilies);return JSON.stringify(next)===JSON.stringify(current)?current:next;});},[stickerFamilies]);
+  const [rowOrders,setRowOrders]=useState(()=>initialLayout.row_orders??{});
+  const [statistics,setStatistics]=useState(()=>statisticsSettings(initialLayout.statistics_style));
   const [matrixSettings,setMatrixSettings]=useState(initialLayout.matrix_settings??{});
   function updateMatrixSettings(key,value){setMatrixSettings(current=>{const next={...current};if(value===null)delete next[key];else next[key]=value;return next;});}
   const [variantSelections,setVariantSelections]=useState(initialLayout.model_variants??{});
@@ -2126,6 +2154,8 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
   const comparisonRequest=useRef(0);
 
   const canvasRef = useRef(null);
+  const [canvasSize,setCanvasSize]=useState({width:1000,height:700});
+  useEffect(()=>{const element=canvasRef.current;if(!element)return;const observer=new ResizeObserver(([entry])=>setCanvasSize({width:entry.contentRect.width,height:entry.contentRect.height}));observer.observe(element);return()=>observer.disconnect();},[]);
   const [decorationMenu,setDecorationMenu]=useState(null);
   const [drawMode,setDrawMode]=useState(null);
   const [shapeKind,setShapeKind]=useState('rectangle');
@@ -2192,15 +2222,15 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
     const screen=drawingBox(drawStart.current,{x:event.clientX,y:event.clientY});drawStart.current=null;setDrawPreview(null);
     const topLeft=flowInstance.screenToFlowPosition({x:screen.x,y:screen.y}),bottomRight=flowInstance.screenToFlowPosition({x:screen.x+screen.width,y:screen.y+screen.height});
     const box={...topLeft,width:bottomRight.x-topLeft.x,height:bottomRight.y-topLeft.y};
-    if(box.width<60||box.height<60){setCanvasNotice('Draw a larger area (at least 60 × 60 canvas units).');return;}
+    if(box.width<(drawMode==='text'?20:60)||box.height<(drawMode==='text'?12:60)){setCanvasNotice(drawMode==='text'?'Draw a larger text area (at least 20 × 12 canvas units).':'Draw a larger area (at least 60 × 60 canvas units).');return;}
     const kind=drawMode;setDrawMode(null);
     setNodes(current=>{
       const fitted=kind==='container'?fitContainer(box,current,null):{box,members:[]};
       if(!fitted){setCanvasNotice('Container rejected: it cannot enclose these items without overlapping another item.');return current;}
       const id=kind+'-'+crypto.randomUUID();
       const node=normalizeDecoration({id,type:kind,position:{x:fitted.box.x,y:fitted.box.y},width:fitted.box.width,height:fitted.box.height,
-        data:{kind:kind==='container'?'rectangle':shapeKind,members:fitted.members,order:Math.max(0,...current.filter(n=>n.type==='shape').map(n=>n.data.order??0))+1}});
-      setCanvasNotice(kind==='container'?'Container added with '+fitted.members.length+' item(s).':'Shape added.');
+        data:{text:'',fontSize:32,baseWidth:box.width,kind:kind==='container'?'rectangle':shapeKind,members:fitted.members,order:Math.max(0,...current.filter(n=>n.type==='shape').map(n=>n.data.order??0))+1}});
+      setCanvasNotice(kind==='text'?'Text box added. Double-click to edit.':kind==='container'?'Container added with '+fitted.members.length+' item(s).':'Shape added.');
       return [...current.map(n=>({...n,selected:false})),{...node,selected:true}];
     });
   }
@@ -2382,6 +2412,9 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
       comparison_ids: comparisonIds,
       model_variants: variantSelections,
       matrix_settings: matrixSettings,
+      statistics_style: statistics,
+      row_orders: rowOrders,
+      sticker_assignments: stickerAssignments,
       schema_version: '9.0',
       ...(retainedLayout.current.retained_content?{retained_content:retainedLayout.current.retained_content}:{}),
       decorations,
@@ -2461,6 +2494,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
         title: model.title || model.id,
         image: model.image,
         results: model.results,
+        jsonModified:model.jsonModified, svgModified:model.svgModified,
         methodSummary: model.methodSummary ?? getMethodSummary(null),
         inUse: false,
         hasPosition: false
@@ -2574,7 +2608,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
 
   function startOrganizing(modelId) {
     setContextMenu(null);
-    setStackDialog({ selected: [modelId], target: '', name: 'Version stack', anchor: modelId, error: '' });
+    setStackDialog({ selected: [modelId], target: '', name: 'Version stack', anchor: modelId, error: '', query:'', sort:'json-desc' });
   }
 
   function commitStack(event) {
@@ -2610,18 +2644,27 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
     }));
   }
 
+  const libraryDrag=useRef(null);
+  const [libraryDragPoint,setLibraryDragPoint]=useState(null);
+  function finishModelDrag(event,cancel=false) {
+    const drag=libraryDrag.current;
+    if(drag?.moved&&!cancel&&flowInstance&&canvasRef.current){
+      const box=canvasRef.current.getBoundingClientRect();
+      if(event.clientX>=box.left&&event.clientX<=box.right&&event.clientY>=box.top&&event.clientY<=box.bottom)
+        activateModel(drag.id,flowInstance.screenToFlowPosition({x:event.clientX,y:event.clientY}));
+    }
+    libraryDrag.current=null;setLibraryDragPoint(null);
+    if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId);
+  }
   function renderLibraryItem(node) {
     const isStack = node.type === 'stack';
     const active = isStack ? nodes.find(model => model.id === node.data.activeId) : node;
     return (
       <article ref={element=>{if(element)libraryCards.current.set(node.id,element);else libraryCards.current.delete(node.id);}} className={'library-card' + (isStack ? ' library-stack' : '')+(foundLibraryId===node.id?' found-content':'')} key={node.id}
-        draggable={!node.data.inUse}
-        onDragStart={event => {
-          if (node.data.inUse) return;
-          event.dataTransfer.setData('application/x-sem-model', node.id);
-          event.dataTransfer.effectAllowed = 'copy';
-          setContextMenu(null);
-        }}>
+        onPointerDown={event=>{if(event.button!==0||node.data.inUse||event.target.closest('button,input,select,label,summary'))return;event.preventDefault();libraryDrag.current={id:node.id,x:event.clientX,y:event.clientY,moved:false};event.currentTarget.setPointerCapture(event.pointerId);}}
+        onPointerMove={event=>{const drag=libraryDrag.current;if(!drag)return;if(Math.hypot(event.clientX-drag.x,event.clientY-drag.y)>6)drag.moved=true;if(drag.moved)setLibraryDragPoint({x:event.clientX,y:event.clientY});}}
+        onPointerUp={event=>finishModelDrag(event)} onPointerCancel={event=>finishModelDrag(event,true)}
+        onLostPointerCapture={()=>{libraryDrag.current=null;setLibraryDragPoint(null);}}>
         <div className="library-item-top">
           <img src={BASE + active?.data.image} alt="" draggable={false} />
           <div className="library-card-body">
@@ -2690,7 +2733,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
       return {
         ...node,
         hidden: false,
-        position: dropPosition ?? (node.data.hasPosition ? node.position : center),
+        position: dropPosition ?? center,
         data: { ...node.data, inUse: true, hasPosition: true }
       };
     }));
@@ -2737,6 +2780,9 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
     retainedLayout.current = document;
     setVariantSelections(document.model_variants??{});
     setMatrixSettings(document.matrix_settings??{});
+    setStatistics(statisticsSettings(document.statistics_style));
+    setRowOrders(document.row_orders??{});
+    setStickerAssignments(enforceStickerFamilies(document.sticker_assignments??{},stickerFamilies));setStickerAction(null);
     setResultWindow(null);
     const models = nodes.filter(node=>node.type==='model').map(node=>({
       ...node, ...modelDimensions(document.model_sizes?.[node.id]),
@@ -2763,7 +2809,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
     onLayoutChange(pageId,layout);
   });
   useEffect(() => {
-    const api = { id: pageId, ready: modelsLoaded, snapshot: getCurrentLayout };
+    const api = { id: pageId, ready: modelsLoaded, snapshot: getCurrentLayout, applySticker:(nodeId,stickerId)=>{const node=nodes.find(n=>n.id===nodeId);if(node&&['model','stack'].includes(node.type))requestSticker(node,stickerId);} };
     controllerRef.current = api;
     return () => { if (controllerRef.current === api) controllerRef.current = null; };
   });
@@ -2824,6 +2870,18 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
   // Add note
   // ====================================================
 
+  function addText() {setDrawMode('text');setCanvasNotice('Drag on the canvas to place a text box. Double-click the text to edit. Escape cancels.');}
+  function fitTextBox() {
+    setNodes(current=>current.map(node=>{
+      if(node.id!==decorationMenu?.id||node.type!=='text')return node;
+      const fontSize=(node.data.fontSize??32)*(node.width/(node.data.baseWidth??300));
+      const context=document.createElement('canvas').getContext('2d');
+      context.font=`${node.data.bold?'bold':'normal'} ${fontSize}px Arial`;
+      const lines=(node.data.text||'Text').split('\n');
+      const width=Math.min(5000,Math.max(20,Math.ceil(Math.max(...lines.map(line=>context.measureText(line).width)))+4));
+      return {...node,width,height:Math.max(9,Math.ceil(lines.length*fontSize*1.2)+2),data:{...node.data,fontSize,baseWidth:width}};
+    }));
+  }
   function addNote() {
     let position = {
       x: 200,
@@ -2915,6 +2973,19 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
   // Comparison selection
   // ====================================================
 
+  function requestSticker(node,stickerId=null,remove=false) {
+    setContextMenu(null);
+    const modelId=node.type==='stack'?node.data.activeId:node.id;
+    setStickerAction({nodeId:node.id,modelId,variantId:activeVariant(modelId),stickerId,remove,title:nodes.find(n=>n.id===modelId)?.data.title??modelId});
+  }
+  function stickerScopes(action) {
+    const node=nodes.find(n=>n.id===action.nodeId);
+    const scopes=[{id:'current',label:action.variantId?'This variant only ('+action.variantId+')':'This model only',keys:[stickerKey(action.modelId,action.variantId)]}];
+    const keysFor=id=>{const variants=variantsFor(id);return variants.length?variants.map(v=>stickerKey(id,v.id)):[stickerKey(id)];};
+    if(variantsFor(action.modelId).length)scopes.push({id:'bundle',label:'All variants of this model',keys:keysFor(action.modelId)});
+    if(node?.type==='stack')scopes.push({id:'stack',label:'All models in this stack (including all variants)',keys:node.data.memberIds.flatMap(keysFor)});
+    return scopes;
+  }
   function variantsFor(id){return nodes.find(n=>n.id===id)?.data.methodSummary?.variants??[];}
   function activeVariant(id){const vs=variantsFor(id);return vs.find(v=>v.id===variantSelections[id])?.id??vs.find(v=>v.id===nodes.find(n=>n.id===id)?.data.methodSummary?.defaultVariant)?.id??vs[0]?.id;}
   function selectedSummary(id){const node=nodes.find(n=>n.id===id);return variantsFor(id).find(v=>v.id===activeVariant(id))?.summary??node?.data.methodSummary;}
@@ -2922,7 +2993,6 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
   function selectFitVariant(id,variantId){setVariantSelections(current=>({...current,[id]:variantId}));if(resultWindow?.nodeId===id)openResults(id,resultWindow.view,variantId);}
   function toggleComparisonModel(nodeId) {
     if(!nodeId.startsWith('cfa:')&&!comparisonIds.includes(nodeId))nodeId=activeComparisonKey(nodeId);
-    if(!comparisonIds.includes(nodeId)&&comparisonIds.length>=5){setCanvasNotice('You can compare up to five models at a time.');return;}
     const next=comparisonIds.includes(nodeId)?comparisonIds.filter(id=>id!==nodeId):[...comparisonIds,nodeId];
     setComparisonIds(next);dismissContextMenus();
     if(comparisonWindow&&next.length>=2)openComparison(comparisonWindow.view,next);
@@ -3098,6 +3168,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
   const shapeRanks = new Map(nodes.filter(node=>node.type==='shape').sort((a,b)=>(a.data.order??0)-(b.data.order??0)).map((node,i)=>[node.id,-1000000+i]));
   const renderedNodes = displayVersionNodes(nodes).map(original => {
     const node={...original,zIndex:10};
+    if(node.type==='text') return node;
     if(isDecoration(node)) return {...node,zIndex:node.type==='container'?-2000000:shapeRanks.get(node.id),data:{...node.data,
       onResizeStart:()=>resizeBefore.current.set(node.id,{...original,position:{...original.position},data:{...original.data}}),
       onResizeEnd:(_event,params)=>finishDecorationResize(node.id,params)}};
@@ -3105,8 +3176,14 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
     const modelId = node.type === 'stack' ? node.data.activeId : node.id;
     const model = nodes.find(item => item.id === modelId);
     return { ...node, data: { ...node.data, methodSummary:selectedSummary(modelId), noteHtml: model?.data.noteHtml ?? '',
-      onOpenNotes: () => openResults(modelId, 'notes') } };
+      onOpenNotes: () => openResults(modelId, 'notes'),
+      stickers:stickerEntries(stickerFamilies).filter(s=>(stickerAssignments[stickerKey(modelId,activeVariant(modelId))]??[]).includes(s.id)),
+      onRemoveSticker:id=>requestSticker(node,id,true),
+      onStickerDragOver:event=>{if(event.dataTransfer.types.includes(STICKER_MIME)){event.preventDefault();event.stopPropagation();event.dataTransfer.dropEffect='copy';}},
+      onStickerDrop:event=>{const id=event.dataTransfer.getData(STICKER_MIME);if(id&&stickerEntries(stickerFamilies).some(s=>s.id===id)){event.preventDefault();event.stopPropagation();requestSticker(node,id);}} } };
   });
+  const visibleBoxes=renderedNodes.filter(n=>!n.hidden).map(itemBox);
+  const minimumZoom=contentMinZoom(visibleBoxes,canvasSize);
   const canvasNotes = nodes.filter(node => node.type === 'note');
   const allNotesCollapsed = canvasNotes.length > 0 && canvasNotes.every(node => node.data.collapsed);
   const hiddenIds = new Set(
@@ -3118,7 +3195,9 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
   const renderedEdges = edges.map(edge => ({
     ...edge,
     type: 'annotated',
-    style: { stroke: arrowAppearance(edge).color, strokeWidth: arrowAppearance(edge).thickness },
+    style: { stroke: arrowAppearance(edge).color, strokeWidth: arrowAppearance(edge).thickness,
+      strokeDasharray: arrowAppearance(edge).line==='dashed'?'8 6':arrowAppearance(edge).line==='dotted'?'1 5':undefined,
+      strokeLinecap: arrowAppearance(edge).line==='dotted'?'round':'butt' },
     markerStart: arrowMarker(edge, 'start'),
     markerEnd: arrowMarker(edge, 'end'),
     data: { ...edge.data, noteHtml: cleanNoteHtml(edge.data?.noteHtml),
@@ -3186,6 +3265,8 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
           <button disabled={!modelsLoaded} onClick={()=>{setDrawMode('container');setCanvasNotice('Drag on the canvas to draw a container. Escape cancels.');}}>Draw container</button>
           <select aria-label="Shape type" value={shapeKind} onChange={event=>setShapeKind(event.target.value)}><option value="rectangle">Rectangle</option><option value="circle">Circle</option><option value="rounded">Rounded rectangle</option></select>
           <button disabled={!modelsLoaded} onClick={()=>{setDrawMode('shape');setCanvasNotice('Drag on the canvas to draw a shape. Escape cancels.');}}>Draw shape</button>
+          <button onClick={()=>setActiveLibrary(current=>current==='stickers'?null:'stickers')} aria-expanded={activeLibrary==='stickers'}>{activeLibrary==='stickers'?'Close Sticker Library':'Sticker Library'}</button>
+          <button onClick={addText} disabled={!modelsLoaded}>+ Text</button>
           <button onClick={addNote} disabled={!modelsLoaded}>
             + Note
           </button>
@@ -3214,7 +3295,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
                 return <div className="queue-item" key={id}><span>{model?.data.title??id}{variant?" — "+(variant.label||variant.id):""}<small>{identity.variantId??identity.modelId}</small></span><button aria-label={'Remove '+id+' from comparison'} onClick={()=>toggleComparisonModel(id)}>×</button></div>;
               })}{!comparisonIds.length&&<p>No models queued.</p>}</div>
               <label className="queue-search">Add a model<input type="search" aria-label="Search models to compare" placeholder="Model name or ID…" value={queueQuery} onChange={event=>setQueueQuery(event.target.value)} /></label>
-              <div className="queue-search-results">{comparisonCandidates.map(node=><div className="queue-item" key={node.id}><span>{node.data.title}<small>{comparisonIdentity(node.id).variantId??node.id}{node.data.stackId?' · Stack version':''}</small></span><button disabled={comparisonIds.length>=5} aria-label={'Add '+node.id+' to comparison'} onClick={()=>toggleComparisonModel(node.id)}>Add</button></div>)}{!comparisonCandidates.length&&<p>No matching models available to add.</p>}</div>
+              <div className="queue-search-results">{comparisonCandidates.map(node=><div className="queue-item" key={node.id}><span>{node.data.title}<small>{comparisonIdentity(node.id).variantId??node.id}{node.data.stackId?' · Stack version':''}</small></span><button aria-label={'Add '+node.id+' to comparison'} onClick={()=>toggleComparisonModel(node.id)}>Add</button></div>)}{!comparisonCandidates.length&&<p>No matching models available to add.</p>}</div>
               <small className="queue-help">Up to five models. Includes available, hidden, and stacked versions.</small>
             </div>}
           </div>
@@ -3224,7 +3305,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
             aria-expanded={libraryOpen}
             aria-controls="model-library"
           >
-            {libraryOpen ? 'Close library' : 'Model library'}
+            {libraryOpen ? 'Close Model Library' : 'Model Library'}
           </button>
 
           {hiddenModelCount > 0 && (
@@ -3243,6 +3324,8 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
           {drawPreview && <div className="drawing-preview" style={{left:drawPreview.x-drawPreview.offsetX,top:drawPreview.y-drawPreview.offsetY,width:drawPreview.width,height:drawPreview.height,borderRadius:drawMode==='shape'&&shapeKind==='circle'?'50%':drawMode==='shape'&&shapeKind==='rounded'?20:0}} />}
         </div>}
         <ReactFlow
+          minZoom={minimumZoom}
+          fitViewOptions={{minZoom:minimumZoom,padding:0.15}}
           nodes={renderedNodes}
           edges={renderedEdges}
           onNodesChange={handleNodeChanges}
@@ -3258,16 +3341,18 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
           onInit={setFlowInstance}
           onNodeContextMenu={(event, node) => { setArrowMenu(null); if(isDecoration(node)){openDecorationMenu(event,node);return;} setDecorationMenu(null);onNodeContextMenu(event, node); }}
           onPaneClick={() => { setContextMenu(null); setArrowMenu(null); }}
-          deleteKeyCode={stackDialog ? null : ['Backspace', 'Delete']}
+          deleteKeyCode={stackDialog || stickerAction ? null : ['Backspace', 'Delete']}
           defaultViewport={validViewport(initialPageLayout.viewport) ?? {x:0,y:0,zoom:1}}
           fitView={!validViewport(initialPageLayout.viewport) && Boolean(initialPageLayout.used_models?.length || initialPageLayout.notes?.length || initialPageLayout.decorations?.length || initialPageLayout.stacks?.some(stack=>stack.in_use))}
           onMoveEnd={(_event,nextViewport)=>setViewport(nextViewport)}
         >
           <Background />
-          <Controls />
+          <Controls fitViewOptions={{minZoom:minimumZoom,padding:0.15}} />
         </ReactFlow>
       </div>
 
+      {libraryDragPoint&&createPortal(<div className="sticker-drag-hint" style={{left:libraryDragPoint.x+12,top:libraryDragPoint.y+12}}>Drop to place model</div>,document.body)}
+      {activeLibrary==='stickers'&&<StickerLibrary families={stickerFamilies} onChange={onStickerFamiliesChange} onClose={()=>setActiveLibrary(null)} onDropOnModel={(nodeId,id)=>{const node=nodes.find(n=>n.id===nodeId);if(node&&['model','stack'].includes(node.type))requestSticker(node,id);}}/>}
       {supportsModels && libraryOpen && (
         <aside className="model-library" id="model-library" aria-label="Model library" onKeyDown={event => event.stopPropagation()}>
           <div className="library-header">
@@ -3297,7 +3382,8 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
                 {!collapsed && <>
                   {label==='In Use' && <label className="library-filter">Show <select aria-label="Filter in-use library items" value={libraryPrefs.filter??'all'} onChange={event=>updateLibraryPrefs({filter:event.target.value})}>
                     <option value="all">All</option><option value="stacks">Stacks only</option><option value="standalone">Standalone only</option></select></label>}
-                  {visible.map(renderLibraryItem)}
+                  <label className="library-filter">Sort <select aria-label={'Sort '+label} value={libraryPrefs['sort-'+label]??'json-desc'} onChange={e=>updateLibraryPrefs({['sort-'+label]:e.target.value})}>{SORT_OPTIONS.map(([value,text])=><option key={value} value={value}>{text}</option>)}</select></label>
+                  {sortModels(visible,libraryPrefs['sort-'+label],nodes).map(renderLibraryItem)}
                   {visible.length===0 && <p className="library-empty">{items.length?'No items match this search or filter.':label==='Hidden'?'No hidden models.':label==='Available'?'No unused models.':'No visible models in use.'}</p>}
                 </>}
               </section>;
@@ -3325,16 +3411,24 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
       )}
 
 
-      {decorationMenu && editedDecoration && <div className="context-menu decoration-menu" role="dialog" aria-label="Shape and container appearance" style={{left:decorationMenu.x,top:decorationMenu.y}} onKeyDown={event=>event.stopPropagation()}>
-        <div className="context-menu-title">{editedDecoration.type==='container'?'Container':'Shape'}<button aria-label="Close shape options" onClick={()=>setDecorationMenu(null)}>×</button></div>
+      {decorationMenu && editedDecoration && <ViewportMenu className="context-menu decoration-menu" role="dialog" aria-label="Shape and container appearance" style={{left:decorationMenu.x,top:decorationMenu.y}} onKeyDown={event=>event.stopPropagation()}>
+        <div className="context-menu-title">{editedDecoration.type==='text'?'Text':editedDecoration.type==='container'?'Container':'Shape'}<button aria-label="Close shape options" onClick={()=>setDecorationMenu(null)}>×</button></div>
+        {editedDecoration.type==='text'?<>
+          <label>Text color <input type="color" value={editedDecoration.data.color} onChange={e=>updateDecoration({color:e.target.value})}/></label>
+          <label>Alignment<select aria-label="Text alignment" value={editedDecoration.data.align??'left'} onChange={e=>updateDecoration({align:e.target.value})}><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></label>
+          <button onClick={fitTextBox}>Fit box to text</button>
+          <button aria-pressed={editedDecoration.data.bold} onClick={()=>updateDecoration({bold:!editedDecoration.data.bold})}>Bold</button>
+          <button aria-pressed={editedDecoration.data.underline} onClick={()=>updateDecoration({underline:!editedDecoration.data.underline})}>Underline</button>
+        </>:<>
         <label>Fill <input type="color" aria-label="Fill color" value={editedDecoration.data.fill} onChange={event=>updateDecoration({fill:event.target.value})}/></label>
         <label>Border <input type="color" aria-label="Border color" value={editedDecoration.data.border} onChange={event=>updateDecoration({border:event.target.value})}/></label>
         <label>Thickness {editedDecoration.data.thickness}<input type="range" aria-label="Border thickness" min="0" max="12" value={editedDecoration.data.thickness} onChange={event=>updateDecoration({thickness:Number(event.target.value)})}/></label>
         <label>Border style <select aria-label="Border style" value={editedDecoration.data.line} onChange={event=>updateDecoration({line:event.target.value})}><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option></select></label>
+        </>}
         {editedDecoration.type==='shape' && <><hr/>{[['forward','Bring forward'],['backward','Send backward'],['front','Bring to front of shapes'],['back','Send to back of shapes']].map(([action,label])=><button key={action} onClick={()=>orderShape(action)}>{label}</button>)}</>}
         <hr/><button className="danger" onClick={()=>{setNodes(current=>current.filter(node=>node.id!==editedDecoration.id));setDecorationMenu(null);}}>Delete {editedDecoration.type}</button>
-      </div>}
-      {arrowMenu && editedArrow && <div className="context-menu arrow-menu" role="dialog" aria-label="Arrow options"
+      </ViewportMenu>}
+      {arrowMenu && editedArrow && <ViewportMenu className="context-menu arrow-menu" role="dialog" aria-label="Arrow options"
         style={{ left: arrowMenu.x, top: arrowMenu.y }} onContextMenu={event => event.preventDefault()}
         onKeyDown={event => { event.stopPropagation(); if (event.key === 'Escape') setArrowMenu(null); }}>
         <div className="context-menu-title">Arrow <button aria-label="Close arrow options" onClick={() => setArrowMenu(null)}>×</button></div>
@@ -3345,13 +3439,14 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
             onClick={() => updateArrow(editedArrow.id, { appearance: { ...arrowSettings, color } })} />)}</div>
         <label>Thickness {arrowSettings.thickness}<input aria-label="Arrow thickness" type="range" min="1" max="6" step="0.5" value={arrowSettings.thickness}
           onChange={event => updateArrow(editedArrow.id, { appearance: { ...arrowSettings, thickness: Number(event.target.value) } })} /></label>
+        <label>Line style <select aria-label="Arrow line style" value={arrowSettings.line} onChange={event=>updateArrow(editedArrow.id,{appearance:{...arrowSettings,line:event.target.value}})}><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option></select></label>
         <label>Arrowhead <select aria-label="Arrowhead type" value={arrowSettings.head}
           onChange={event => updateArrow(editedArrow.id, { appearance: { ...arrowSettings, head: event.target.value } })}>
           <option value="none">None</option><option value="open">Open arrow</option><option value="filled">Filled triangle</option></select></label>
         <label>Arrowhead ends <select aria-label="Arrowhead ends" value={arrowSettings.ends}
           onChange={event => updateArrow(editedArrow.id, { appearance: { ...arrowSettings, ends: event.target.value } })}>
           <option value="none">Neither end</option><option value="start">Start only</option><option value="end">End only</option><option value="both">Both ends</option></select></label>
-        <label>Arrowhead size {arrowSettings.size}<input aria-label="Arrowhead size" type="range" min="8" max="36" value={arrowSettings.size} disabled={arrowSettings.head === 'none'}
+        <label>Arrowhead size {arrowSettings.size}<input aria-label="Arrowhead size" type="range" min="8" max="56" value={arrowSettings.size} disabled={arrowSettings.head === 'none'}
           onChange={event => updateArrow(editedArrow.id, { appearance: { ...arrowSettings, size: Number(event.target.value) } })} /></label>
         <button onClick={() => updateArrow(editedArrow.id, { appearance: { ...ARROW_DEFAULTS } })}>Reset appearance</button>
         <button onClick={() => { setEdges(current => current.map(edge => ({ ...edge, selected: edge.id === editedArrow.id }))); setArrowMenu(null); }}>Adjust bend…</button>
@@ -3360,7 +3455,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
         <button onClick={() => { setArrowNoteId(editedArrow.id); setArrowMenu(null); }}>{cleanNoteHtml(editedArrow.data?.noteHtml) ? 'Edit note' : 'Add note'}</button>
         {cleanNoteHtml(editedArrow.data?.noteHtml) && <button onClick={() => { updateArrow(editedArrow.id, { noteHtml: '' }); setArrowNoteId(null); setArrowMenu(null); }}>Delete note</button>}
         <hr /><button className="danger" onClick={() => { setEdges(current => current.filter(edge => edge.id !== editedArrow.id)); setArrowMenu(null); }}>Delete arrow</button>
-      </div>}
+      </ViewportMenu>}
       {notedArrow && <Rnd key={notedArrow.id} className="result-window arrow-note-window" bounds="window"
         default={{ x: Math.max(10, window.innerWidth / 2 - 300), y: 90, width: Math.min(600, window.innerWidth - 20), height: 420 }}
         minWidth={350} minHeight={250} dragHandleClassName="arrow-note-dragbar">
@@ -3371,12 +3466,11 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
       </Rnd>}
       {/* Right-click context menu */}
       {contextMenu && (
-        <div
+        <ViewportMenu
           className="context-menu"
           style={{
             left: contextMenu.x,
-            top: contextMenu.y,
-            maxHeight: Math.max(160, window.innerHeight-contextMenu.y-12)
+            top: contextMenu.y
           }}
         >
           <div className="context-menu-title">
@@ -3385,6 +3479,7 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
 
           {contextMenu.nodeType !== 'note' ? (
             <>
+              <button onClick={()=>requestSticker(menuNode)}>Manage stickers…</button>
               {menuNode?.type === 'stack' && (
                 <div className="context-versions">
                   <strong>Displayed version</strong>
@@ -3458,9 +3553,10 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
               <button className="danger" onClick={() => deleteNote(contextMenu.nodeId)}>Delete note</button>
             </>
           )}
-        </div>
+        </ViewportMenu>
       )}
 
+      {stickerAction&&<StickerAction key={stickerAction.nodeId+':'+stickerAction.stickerId+':'+stickerAction.remove} action={stickerAction} families={stickerFamilies} scopes={stickerScopes(stickerAction)} onClose={()=>setStickerAction(null)} onApply={(id,scope)=>{const target=stickerScopes(stickerAction).find(s=>s.id===scope);if(target)setStickerAssignments(current=>applySticker(current,target.keys,id,stickerFamilies,stickerAction.remove));setStickerAction(null);}}/>}
       {stackDialog && (
         <div className="stack-dialog-backdrop" onKeyDown={event => {
           if (event.key === 'Escape') setStackDialog(null);
@@ -3490,8 +3586,11 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
               </label>
             </>}
             <p>Select models to include. External arrows follow the stack; arrows between combined models are removed. Moving to an existing stack uses its position and Use setting.</p>
+            <input aria-label="Search models to stack" placeholder="Search models…" value={stackDialog.query??''} onChange={e=>setStackDialog(current=>({...current,query:e.target.value}))}/>
+            <label>Sort <select value={stackDialog.sort??'json-desc'} onChange={e=>setStackDialog(current=>({...current,sort:e.target.value}))}>{SORT_OPTIONS.map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
+            <small>{stackDialog.selected.length} selected. Search keeps your selections.</small>
             <fieldset className="stack-model-picker"><legend>Models</legend>
-              {libraryModels.map(model => {
+              {sortModels(libraryModels.filter(model=>(model.id+' '+model.data.title).toLowerCase().includes((stackDialog.query??'').toLowerCase())),stackDialog.sort).map(model => {
                 const owner = nodes.find(node => node.id === model.data.stackId);
                 const alreadyInTarget = Boolean(stackDialog.target && owner?.id === stackDialog.target);
                 return <label key={model.id}>
@@ -3517,8 +3616,10 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
           </form>
         </div>
       )}
+      <StatisticsContext.Provider value={{settings:statistics,update:change=>setStatistics(current=>({...current,...change}))}}>
       <MatrixSettingsContext.Provider value={{settings:matrixSettings,update:updateMatrixSettings}}>
       {/* Single-model results */}
+      <RowOrderContext.Provider value={{orders:rowOrders,scope:JSON.stringify(['model',resultWindow?.nodeId,resultWindow?.variantId??null,resultWindow?.view]),enabled:['paths','loadings','defined','variances','covariances','thresholds','r2','mi'].includes(resultWindow?.view),update:(key,order)=>setRowOrders(current=>({...current,[key]:order}))}}>
       <ResultWindow
         onChangeVariant={id=>selectFitVariant(resultWindow.nodeId,id)}
         windowData={resultWindow}
@@ -3537,7 +3638,9 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
         }
       />
 
+      </RowOrderContext.Provider>
       {/* Multi-model comparison */}
+      <RowOrderContext.Provider value={{orders:rowOrders,scope:JSON.stringify(['comparison',comparisonWindow?.view]),enabled:['paths','loadings','defined','variances','covariances','thresholds','r2','mi'].includes(comparisonWindow?.view),update:(key,order)=>setRowOrders(current=>({...current,[key]:order}))}}>
       <ComparisonWindow
         windowData={comparisonWindow}
         onClose={() => {comparisonRequest.current++;setComparisonWindow(null);}}
@@ -3548,7 +3651,9 @@ function PageCanvas({ pageId, pageType, initialLayout, onLayoutChange, controlle
           }))
         }
       />
+      </RowOrderContext.Provider>
       </MatrixSettingsContext.Provider>
+      </StatisticsContext.Provider>
     </div>
   );
 }

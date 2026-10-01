@@ -336,6 +336,36 @@
       "title": "Model B3x.1c",
       "image": "models/B3x.1c.svg",
       "results": "results/B3x.1c.json"
+    },
+    {
+      "id": "B3x.1c2",
+      "title": "Model B3x.1c2",
+      "image": "models/B3x.1c2.svg",
+      "results": "results/B3x.1c2.json"
+    },
+    {
+      "id": "B3x.2c2",
+      "title": "Model B3x.2c2",
+      "image": "models/B3x.2c2.svg",
+      "results": "results/B3x.2c2.json"
+    },
+    {
+      "id": "B3x.2c2_ml",
+      "title": "Model B3x.2c2_ml",
+      "image": "models/B3x.2c2_ml.svg",
+      "results": "results/B3x.2c2_ml.json"
+    },
+    {
+      "id": "B3x.1f",
+      "title": "Model B3x.1f",
+      "image": "models/B3x.1f.svg",
+      "results": "results/B3x.1f.json"
+    },
+    {
+      "id": "B3x.1f_ml",
+      "title": "Model B3x.1f_ml",
+      "image": "models/B3x.1f_ml.svg",
+      "results": "results/B3x.1f_ml.json"
     }
   ]
 }

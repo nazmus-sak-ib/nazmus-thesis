@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { readdir, readFile, lstat } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -22,6 +23,18 @@ async function listFiles(root, kind, warnings) {
 // Matching uses the exact filename stem, including case, on all platforms.
 export async function scanModelLibrary(root, mode = 'live') {
   const warnings = [];
+  const history=new Map();
+  if(mode==='build') {
+    try {
+      const log=execFileSync('git',['log','--format=DATE:%cI','--name-only','--','models','results'],{cwd:root,encoding:'utf8',maxBuffer:16*1024*1024});
+      let date;
+      for(const line of log.split(/\r?\n/)) {
+        if(line.startsWith('DATE:')) date=line.slice(5);
+        else if(line.trim() && date) {const key=line.replace(/^web\//,'');if(!history.has(key))history.set(key,date);}
+      }
+    } catch { /* Non-Git builds use filesystem dates. */ }
+  }
+  const modified=async file=>history.get(file)??(await lstat(path.join(root,file))).mtime.toISOString();
   const [images, results] = await Promise.all([
     listFiles(root, 'image', warnings), listFiles(root, 'results', warnings)
   ]);
@@ -57,7 +70,7 @@ export async function scanModelLibrary(root, mode = 'live') {
     }
     const title = typeof data.metadata?.model_name === 'string' && data.metadata.model_name.trim()
       ? data.metadata.model_name : 'Model ' + id;
-    models.push({ id, title, image: 'models/' + encodeURIComponent(files.image[0]),
+    models.push({ id, title, jsonModified:await modified('results/'+files.results[0]), svgModified:await modified('models/'+files.image[0]), image: 'models/' + encodeURIComponent(files.image[0]),
       results: 'results/' + encodeURIComponent(files.results[0]) });
   }
   return { schema_version: '1.0', source: 'folder-scan', mode, models, broken, warnings };

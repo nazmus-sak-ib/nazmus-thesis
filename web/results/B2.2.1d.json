@@ -1,9 +1,9 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "metadata": {
     "model_id": "B2.2.1d",
     "model_name": "Model B2.2.1d",
-    "exported_at": "2026-09-27T17:18:15-0400",
+    "exported_at": "2026-09-30T23:46:48-0400",
     "lavaan_version": "0.7.2",
     "estimator": "DWLS",
     "estimator_requested": "WLSMV",
@@ -30,7 +30,55 @@
     "converged": true,
     "post_check": true,
     "number_parameters": 197,
-    "number_groups": 1
+    "number_groups": 1,
+    "latent_variables": [
+      "Attitude",
+      "PBC",
+      "DescriptiveNorms",
+      "InjunctiveNorms",
+      "Symbolism",
+      "AoC",
+      "BEnv",
+      "Reactance",
+      "AntiIntel",
+      "Intention"
+    ],
+    "observed_variables": [
+      "att_appealing",
+      "att_desirable",
+      "att_goodidea",
+      "att_pleasant",
+      "pbc_barrier",
+      "pbc_could",
+      "pbc_resources",
+      "norms_d_many",
+      "norms_d_common",
+      "norms_d_few",
+      "norms_i_consider",
+      "norms_i_bad",
+      "norms_i_support",
+      "symb_envresp",
+      "symb_modern",
+      "aoc_transport",
+      "aoc_overstated",
+      "aoc_minor",
+      "ben_env_reduce",
+      "ben_env_shift",
+      "ben_env_nodiff",
+      "reactance_interfere",
+      "reactance_rulesharm",
+      "reactance_commongood",
+      "reactance_individual",
+      "antiintel_commonsense",
+      "antiintel_facts",
+      "antiintel_expertshelp",
+      "nextv_bev",
+      "nextv_phev",
+      "nextv_icev"
+    ],
+    "group_labels": [],
+    "latent_correlation_source": "lavaan::lavInspect(fit, \"cor.lv\")",
+    "latent_covariance_source": "lavaan::lavInspect(fit, \"cov.lv\")"
   },
   "sample_size": [
     {
@@ -44,7 +92,7 @@
       "n_patterns": 366
     }
   ],
-  "model_syntax": "\n  # =======================================\n  # Reflective Measurement Model\n  # =======================================\n  Attitude =~ att_appealing + att_desirable +\n              att_goodidea + att_pleasant\n  PBC =~ pbc_barrier + pbc_could +\n         pbc_resources\n  DescriptiveNorms =~ norms_d_many + norms_d_common +\n                      norms_d_few\n  InjunctiveNorms =~ norms_i_consider + norms_i_bad +\n                     norms_i_support\n\n\n  Symbolism =~ symb_envresp + symb_modern\n  AoC =~ aoc_transport + aoc_overstated + aoc_minor\n  BEnv =~ ben_env_reduce + ben_env_shift + ben_env_nodiff\n  \n  Reactance =~ reactance_interfere + reactance_rulesharm + reactance_commongood + reactance_individual\n  AntiIntel =~ antiintel_commonsense + antiintel_facts + antiintel_expertshelp\n\n  Intention =~ nextv_bev + nextv_phev + nextv_icev\n\n\n  # =======================================\n  # Structural path\n  # ======================================= \n  Intention ~ d1*Attitude + PBC + d2*InjunctiveNorms + DescriptiveNorms + f2*Reactance + e2*AntiIntel\n  Attitude ~ c1*AoC + b1*BEnv + Symbolism + f1*Reactance + e1*AntiIntel\n  BEnv ~ a*AoC\n  AoC ~ g*AntiIntel\n  Reactance ~ h*AntiIntel\n  InjunctiveNorms ~  Symbolism\n\n  \n  # AoC on Attitude\n  dir_aoc_att := c1\n  ind_aoc_att := a*b1\n  tot_aoc_att := c1 + a*b1\n\n  # AoC on Intention\n  ind_tot_aoc_int := a*b1*d1 + c1*d1\n  \n  # Dispositions on Attitude and Intention\n  dir_tot_pr_att := f1\n  \n  ind_pr_int := f1*d1\n  dir_pr_int := f2\n  tot_pr_int := f2 + f1*d1\n  \n  dir_ai_att := e1\n  ind_ai_aoc_att := g*c1\n  ind_ai_pr_att := h*f1\n  ind_ai_aoc_benv_att := g*a*b1\n  ind_ai_att := g*c1 + h*f1 + g*a*b1\n  tot_ai_att := e1 + g*c1 + h*f1 + g*a*b1\n  \n  dir_ai_int := e2\n  ind_ai_int := (e1 + g*c1 + g*a*b1 + h*f1)*d1 \n  ind_ai_pr_int := h*f2\n  tot_ai_int := e2 + (e1 + g*c1 + g*a*b1)*d1+ h*f2\n\n  # =======================================\n  # Covariance path\n  # ======================================= \n  Attitude ~~ PBC\n  Attitude ~~ DescriptiveNorms\n  Attitude ~~ InjunctiveNorms\n  \n  InjunctiveNorms ~~ PBC\n  InjunctiveNorms ~~ DescriptiveNorms\n  \n  InjunctiveNorms ~~ AoC\n  InjunctiveNorms ~~ BEnv\n  \n  BEnv ~~ PBC\n  BEnv ~~ DescriptiveNorms\n  BEnv ~~ Symbolism\n  \n  # New endo ~~ exo paths in the presence of dispositional accounts (same as 2.2.1a)\n  BEnv ~~ Reactance\n  BEnv ~~ AntiIntel\n  \n  InjunctiveNorms ~~ Reactance\n  InjunctiveNorms ~~ AntiIntel\n  \n  # New endo ~~ exo paths due to AoC becoming an endo compared to 2.2.1a\n  AoC ~~ PBC\n  AoC ~~ DescriptiveNorms\n  AoC ~~ Symbolism\n  AoC ~~ Reactance\n  \n  # New endo ~~ exo paths due to Reactance becoming an endo compared to 2.2.1a/c/c2\n  Reactance ~~ PBC\n  Reactance ~~ DescriptiveNorms\n  Reactance ~~ Symbolism\n  \n  # In addition, all exo ~~ exo allowed with auto.cov.lv.x = TRUE\n",
+  "model_syntax": "\n  # =======================================\n  # Reflective Measurement Model\n  # =======================================\n  Attitude =~ att_appealing + att_desirable +\n              att_goodidea + att_pleasant\n  PBC =~ pbc_barrier + pbc_could +\n         pbc_resources\n  DescriptiveNorms =~ norms_d_many + norms_d_common +\n                      norms_d_few\n  InjunctiveNorms =~ norms_i_consider + norms_i_bad +\n                     norms_i_support\n\n\n  Symbolism =~ symb_envresp + symb_modern\n  AoC =~ aoc_transport + aoc_overstated + aoc_minor\n  BEnv =~ ben_env_reduce + ben_env_shift + ben_env_nodiff\n  \n  Reactance =~ reactance_interfere + reactance_rulesharm + reactance_commongood + reactance_individual\n  AntiIntel =~ antiintel_commonsense + antiintel_facts + antiintel_expertshelp\n\n  Intention =~ nextv_bev + nextv_phev + nextv_icev\n\n\n  # =======================================\n  # Structural path\n  # ======================================= \n  Intention ~ d1*Attitude + PBC + d2*InjunctiveNorms + DescriptiveNorms + f2*Reactance + e2*AntiIntel\n  Attitude ~ c1*AoC + b1*BEnv + Symbolism + f1*Reactance + e1*AntiIntel\n  BEnv ~ a*AoC\n  AoC ~ g*AntiIntel\n  Reactance ~ h*AntiIntel\n  InjunctiveNorms ~  Symbolism\n\n  \n  # AoC on Attitude\n  dir_aoc_att := c1\n  ind_aoc_att := a*b1\n  tot_aoc_att := c1 + a*b1\n\n  # AoC on Intention\n  ind_tot_aoc_int := a*b1*d1 + c1*d1\n  \n  # Dispositions on Attitude and Intention\n  dir_tot_pr_att := f1\n  \n  ind_pr_int := f1*d1\n  dir_pr_int := f2\n  tot_pr_int := f2 + f1*d1\n  \n  dir_ai_att := e1\n  ind_ai_aoc_att := g*c1\n  ind_ai_pr_att := h*f1\n  ind_ai_aoc_benv_att := g*a*b1\n  ind_ai_att := g*c1 + h*f1 + g*a*b1\n  tot_ai_att := e1 + g*c1 + h*f1 + g*a*b1\n  \n  dir_ai_int := e2\n  ind_ai_int := (e1 + g*c1 + g*a*b1 + h*f1)*d1 \n  ind_ai_pr_int := h*f2\n  tot_ai_int := e2 + (e1 + g*c1 + g*a*b1  + h*f1)*d1+ h*f2\n\n  # =======================================\n  # Covariance path\n  # ======================================= \n  Attitude ~~ PBC\n  Attitude ~~ DescriptiveNorms\n  Attitude ~~ InjunctiveNorms\n  \n  InjunctiveNorms ~~ PBC\n  InjunctiveNorms ~~ DescriptiveNorms\n  \n  InjunctiveNorms ~~ AoC\n  InjunctiveNorms ~~ BEnv\n  \n  BEnv ~~ PBC\n  BEnv ~~ DescriptiveNorms\n  BEnv ~~ Symbolism\n  \n  # New endo ~~ exo paths in the presence of dispositional accounts (same as 2.2.1a)\n  BEnv ~~ Reactance\n  BEnv ~~ AntiIntel\n  \n  InjunctiveNorms ~~ Reactance\n  InjunctiveNorms ~~ AntiIntel\n  \n  # New endo ~~ exo paths due to AoC becoming an endo compared to 2.2.1a\n  AoC ~~ PBC\n  AoC ~~ DescriptiveNorms\n  AoC ~~ Symbolism\n  AoC ~~ Reactance\n  \n  # New endo ~~ exo paths due to Reactance becoming an endo compared to 2.2.1a/c/c2\n  Reactance ~~ PBC\n  Reactance ~~ DescriptiveNorms\n  Reactance ~~ Symbolism\n  \n  # In addition, all exo ~~ exo allowed with auto.cov.lv.x = TRUE\n",
   "fit_measures": [
     {
       "measure": "npar",
@@ -5264,16 +5312,16 @@
     {
       "lhs": "tot_ai_int",
       "op": ":=",
-      "rhs": "e2+(e1+g*c1+g*a*b1)*d1+h*f2",
+      "rhs": "e2+(e1+g*c1+g*a*b1+h*f1)*d1+h*f2",
       "label": "tot_ai_int",
-      "est": 0.5961222178696564,
-      "se": 0.1012586459167364,
-      "z": 5.887124131205939,
-      "pvalue": 3.929735648000587e-09,
-      "ci.lower": 0.3976589187495593,
-      "ci.upper": 0.7945855169897534,
-      "std.lv": 0.529251436284089,
-      "std.all": 0.529251436284089,
+      "est": 0.70031057256411,
+      "se": 0.1017108752405644,
+      "z": 6.885306717769858,
+      "pvalue": 5.766276345298138e-12,
+      "ci.lower": 0.5009609202565571,
+      "ci.upper": 0.8996602248716629,
+      "std.lv": 0.621752327398623,
+      "std.all": 0.621752327398623,
       "section": "defined"
     }
   ],
@@ -13105,5 +13153,304 @@
       "sepc.all": 0.0001636512727265112,
       "sepc.nox": 0.0001636512727265112
     }
-  ]
+  ],
+  "latent_correlations": {
+    "kind": "matrix",
+    "row_names": [
+      "Attitude",
+      "PBC",
+      "DescriptiveNorms",
+      "InjunctiveNorms",
+      "Symbolism",
+      "AoC",
+      "BEnv",
+      "Reactance",
+      "AntiIntel",
+      "Intention"
+    ],
+    "column_names": [
+      "Attitude",
+      "PBC",
+      "DescriptiveNorms",
+      "InjunctiveNorms",
+      "Symbolism",
+      "AoC",
+      "BEnv",
+      "Reactance",
+      "AntiIntel",
+      "Intention"
+    ],
+    "values": [
+      [
+        1,
+        0.4953558873196001,
+        0.5926048388531535,
+        0.8262945920033307,
+        0.6119296118236748,
+        0.6788076386364945,
+        0.7273759214847528,
+        -0.6706679862399905,
+        0.6722975180756616,
+        0.8773320234991048
+      ],
+      [
+        0.4953558873196002,
+        1,
+        0.3988065177762147,
+        0.517138231051927,
+        0.2816272133325445,
+        0.3082588115751046,
+        0.3506051354240075,
+        -0.3141348827304914,
+        0.3425411650925071,
+        0.5546277747593029
+      ],
+      [
+        0.5926048388531535,
+        0.3988065177762147,
+        1,
+        0.8142677365464353,
+        0.5026255866318819,
+        0.4850827066958863,
+        0.4951519804668601,
+        -0.5108839178760564,
+        0.4731465835738574,
+        0.5962523031416427
+      ],
+      [
+        0.8262945920033307,
+        0.517138231051927,
+        0.8142677365464354,
+        1,
+        0.7102005999621596,
+        0.7389941715318505,
+        0.746744455303012,
+        -0.7471156231749446,
+        0.7856017894059887,
+        0.8051986108185644
+      ],
+      [
+        0.6119296118236748,
+        0.2816272133325445,
+        0.5026255866318819,
+        0.7102005999621596,
+        1,
+        0.665192656448881,
+        0.6872047933079183,
+        -0.6181162294650639,
+        0.6504318323288211,
+        0.5941129478529495
+      ],
+      [
+        0.6788076386364944,
+        0.3082588115751046,
+        0.4850827066958863,
+        0.7389941715318507,
+        0.6651926564488809,
+        1,
+        0.8694769963990906,
+        -0.8054808931034653,
+        0.8404900995424996,
+        0.6961842999374785
+      ],
+      [
+        0.7273759214847527,
+        0.3506051354240075,
+        0.4951519804668602,
+        0.746744455303012,
+        0.6872047933079182,
+        0.8694769963990906,
+        1,
+        -0.7693749804080727,
+        0.782844550062375,
+        0.7172295537521697
+      ],
+      [
+        -0.6706679862399905,
+        -0.3141348827304914,
+        -0.5108839178760564,
+        -0.7471156231749446,
+        -0.6181162294650641,
+        -0.8054808931034653,
+        -0.769374980408073,
+        1,
+        -0.8318064287743292,
+        -0.7141582415419354
+      ],
+      [
+        0.6722975180756617,
+        0.3425411650925071,
+        0.4731465835738574,
+        0.7856017894059887,
+        0.6504318323288211,
+        0.8404900995424996,
+        0.782844550062375,
+        -0.8318064287743293,
+        1,
+        0.7263850634944737
+      ],
+      [
+        0.8773320234991048,
+        0.5546277747593029,
+        0.5962523031416427,
+        0.8051986108185644,
+        0.5941129478529497,
+        0.6961842999374784,
+        0.7172295537521698,
+        -0.7141582415419352,
+        0.7263850634944737,
+        1
+      ]
+    ]
+  },
+  "latent_covariances": {
+    "kind": "matrix",
+    "row_names": [
+      "Attitude",
+      "PBC",
+      "DescriptiveNorms",
+      "InjunctiveNorms",
+      "Symbolism",
+      "AoC",
+      "BEnv",
+      "Reactance",
+      "AntiIntel",
+      "Intention"
+    ],
+    "column_names": [
+      "Attitude",
+      "PBC",
+      "DescriptiveNorms",
+      "InjunctiveNorms",
+      "Symbolism",
+      "AoC",
+      "BEnv",
+      "Reactance",
+      "AntiIntel",
+      "Intention"
+    ],
+    "values": [
+      [
+        0.9650688206805225,
+        0.4363401558309873,
+        0.463234375808546,
+        0.6851360310958823,
+        0.5753161717217938,
+        0.6106051932721175,
+        0.6486708403414543,
+        -0.5547450570697715,
+        0.5332861565828571,
+        0.7838555673251932
+      ],
+      [
+        0.4363401558309873,
+        0.8040025425528198,
+        0.2845426703869199,
+        0.3913795336476828,
+        0.2416736486822368,
+        0.2530922468817555,
+        0.2853864156589484,
+        -0.2371655465586825,
+        0.2480054024473558,
+        0.452296522445451
+      ],
+      [
+        0.463234375808546,
+        0.2845426703869199,
+        0.6331591521701899,
+        0.5468729299875311,
+        0.3827604067017984,
+        0.353432812911884,
+        0.3576689812375083,
+        -0.3422830544666661,
+        0.3039987604398591,
+        0.4314986458306243
+      ],
+      [
+        0.6851360310958823,
+        0.3913795336476828,
+        0.5468729299875311,
+        0.7124026226762272,
+        0.5736800661870904,
+        0.5711345045918754,
+        0.5721647183532692,
+        -0.530954487503282,
+        0.5354080277555425,
+        0.6180999305974764
+      ],
+      [
+        0.5753161717217938,
+        0.2416736486822368,
+        0.3827604067017984,
+        0.5736800661870904,
+        0.9159081845185442,
+        0.5829187790266677,
+        0.5970331733805813,
+        -0.4980842847745063,
+        0.5026288553494204,
+        0.5171159224947426
+      ],
+      [
+        0.6106051932721174,
+        0.2530922468817555,
+        0.353432812911884,
+        0.5711345045918755,
+        0.5829187790266677,
+        0.8384347330030555,
+        0.7227349216489012,
+        -0.6210071438816469,
+        0.6214223835236233,
+        0.5797647128300909
+      ],
+      [
+        0.6486708403414542,
+        0.2853864156589484,
+        0.3576689812375083,
+        0.5721647183532692,
+        0.5970331733805813,
+        0.7227349216489012,
+        0.8240861696908343,
+        -0.5880728029773391,
+        0.5738276950450131,
+        0.5921577429684356
+      ],
+      [
+        -0.5547450570697715,
+        -0.2371655465586825,
+        -0.3422830544666661,
+        -0.530954487503282,
+        -0.4980842847745063,
+        -0.6210071438816469,
+        -0.5880728029773392,
+        0.7089464716826024,
+        -0.5655208938182207,
+        -0.5468825904585345
+      ],
+      [
+        0.5332861565828571,
+        0.2480054024473558,
+        0.3039987604398591,
+        0.5354080277555425,
+        0.5026288553494204,
+        0.6214223835236233,
+        0.5738276950450131,
+        -0.5655208938182207,
+        0.6519875752161578,
+        0.5334325197567544
+      ],
+      [
+        0.7838555673251932,
+        0.452296522445451,
+        0.4314986458306243,
+        0.6180999305974764,
+        0.5171159224947426,
+        0.5797647128300908,
+        0.5921577429684356,
+        -0.5468825904585344,
+        0.5334325197567544,
+        0.8271529941203046
+      ]
+    ]
+  },
+  "latent_matrix_diagnostics": []
 }

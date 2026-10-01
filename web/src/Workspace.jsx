@@ -1,3 +1,4 @@
+import {enforceStickerFamilies} from './stickers.js';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { loadPublishedWorkspace } from './loadPublishedWorkspace.js';
 import { WORKSPACE_KEY, LEGACY_KEY, PAGE_TYPES, newPage, normalizeWorkspace, workspaceFromLegacy, mergeLegacyLayouts, validateLayout, updatePageLayout, canDeletePage, deleteEmptyPage, pageContentItems, pageContentSummary, removePageContent } from './workspaceState.js';
@@ -5,6 +6,7 @@ import { workspaceFingerprint, reorderPages } from './workspaceUi.js';
 const BASE=import.meta.env.BASE_URL;
 const SAVE_BASELINE_KEY=WORKSPACE_KEY+'-last-file-save';
 export default function Workspace({ Canvas }) {
+  const [activeLibrary,setActiveLibrary]=useState('models');
   const [workspace,setWorkspace]=useState(null),[error,setError]=useState(''),[notice,setNotice]=useState('');
   const [collapsed,setCollapsed]=useState(()=>{try{return localStorage.getItem('sem-pages-collapsed')==='true';}catch{return false;}});
   const [dialog,setDialog]=useState(null),[menu,setMenu]=useState(null),[busy,setBusy]=useState(false),[generation,setGeneration]=useState(0);
@@ -76,6 +78,7 @@ export default function Workspace({ Canvas }) {
     const api=canvasApi.current;
     return api?.ready && current.pages.some(page=>page.id===api.id) ? updatePageLayout(current,api.id,api.snapshot()) : current;
   }
+  function updateStickerFamilies(families) {const current=capture();if(current)commit({...current,sticker_families:families,pages:current.pages.map(page=>({...page,layout:{...page.layout,sticker_assignments:enforceStickerFamilies(page.layout.sticker_assignments??{},families)}}))});}
   function switchPage(id){const current=capture();if(!current||current.active_page===id)return;commit({...current,active_page:id});setMenu(null);}
   function togglePages(){const next=!collapsed;setCollapsed(next);try{localStorage.setItem('sem-pages-collapsed',String(next));}catch{/* optional preference */}}
   function createDialog(){const current=capture();if(!current)return;commit(current);let n=current.pages.length+1;while(current.pages.some(p=>p.title.toLowerCase()==='page '+n))n++;setDialog({mode:'create',title:'Page '+n,type:'model'});setMenu(null);}
@@ -186,8 +189,9 @@ export default function Workspace({ Canvas }) {
         <button aria-label="Close content finder" onClick={()=>setFindRequest(null)}>×</button>
       </div>}
       {active&&<Canvas key={generation+':'+active.id} pageId={active.id} pageType={active.type} initialLayout={active.layout} historyStore={pageHistories}
-        onLayoutChange={recordLayout} controllerRef={canvasApi} findRequest={findRequest?.pageId===active.id?findRequest:null} onFindResult={onFindResult} />}
+        activeLibrary={activeLibrary} setActiveLibrary={setActiveLibrary} onStickerFamiliesChange={updateStickerFamilies} stickerFamilies={workspace.sticker_families??[]} onLayoutChange={recordLayout} controllerRef={canvasApi} findRequest={findRequest?.pageId===active.id?findRequest:null} onFindResult={onFindResult} />}
     </main>
+
     {dialog&&<div className="page-dialog-backdrop" onKeyDown={event=>{event.stopPropagation();if(event.key==='Escape')setDialog(null);}}>
       <form className="page-dialog" role="dialog" aria-modal="true" aria-label={dialog.mode==='create'?'New page':dialog.mode==='remove-content'?'Remove saved item':dialog.mode==='delete'?'Delete empty page':'Rename page'} onSubmit={submitDialog}>
         <h2>{dialog.mode==='create'?'New page':dialog.mode==='remove-content'?'Remove saved item':dialog.mode==='delete'?'Delete empty page':'Rename page'}</h2>

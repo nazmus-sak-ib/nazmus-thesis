@@ -1,3 +1,4 @@
+import { statisticsSettings } from './statisticsStyle.js';
 // Navigation alone is not a document edit. Page order and every saved layout
 // field are significant; object key ordering is not.
 export function workspaceFingerprint(workspace) {
@@ -6,12 +7,14 @@ export function workspaceFingerprint(workspace) {
     ? Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonical(value[key])])) : value;
   const { active_page, ...document } = workspace;
   void active_page;
+  document.sticker_families??=[];
   document.pages=workspace.pages?.map(page=>{
     const {viewport,...layout}=page.layout??{};
     void viewport;
     const used=new Set([...(layout.used_models??[]),...Object.keys(layout.model_positions??{}),...(layout.stacks??[]).flatMap(s=>s.members??[])]);
     for(const key of ['used_models','hidden_models','stacks','notes','edges','decorations','comparison_ids'])layout[key]??=[];
-    for(const key of ['model_positions','model_notes','model_variants','matrix_settings'])layout[key]??={};
+    for(const key of ['model_positions','model_notes','model_variants','matrix_settings','sticker_assignments','row_orders'])layout[key]??={};
+    layout.statistics_style=statisticsSettings(layout.statistics_style);
     layout.model_sizes=Object.fromEntries(Object.entries(layout.model_sizes??{}).filter(([id])=>used.has(id)));
     return {...page,layout};
   });
